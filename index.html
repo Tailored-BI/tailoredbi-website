@@ -98,6 +98,38 @@ nav {
 .cap p { font-size:14px; color:var(--muted2); line-height:1.65; }
 .cap-tag { margin-top:18px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
 
+/* EXAMPLES */
+.examples-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px; }
+.example-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:border-color .2s; }
+.example-card:hover { border-color:rgba(212,168,67,.3); }
+.example-preview { height:190px; background:var(--bg3); padding:18px; position:relative; overflow:hidden; border-bottom:1px solid var(--border); }
+.preview-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.preview-title { font-size:11px; font-weight:700; color:var(--text); letter-spacing:.3px; }
+.preview-slicers { display:flex; gap:4px; }
+.preview-slicer { font-size:9px; padding:2px 7px; border:1px solid rgba(212,168,67,.4); border-radius:2px; color:var(--gold); font-family:'Syne Mono',monospace; }
+.preview-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
+.preview-kpi { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:3px; padding:7px 8px; }
+.preview-kpi-val { font-size:15px; font-weight:700; color:var(--gold); font-family:'Syne Mono',monospace; line-height:1; margin-bottom:3px; }
+.preview-kpi-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.preview-bars { display:flex; align-items:flex-end; gap:3px; height:48px; }
+.preview-bar { flex:1; border-radius:2px 2px 0 0; min-width:6px; }
+.preview-bar.act { background:var(--gold); opacity:.85; }
+.preview-bar.bud { background:rgba(255,255,255,.1); }
+.preview-table { width:100%; border-collapse:collapse; }
+.preview-table tr { border-bottom:1px solid rgba(255,255,255,.05); }
+.preview-table td { font-size:10px; font-family:'Syne Mono',monospace; padding:4px 0; color:var(--muted2); }
+.preview-table td:last-child { text-align:right; }
+.preview-table tr.subtot td { color:var(--gold); font-weight:600; }
+.preview-aging { display:flex; gap:8px; align-items:flex-end; height:60px; margin-top:8px; }
+.aging-bar-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; }
+.aging-bar { width:100%; border-radius:2px 2px 0 0; }
+.aging-label { font-size:8px; font-family:'Syne Mono',monospace; color:var(--muted); }
+.example-body { padding:20px; }
+.example-body h3 { font-size:15px; font-weight:600; margin-bottom:6px; letter-spacing:-.2px; }
+.example-body p { font-size:13px; color:var(--muted2); line-height:1.6; margin-bottom:14px; }
+.example-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.example-tag { font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid var(--border); color:var(--muted); }
+
 /* ARCH */
 .arch-bg { background:var(--bg2); }
 .arch-lanes { display:grid; grid-template-columns:1fr 40px 1fr; margin-bottom:36px; }
@@ -197,6 +229,7 @@ footer p { font-size:12px; color:var(--muted); }
   <div class="brand">Tailored<span>.BI</span></div>
   <ul class="nav-links">
     <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#examples">Examples</a></li>
     <li><a href="#architecture">Architecture</a></li>
     <li><a href="#stack">Stack</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -232,6 +265,236 @@ footer p { font-size:12px; color:var(--muted); }
     <div class="cap"><div class="cap-n">04</div><h3>Financial Reporting</h3><p>P&amp;L, Budget vs. Actual, rolling 12-month, department drill-through — built on your Epicor chart of accounts, not a generic finance template.</p><div class="cap-tag">GL · Finance</div></div>
     <div class="cap"><div class="cap-n">05</div><h3>Epicor BAQ Architecture</h3><p>External BAQs designed for BI extraction with parameter-driven filters, proper joins across Epicor tables, and REST API exposure for Fabric.</p><div class="cap-tag">Epicor Kinetic</div></div>
     <div class="cap"><div class="cap-n">06</div><h3>Multi-Calendar Time Intelligence</h3><p>Standard Gregorian, Fiscal Gregorian, and Retail 4-4-5 / 4-5-4 / 5-4-4 — pre-computed in a universal date table, configured per client deployment.</p><div class="cap-tag">445 · 454 · 544</div></div>
+  </div>
+</div>
+</section>
+
+<hr class="div"/>
+
+<!-- EXAMPLES -->
+<section class="sec" id="examples">
+<div class="sec-inner">
+  <p class="kicker">Deliverables</p>
+  <h2 class="sec-title">What you actually get</h2>
+  <p class="sec-lead">Production Power BI reports built on the TailoredBI warehouse schema — not mockups, not templates. Real models connected to your Epicor data.</p>
+  <div class="examples-grid">
+
+    <!-- Financial Performance -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Financial Performance</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">FY25</span>
+            <span class="preview-slicer">Actual</span>
+            <span class="preview-slicer">All Depts</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">$24.3M</div><div class="preview-kpi-lbl">Revenue</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val">37.4%</div><div class="preview-kpi-lbl">Gross Margin</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:var(--teal)">+$0.6M</div><div class="preview-kpi-lbl">Var to Budget</div></div>
+        </div>
+        <div class="preview-bars">
+          <div class="preview-bar bud" style="height:52%"></div><div class="preview-bar act" style="height:58%"></div>
+          <div class="preview-bar bud" style="height:56%"></div><div class="preview-bar act" style="height:62%"></div>
+          <div class="preview-bar bud" style="height:60%"></div><div class="preview-bar act" style="height:68%"></div>
+          <div class="preview-bar bud" style="height:64%"></div><div class="preview-bar act" style="height:72%"></div>
+          <div class="preview-bar bud" style="height:62%"></div><div class="preview-bar act" style="height:70%"></div>
+          <div class="preview-bar bud" style="height:66%"></div><div class="preview-bar act" style="height:75%"></div>
+          <div class="preview-bar bud" style="height:70%"></div><div class="preview-bar act" style="height:78%"></div>
+          <div class="preview-bar bud" style="height:68%"></div><div class="preview-bar act" style="height:80%"></div>
+        </div>
+      </div>
+      <div class="example-body">
+        <h3>Financial Performance</h3>
+        <p>P&amp;L Summary, Revenue Detail, Cost &amp; Margin, Budget vs. Actual, Department Drill-through, and Rolling 12-Month Trend. Slicers for Fiscal Year, Period, Department, and Scenario (Actual/Budget/Forecast).</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.GL</span>
+          <span class="example-tag">dim.Account</span>
+          <span class="example-tag">dim.Department</span>
+          <span class="example-tag">6 pages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales Performance -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Sales Performance</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">FY25</span>
+            <span class="preview-slicer">All Reps</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">$18.1M</div><div class="preview-kpi-lbl">Net Revenue</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val">44.2%</div><div class="preview-kpi-lbl">Avg Margin</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:var(--teal)">+8.2%</div><div class="preview-kpi-lbl">vs Prior Year</div></div>
+        </div>
+        <div class="preview-bars">
+          <div class="preview-bar act" style="height:90%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:72%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:58%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:45%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:38%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:30%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:22%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:18%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:14%;background:var(--blue);opacity:.8"></div>
+          <div class="preview-bar act" style="height:10%;background:var(--blue);opacity:.8"></div>
+        </div>
+      </div>
+      <div class="example-body">
+        <h3>Sales Performance</h3>
+        <p>Revenue by customer, rep, product line, and region. Top-10 customer ranking, gross margin by product group, order backlog, and YOY trend. Drill-through from summary to order-line detail.</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.SalesOrder</span>
+          <span class="example-tag">dim.Customer</span>
+          <span class="example-tag">dim.SalesRep</span>
+          <span class="example-tag">dim.Part</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AR Aging -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Accounts Receivable</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">Open</span>
+            <span class="preview-slicer">All Customers</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">$847K</div><div class="preview-kpi-lbl">Total Open AR</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:#f59e0b">$124K</div><div class="preview-kpi-lbl">31–60 Days</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:#ef4444">$38K</div><div class="preview-kpi-lbl">90+ Days</div></div>
+        </div>
+        <div class="preview-aging">
+          <div class="aging-bar-wrap"><div class="aging-bar" style="height:100%;background:var(--teal);opacity:.7"></div><div class="aging-label">Current</div></div>
+          <div class="aging-bar-wrap"><div class="aging-bar" style="height:65%;background:var(--gold);opacity:.7"></div><div class="aging-label">1–30</div></div>
+          <div class="aging-bar-wrap"><div class="aging-bar" style="height:38%;background:#f59e0b;opacity:.8"></div><div class="aging-label">31–60</div></div>
+          <div class="aging-bar-wrap"><div class="aging-bar" style="height:20%;background:#ef4444;opacity:.7"></div><div class="aging-label">61–90</div></div>
+          <div class="aging-bar-wrap"><div class="aging-bar" style="height:10%;background:#dc2626;opacity:.8"></div><div class="aging-label">90+</div></div>
+        </div>
+      </div>
+      <div class="example-body">
+        <h3>AR Aging &amp; Collections</h3>
+        <p>Aging buckets (Current / 1–30 / 31–60 / 61–90 / 90+), DSO trend, customer-level balance detail, payment history, and overdue alerts. Drill-through from bucket to individual invoice lines.</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.ARInvoice</span>
+          <span class="example-tag">dim.Customer</span>
+          <span class="example-tag">dim.Terms</span>
+          <span class="example-tag">Aging buckets</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Inventory Status</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">All WH</span>
+            <span class="preview-slicer">Mar 2025</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">$312K</div><div class="preview-kpi-lbl">Total Value</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:#f59e0b">4</div><div class="preview-kpi-lbl">Below Reorder</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val">6.2x</div><div class="preview-kpi-lbl">Turns (Annual)</div></div>
+        </div>
+        <table class="preview-table" style="margin-top:8px">
+          <tr><td>DOOR-INT-36</td><td style="color:var(--teal)">● Normal</td><td>120 EA</td></tr>
+          <tr><td>MAT-LUMBER</td><td style="color:var(--teal)">● Normal</td><td>32,000 BF</td></tr>
+          <tr><td>DOOR-EXT-36</td><td style="color:#f59e0b">⚠ Low</td><td>85 EA</td></tr>
+          <tr><td>MAT-GLASS</td><td style="color:#f59e0b">⚠ Low</td><td>320 EA</td></tr>
+        </table>
+      </div>
+      <div class="example-body">
+        <h3>Inventory &amp; Stock Status</h3>
+        <p>On-hand, allocated, available, and on-order quantities by part and warehouse. Stock status flags (Normal / Below Reorder / Stockout / Overstocked), inventory turns, and period-over-period value trend.</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.Inventory</span>
+          <span class="example-tag">fact.InventoryTrans</span>
+          <span class="example-tag">dim.Part</span>
+          <span class="example-tag">dim.Warehouse</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Production -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Production &amp; Job Costing</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">Q1 2025</span>
+            <span class="preview-slicer">MFG</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">94.2%</div><div class="preview-kpi-lbl">Completion Rate</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:#ef4444">1.8%</div><div class="preview-kpi-lbl">Scrap Rate</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:var(--teal)">96.4%</div><div class="preview-kpi-lbl">Labor Efficiency</div></div>
+        </div>
+        <table class="preview-table" style="margin-top:8px">
+          <tr><td>J2401</td><td style="color:var(--teal)">Complete</td><td style="color:#ef4444">-$89</td></tr>
+          <tr><td>J2402</td><td style="color:var(--teal)">Complete</td><td style="color:var(--teal)">+$53</td></tr>
+          <tr><td>J2405</td><td style="color:var(--teal)">Complete</td><td style="color:#ef4444">-$93</td></tr>
+          <tr><td>J2407</td><td style="color:#f59e0b">In Process</td><td>—</td></tr>
+        </table>
+      </div>
+      <div class="example-body">
+        <h3>Production &amp; Job Costing</h3>
+        <p>Job completion rates, scrap analysis, labor efficiency (actual vs. estimated hours), cost variance by job and product, and on-time delivery tracking. Drill-through from summary to individual job operations.</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.Production</span>
+          <span class="example-tag">fact.LaborTime</span>
+          <span class="example-tag">dim.Employee</span>
+          <span class="example-tag">bridge.JobMaterial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchasing -->
+    <div class="example-card">
+      <div class="example-preview">
+        <div class="preview-topbar">
+          <span class="preview-title">Purchasing &amp; AP</span>
+          <div class="preview-slicers">
+            <span class="preview-slicer">YTD 2025</span>
+            <span class="preview-slicer">All Vendors</span>
+          </div>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><div class="preview-kpi-val">$1.2M</div><div class="preview-kpi-lbl">PO Spend YTD</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val" style="color:var(--teal)">91%</div><div class="preview-kpi-lbl">On-Time Receipt</div></div>
+          <div class="preview-kpi"><div class="preview-kpi-val">$174K</div><div class="preview-kpi-lbl">Open AP</div></div>
+        </div>
+        <table class="preview-table" style="margin-top:8px">
+          <tr><td>Rocky Mtn Lumber</td><td style="color:var(--teal)">Preferred</td><td>$421K</td></tr>
+          <tr><td>Premium Glass Co</td><td style="color:var(--teal)">Preferred</td><td>$214K</td></tr>
+          <tr><td>Natl Hardware</td><td style="color:var(--teal)">Preferred</td><td>$138K</td></tr>
+          <tr><td>CNC Tooling</td><td style="color:var(--muted)">Standard</td><td>$88K</td></tr>
+        </table>
+      </div>
+      <div class="example-body">
+        <h3>Purchasing &amp; Accounts Payable</h3>
+        <p>PO spend by vendor and category, receipt performance, open PO tracking, AP aging, and DPO analysis. Vendor scorecards with lead time, on-time rate, and spend trend. AP aging buckets mirror the AR model.</p>
+        <div class="example-tags">
+          <span class="example-tag">fact.PurchaseOrder</span>
+          <span class="example-tag">fact.APInvoice</span>
+          <span class="example-tag">dim.Vendor</span>
+          <span class="example-tag">dim.Terms</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 </section>
