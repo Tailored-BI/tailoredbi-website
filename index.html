@@ -6,7 +6,7 @@
 <title>Tailored.BI — Epicor Kinetic BI Consulting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Syne+Mono&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -26,7 +26,7 @@ html { scroll-behavior: smooth; }
 }
 body {
   background: var(--bg); color: var(--text);
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 16px; line-height: 1.6; overflow-x: hidden;
 }
 
@@ -73,7 +73,7 @@ nav {
   max-width: 520px; font-weight: 400; margin-bottom: 44px;
 }
 .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
-.btn { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; letter-spacing:.5px; padding:12px 28px; border-radius:4px; text-decoration:none; transition:all .15s; display:inline-block; }
+.btn { font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; letter-spacing:.5px; padding:12px 28px; border-radius:4px; text-decoration:none; transition:all .15s; display:inline-block; }
 .btn-gold { background:var(--gold); color:#0B1120; }
 .btn-gold:hover { background:var(--gold2); }
 .btn-ghost { background:transparent; color:var(--muted2); border:1px solid var(--bord2); }
@@ -93,10 +93,34 @@ nav {
 .cap:hover { background:var(--bg3); }
 .cap::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); transform:scaleX(0); transform-origin:left; transition:transform .3s; }
 .cap:hover::before { transform:scaleX(1); }
-.cap-n { font-family:'Syne Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:14px; letter-spacing:1px; }
+.cap-n { font-family:'Roboto Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:14px; letter-spacing:1px; }
 .cap h3 { font-size:16px; font-weight:600; margin-bottom:10px; letter-spacing:-.2px; }
 .cap p { font-size:14px; color:var(--muted2); line-height:1.65; }
 .cap-tag { margin-top:18px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+
+/* WHY A WAREHOUSE */
+.why-grid { display:grid; grid-template-columns:1fr 48px 1fr; gap:0; align-items:start; }
+.why-col-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+.why-col-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; margin-top:2px; }
+.why-col-icon.bad  { background:rgba(239,68,68,.12); color:#ef4444; border:1px solid rgba(239,68,68,.25); }
+.why-col-icon.good { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+.why-col-label { font-size:13px; font-weight:700; letter-spacing:-.1px; margin-bottom:3px; }
+.why-col-label.bad  { color:#ef4444; }
+.why-col-label.good { color:#34d399; }
+.why-col-sub { font-size:11px; font-family:'Roboto Mono',monospace; color:var(--muted); letter-spacing:.2px; }
+.why-bad  { padding-right:32px; }
+.why-good { padding-left:32px; }
+.why-items { display:flex; flex-direction:column; gap:0; }
+.why-item { display:flex; gap:14px; padding:20px 0; border-bottom:1px solid var(--border); }
+.why-item:last-child { border-bottom:none; }
+.why-item-icon { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; margin-top:3px; }
+.why-item-icon.bad  { background:rgba(239,68,68,.1); color:#ef4444; }
+.why-item-icon.good { background:rgba(52,211,153,.1); color:#34d399; }
+.why-item h4 { font-size:14px; font-weight:600; margin-bottom:5px; }
+.why-item p  { font-size:13px; color:var(--muted2); line-height:1.65; }
+.why-div { display:flex; flex-direction:column; align-items:center; padding-top:60px; }
+.why-div-line { width:1px; flex:1; background:linear-gradient(to bottom,transparent,var(--bord2) 20%,var(--bord2) 80%,transparent); }
+.why-div-vs { font-size:11px; font-weight:700; letter-spacing:1px; color:var(--muted); text-transform:uppercase; padding:10px 0; writing-mode:vertical-rl; }
 
 /* EXAMPLES */
 .examples-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px; }
@@ -106,10 +130,10 @@ nav {
 .preview-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .preview-title { font-size:11px; font-weight:700; color:var(--text); letter-spacing:.3px; }
 .preview-slicers { display:flex; gap:4px; }
-.preview-slicer { font-size:9px; padding:2px 7px; border:1px solid rgba(212,168,67,.4); border-radius:2px; color:var(--gold); font-family:'Syne Mono',monospace; }
+.preview-slicer { font-size:9px; padding:2px 7px; border:1px solid rgba(212,168,67,.4); border-radius:2px; color:var(--gold); font-family:'Roboto Mono',monospace; }
 .preview-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
 .preview-kpi { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:3px; padding:7px 8px; }
-.preview-kpi-val { font-size:15px; font-weight:700; color:var(--gold); font-family:'Syne Mono',monospace; line-height:1; margin-bottom:3px; }
+.preview-kpi-val { font-size:15px; font-weight:700; color:var(--gold); font-family:'Roboto Mono',monospace; line-height:1; margin-bottom:3px; }
 .preview-kpi-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
 .preview-bars { display:flex; align-items:flex-end; gap:3px; height:48px; }
 .preview-bar { flex:1; border-radius:2px 2px 0 0; min-width:6px; }
@@ -117,13 +141,13 @@ nav {
 .preview-bar.bud { background:rgba(255,255,255,.1); }
 .preview-table { width:100%; border-collapse:collapse; }
 .preview-table tr { border-bottom:1px solid rgba(255,255,255,.05); }
-.preview-table td { font-size:10px; font-family:'Syne Mono',monospace; padding:4px 0; color:var(--muted2); }
+.preview-table td { font-size:10px; font-family:'Roboto Mono',monospace; padding:4px 0; color:var(--muted2); }
 .preview-table td:last-child { text-align:right; }
 .preview-table tr.subtot td { color:var(--gold); font-weight:600; }
 .preview-aging { display:flex; gap:8px; align-items:flex-end; height:60px; margin-top:8px; }
 .aging-bar-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; }
 .aging-bar { width:100%; border-radius:2px 2px 0 0; }
-.aging-label { font-size:8px; font-family:'Syne Mono',monospace; color:var(--muted); }
+.aging-label { font-size:8px; font-family:'Roboto Mono',monospace; color:var(--muted); }
 .example-body { padding:20px; }
 .example-body h3 { font-size:15px; font-weight:600; margin-bottom:6px; letter-spacing:-.2px; }
 .example-body p { font-size:13px; color:var(--muted2); line-height:1.6; margin-bottom:14px; }
@@ -145,12 +169,12 @@ nav {
 .steps { padding-top:4px; }
 .step { display:flex; gap:16px; padding:22px 0; border-bottom:1px solid var(--border); }
 .step:last-child { border-bottom:none; }
-.step-b { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne Mono',monospace; font-size:11px; flex-shrink:0; margin-top:2px; }
+.step-b { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Roboto Mono',monospace; font-size:11px; flex-shrink:0; margin-top:2px; }
 .step-b.sql { background:rgba(45,212,191,.12); color:var(--teal); border:1px solid rgba(45,212,191,.25); }
 .step-b.api { background:rgba(96,165,250,.12); color:var(--blue); border:1px solid rgba(96,165,250,.25); }
 .step h4 { font-size:14px; font-weight:600; margin-bottom:5px; }
 .step p { font-size:13px; color:var(--muted2); line-height:1.6; }
-.step code { font-family:'Syne Mono',monospace; font-size:11px; color:var(--gold); background:rgba(212,168,67,.1); padding:1px 6px; border-radius:3px; }
+.step code { font-family:'Roboto Mono',monospace; font-size:11px; color:var(--gold); background:rgba(212,168,67,.1); padding:1px 6px; border-radius:3px; }
 .arr { text-align:center; color:var(--border); font-size:16px; padding:4px 0; line-height:1; display:block; }
 .merge { display:grid; grid-template-columns:1fr 40px 1fr; align-items:center; margin-bottom:24px; }
 .merge-line { height:1px; background:var(--bord2); }
@@ -161,13 +185,13 @@ nav {
 .wh-top p { font-size:13px; color:var(--muted2); margin-top:6px; max-width:560px; line-height:1.6; }
 .wh-badge { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:5px 12px; border-radius:3px; background:rgba(212,168,67,.12); color:var(--gold); flex-shrink:0; margin-top:2px; border:1px solid rgba(212,168,67,.2); }
 .wh-tables { padding:20px 28px; display:flex; flex-wrap:wrap; gap:8px; }
-.wht { font-family:'Syne Mono',monospace; font-size:11px; padding:4px 10px; border-radius:3px; border:1px solid; }
+.wht { font-family:'Roboto Mono',monospace; font-size:11px; padding:4px 10px; border-radius:3px; border:1px solid; }
 .wht.d { color:var(--teal); border-color:rgba(45,212,191,.2); background:rgba(45,212,191,.05); }
 .wht.f { color:var(--blue); border-color:rgba(96,165,250,.2); background:rgba(96,165,250,.05); }
 .wht.o { color:var(--gold); border-color:rgba(212,168,67,.2); background:rgba(212,168,67,.05); }
 .callouts { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:32px; }
 .callout { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:20px; }
-.callout-ico { font-family:'Syne Mono',monospace; font-size:18px; color:var(--gold); margin-bottom:10px; line-height:1; }
+.callout-ico { font-family:'Roboto Mono',monospace; font-size:18px; color:var(--gold); margin-bottom:10px; line-height:1; }
 .callout h4 { font-size:13px; font-weight:600; margin-bottom:6px; }
 .callout p { font-size:12px; color:var(--muted2); line-height:1.6; }
 
@@ -185,13 +209,13 @@ nav {
 form { display:flex; flex-direction:column; gap:14px; }
 input, textarea {
   background:var(--bg); border:1px solid var(--bord2); color:var(--text);
-  padding:12px 16px; font-family:'Syne',sans-serif; font-size:14px;
+  padding:12px 16px; font-family:'Outfit',sans-serif; font-size:14px;
   border-radius:6px; outline:none; width:100%; transition:border-color .15s;
 }
 input:focus, textarea:focus { border-color:rgba(212,168,67,.5); }
 input::placeholder, textarea::placeholder { color:var(--muted); }
 textarea { min-height:130px; resize:vertical; }
-.form-btn { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; letter-spacing:.5px; padding:13px 28px; background:var(--gold); color:#0B1120; border:none; border-radius:6px; cursor:pointer; align-self:flex-start; transition:background .15s; }
+.form-btn { font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; letter-spacing:.5px; padding:13px 28px; background:var(--gold); color:#0B1120; border:none; border-radius:6px; cursor:pointer; align-self:flex-start; transition:background .15s; }
 .form-btn:hover { background:var(--gold2); }
 
 /* FOOTER */
@@ -210,6 +234,10 @@ footer p { font-size:12px; color:var(--muted); }
   .arch-or-col{display:none;}
   .merge{grid-template-columns:1fr;}
   .merge-line,.merge-dot{display:none;}
+  .why-grid{grid-template-columns:1fr;}
+  .why-div{display:none;}
+  .why-bad{padding-right:0;}
+  .why-good{padding-left:0;margin-top:48px;}
   .contact-grid{grid-template-columns:1fr;gap:48px;}
   footer{flex-direction:column;gap:10px;text-align:center;}
 }
@@ -228,6 +256,7 @@ footer p { font-size:12px; color:var(--muted); }
 <nav>
   <div class="brand">Tailored<span>.BI</span></div>
   <ul class="nav-links">
+    <li><a href="#why">Why a Warehouse</a></li>
     <li><a href="#capabilities">Capabilities</a></li>
     <li><a href="#examples">Examples</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -242,13 +271,127 @@ footer p { font-size:12px; color:var(--muted); }
 <div class="hero">
   <div class="hero-eyebrow">Epicor Kinetic · Microsoft Fabric · Power BI</div>
   <h1>BI consulting built<br/>for <span class="acc">Epicor.</span></h1>
-  <p class="hero-sub">Turning Epicor Kinetic ERP data into clear, actionable Power BI reporting — through Fabric, the cloud, or wherever your data lives. Built right, the first time.</p>
+  <p class="hero-sub">Turning Epicor Kinetic ERP data into clear, actionable insights via Power BI reporting — whether your data is on-premises or in the cloud, our Microsoft Fabric Tailored.BI Data Warehouse is optimized to work regardless of where your data lives. Built right, the first time.</p>
   <div class="hero-btns">
     <a href="#architecture" class="btn btn-gold">See how it works</a>
     <a href="#contact" class="btn btn-ghost">Start a conversation</a>
   </div>
 </div>
 </div>
+
+<!-- WHY A WAREHOUSE -->
+<section class="sec" id="why">
+<div class="sec-inner">
+  <p class="kicker">Why it matters</p>
+  <h2 class="sec-title">There's a better way than<br/>connecting Power BI directly<br/>to Epicor.</h2>
+  <p class="sec-lead">Most Epicor reporting starts the same way — Power BI pointed straight at the Epicor database or a BAQ, pulling data on demand. It works at first. Then it doesn't.</p>
+
+  <div class="why-grid">
+    <!-- LEFT: Direct connection problems -->
+    <div class="why-col why-bad">
+      <div class="why-col-head">
+        <div class="why-col-icon bad">✕</div>
+        <div>
+          <div class="why-col-label bad">Direct connection approach</div>
+          <div class="why-col-sub">Power BI → Epicor database or BAQ</div>
+        </div>
+      </div>
+      <div class="why-items">
+        <div class="why-item">
+          <div class="why-item-icon bad">—</div>
+          <div>
+            <h4>Slow reports, angry users</h4>
+            <p>Every refresh hits the live Epicor database. Complex visuals trigger complex queries. Reports time out. Users refresh repeatedly. The ERP slows down for everyone else.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon bad">—</div>
+          <div>
+            <h4>Epicor schema complexity</h4>
+            <p>The Epicor database has hundreds of tables with non-obvious relationships. DAX measures end up doing work that SQL should do — joins, case logic, cross-table calculations — making models fragile and hard to maintain.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon bad">—</div>
+          <div>
+            <h4>No history, no comparisons</h4>
+            <p>Epicor stores current state. Without a warehouse capturing snapshots, period-over-period analysis, budget vs. actual, and prior-year comparisons require complex workarounds — if they're possible at all.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon bad">—</div>
+          <div>
+            <h4>Breaks on Epicor upgrades</h4>
+            <p>Direct schema connections are brittle. When Epicor changes a table structure, columns move, or a BAQ is modified, every downstream report that touches it breaks — often silently.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon bad">—</div>
+          <div>
+            <h4>One report at a time</h4>
+            <p>Each report is its own island. No shared logic, no reusable measures, no consistent definitions. "Revenue" means something different in the Sales report than it does in the Finance report.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="why-div">
+      <div class="why-div-line"></div>
+      <div class="why-div-vs">vs</div>
+      <div class="why-div-line"></div>
+    </div>
+
+    <!-- RIGHT: Warehouse approach -->
+    <div class="why-col why-good">
+      <div class="why-col-head">
+        <div class="why-col-icon good">✓</div>
+        <div>
+          <div class="why-col-label good">Tailored.BI Data Warehouse</div>
+          <div class="why-col-sub">Power BI → Fabric warehouse → Epicor</div>
+        </div>
+      </div>
+      <div class="why-items">
+        <div class="why-item">
+          <div class="why-item-icon good">+</div>
+          <div>
+            <h4>Fast reports, always</h4>
+            <p>Power BI reads from pre-shaped, indexed warehouse tables — not live Epicor. Incremental refresh means only changed rows move. Reports open in seconds. The ERP is untouched.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon good">+</div>
+          <div>
+            <h4>Clean, BI-ready schema</h4>
+            <p>A purpose-built star schema translates Epicor's complexity into simple, predictable tables. DAX measures are clean and fast. New reports can be built in hours, not days.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon good">+</div>
+          <div>
+            <h4>Full history, any comparison</h4>
+            <p>The warehouse captures period snapshots and preserves history. Budget vs. actual, prior-year comparisons, rolling 12-month trends, and retail 4-4-5 calendar analysis all work natively.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon good">+</div>
+          <div>
+            <h4>Isolated from Epicor changes</h4>
+            <p>The warehouse is the buffer. When Epicor is upgraded, only the ETL layer needs updating — not every report. Reports keep working while the plumbing is fixed behind the scenes.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon good">+</div>
+          <div>
+            <h4>One version of the truth</h4>
+            <p>Every report shares the same dim tables, the same DAX measures, and the same definitions. Revenue is Revenue. Margin is Margin. Across Finance, Sales, Operations — everywhere.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
 
 <hr class="div"/>
 
@@ -557,7 +700,7 @@ footer p { font-size:12px; color:var(--muted); }
     <div class="wh-top">
       <div>
         <h3>TailoredBI Fabric Warehouse</h3>
-        <p>Both lanes write to the same schema using the same MERGE pattern, controlled by the same <code style="font-family:'Syne Mono',monospace;font-size:12px;color:var(--gold);background:rgba(212,168,67,.1);padding:1px 6px;border-radius:3px;">staging.Watermark</code> table. Power BI models, DAX measures, and TMDL calendars work identically regardless of which lane delivered the data.</p>
+        <p>Both lanes write to the same schema using the same MERGE pattern, controlled by the same <code style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--gold);background:rgba(212,168,67,.1);padding:1px 6px;border-radius:3px;">staging.Watermark</code> table. Power BI models, DAX measures, and TMDL calendars work identically regardless of which lane delivered the data.</p>
       </div>
       <span class="wh-badge">Lane-agnostic</span>
     </div>
@@ -584,7 +727,7 @@ footer p { font-size:12px; color:var(--muted); }
 
   <!-- CALLOUTS -->
   <div class="callouts">
-    <div class="callout"><div class="callout-ico">⟳</div><h4>Watermark incremental refresh</h4><p>Each table tracks its own <code style="font-family:'Syne Mono',monospace;font-size:11px;color:var(--gold);">LastLoadedUTC</code>. Only changed rows are pulled — no full reloads.</p></div>
+    <div class="callout"><div class="callout-ico">⟳</div><h4>Watermark incremental refresh</h4><p>Each table tracks its own <code style="font-family:'Roboto Mono',monospace;font-size:11px;color:var(--gold);">LastLoadedUTC</code>. Only changed rows are pulled — no full reloads.</p></div>
     <div class="callout"><div class="callout-ico">◈</div><h4>Schema is the contract</h4><p>The warehouse schema never changes based on which ETL lane runs. Models work from day one on any client deployment.</p></div>
     <div class="callout"><div class="callout-ico">▣</div><h4>Universal date table</h4><p>Standard, Fiscal, and Retail 445/454/544 columns pre-computed — configured once per deployment via 4 parameters.</p></div>
     <div class="callout"><div class="callout-ico">◎</div><h4>8 Power BI model areas</h4><p>Finance, Sales, AR, AP, Purchasing, Inventory, Operations, and Shipping — all sharing the same dim tables.</p></div>
