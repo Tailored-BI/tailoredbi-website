@@ -1,1 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mars Aerospace Components - Epicor Kinetic BI Demo | Tailored.BI</title>
+<meta name="description" content="See how Tailored.BI built a Microsoft Fabric data warehouse for Mars Aerospace Components, a fictional Epicor Kinetic aerospace parts manufacturer.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tailored.bi/mars/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tailored.bi/mars/">
+<meta property="og:title" content="Mars Aerospace Components - Epicor Kinetic BI | Tailored.BI">
+<meta property="og:description" content="Fabric data warehouse and Power BI for aerospace Epicor Kinetic. Job costing, lot traceability, contract billing.">
+<meta property="og:site_name" content="Tailored.BI">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"Mars Aerospace Components - Epicor Kinetic BI Demo","url":"https://tailored.bi/mars/","isPartOf":{"@type":"WebSite","name":"Tailored.BI","url":"https://tailored.bi"}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:ital,wght@0,200;0,300;0,400;0,500;0,600;1,300&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
 
+:root{
+  --void:   #020A04;
+  --deep:   #030D05;
+  --panel:  #060F07;
+  --card:   #071008;
+  --b1:     #0C1E0D;
+  --b2:     #112212;
+  --cyan:   #00FF88;
+  --cyan2:  #00CC66;
+  --cyan3:  rgba(0,255,136,0.10);
+  --orange: #FF5E1A;
+  --amber:  #FFB800;
+  --green:  #A0FF40;
+  --red:    #FF2244;
+  --white:  #E8F4FF;
+  --steel:  #6B8CAE;
+  --dim:    #254030;
+  --tbi:    #D4A843;
+}
+
+body{
+  font-family:'Exo 2',sans-serif;
+  background:var(--void);
+  color:var(--white);
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* -- ANIMATED BACKGROUND -- */
+.bg-layer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+/* Rotating radar sweep */
+.radar{
+  position:absolute;
+  width:800px;height:800px;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  opacity:0.03;
+  animation:radarSpin 20s linear infinite;
+}
+@keyframes radarSpin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+/* Grid overlay */
+.bg-layer::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+/* Scan line */
+.bg-layer::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.3),transparent);
+  animation:scan 8s linear infinite;
+  top:0;
+}
+@keyframes scan{0%{top:0;opacity:0;}5%{opacity:1;}95%{opacity:1;}100%{top:100vh;opacity:0;}}
+
+/* Glow orbs */
+.orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(80px);
+  animation:pulse 6s ease-in-out infinite alternate;
+}
+.orb1{width:400px;height:400px;background:rgba(0,255,136,0.06);top:-100px;left:-100px;}
+.orb2{width:500px;height:500px;background:rgba(255,94,26,0.05);bottom:-150px;right:-100px;animation-delay:-3s;}
+.orb3{width:300px;height:300px;background:rgba(0,255,136,0.04);top:40%;left:60%;animation-delay:-1.5s;}
+@keyframes pulse{from{opacity:0.5;}to{opacity:1;}}
+
+/* Content sits above bg */
+.content{position:relative;z-index:1;}
+
+/* -- TBI BAR -- */
+.tbi-bar{
+  background:rgba(2,4,10,0.95);
+  backdrop-filter:blur(10px);
+  padding:8px 40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(0,255,136,0.15);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.tbi-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  color:rgba(0,255,136,0.4);
+  letter-spacing:1px;
+}
+.tbi-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.tbi-wordmark{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  color:var(--white);
+  letter-spacing:2px;
+}
+.tbi-wordmark em{font-style:normal;color:var(--tbi);}
+.tbi-sep{color:var(--dim);}
+.tbi-right a{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--cyan);
+  text-decoration:none;
+  border:1px solid rgba(0,255,136,0.25);
+  padding:5px 12px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.tbi-right a::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.1),transparent);
+  transition:left .3s;
+}
+.tbi-right a:hover::before{left:100%;}
+.tbi-right a:hover{border-color:var(--cyan);color:var(--white);}
+
+/* -- HERO HEADER -- */
+.hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:80px 60px;
+  position:relative;
+  overflow:hidden;
+}
+/* Corner HUD brackets */
+.hud-corner{
+  position:absolute;
+  width:60px;height:60px;
+  border-color:var(--cyan);
+  border-style:solid;
+  opacity:0.4;
+}
+.hud-tl{top:20px;left:20px;border-width:2px 0 0 2px;}
+.hud-tr{top:20px;right:20px;border-width:2px 2px 0 0;}
+.hud-bl{bottom:20px;left:20px;border-width:0 0 2px 2px;}
+.hud-br{bottom:20px;right:20px;border-width:0 2px 2px 0;}
+
+/* Animated orbit ring in hero */
+.hero-visual{
+  position:absolute;
+  right:-100px;
+  top:50%;
+  transform:translateY(-50%);
+  width:700px;height:700px;
+  opacity:0.08;
+}
+.orbit-ring{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid var(--cyan);
+}
+.or1{width:100%;height:100%;top:0;left:0;animation:orbitSpin 30s linear infinite;}
+.or2{width:75%;height:75%;top:12.5%;left:12.5%;animation:orbitSpin 20s linear infinite reverse;}
+.or3{width:50%;height:50%;top:25%;left:25%;animation:orbitSpin 12s linear infinite;}
+.or4{width:30%;height:30%;top:35%;left:35%;border-color:var(--orange);animation:orbitSpin 8s linear infinite reverse;}
+.orbit-dot{
+  position:absolute;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--cyan);
+  top:50%;
+  transform-origin:0 0;
+}
+@keyframes orbitSpin{to{transform:rotate(360deg);}}
+
+.hero-eyebrow{
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  margin-bottom:24px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  animation:fadeUp .8s ease both;
+}
+.hero-eyebrow::before{
+  content:'';
+  width:40px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan));
+}
+.hero-eyebrow::after{
+  content:'';
+  width:40px;height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* Logomark */
+.mars-mark{
+  margin-bottom:32px;
+  animation:fadeUp .8s .1s ease both;
+}
+
+.hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-weight:900;
+  font-size:clamp(36px,6vw,80px);
+  line-height:0.95;
+  text-transform:uppercase;
+  letter-spacing:4px;
+  margin-bottom:8px;
+  animation:fadeUp .8s .15s ease both;
+  position:relative;
+}
+/* Glitch effect on title */
+.hero-title::before,.hero-title::after{
+  content:attr(data-text);
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  animation:glitch 6s infinite;
+}
+.hero-title::before{
+  color:var(--cyan);
+  clip-path:polygon(0 0,100% 0,100% 45%,0 45%);
+  animation:glitch1 6s infinite;
+}
+.hero-title::after{
+  color:var(--orange);
+  clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%);
+  animation:glitch2 6s infinite;
+}
+@keyframes glitch1{
+  0%,94%{transform:none;opacity:0;}
+  95%{transform:translate(-3px,0);opacity:0.7;}
+  96%{transform:translate(3px,0);opacity:0.7;}
+  97%{transform:none;opacity:0;}
+  100%{opacity:0;}
+}
+@keyframes glitch2{
+  0%,94%{transform:none;opacity:0;}
+  95%{transform:translate(3px,0);opacity:0.7;}
+  96%{transform:translate(-3px,0);opacity:0.7;}
+  97%{transform:none;opacity:0;}
+  100%{opacity:0;}
+}
+
+.hero-title-orange{color:var(--orange);}
+
+.hero-subtitle{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(12px,2vw,18px);
+  font-weight:400;
+  letter-spacing:6px;
+  color:var(--cyan);
+  text-transform:uppercase;
+  margin-bottom:40px;
+  animation:fadeUp .8s .2s ease both;
+}
+
+.hero-desc{
+  font-size:15px;
+  font-weight:300;
+  color:var(--steel);
+  line-height:1.8;
+  max-width:600px;
+  margin-bottom:40px;
+  animation:fadeUp .8s .25s ease both;
+  font-style:italic;
+}
+
+/* Status readouts */
+.hero-readouts{
+  display:flex;
+  gap:0;
+  animation:fadeUp .8s .3s ease both;
+  border:1px solid rgba(0,255,136,0.15);
+  width:fit-content;
+}
+.readout{
+  padding:12px 24px;
+  border-right:1px solid rgba(0,255,136,0.15);
+  position:relative;
+}
+.readout:last-child{border-right:none;}
+.readout-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(0,255,136,0.4);
+  margin-bottom:4px;
+}
+.readout-val{
+  font-family:'Orbitron',sans-serif;
+  font-size:16px;
+  font-weight:700;
+  color:var(--cyan);
+}
+.readout-val.orange{color:var(--orange);}
+.readout-val.green{color:var(--green);}
+/* Blinking cursor on last readout */
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* -- DIVIDER -- */
+.hud-divider{
+  display:flex;
+  align-items:center;
+  padding:0 60px;
+  margin:0;
+  gap:16px;
+  opacity:0.4;
+}
+.hud-divider::before,.hud-divider::after{
+  content:'';
+  flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan));
+}
+.hud-divider::after{
+  background:linear-gradient(90deg,var(--cyan),transparent);
+}
+.hud-divider-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* -- SECTION -- */
+.sec{
+  padding:60px 60px;
+  border-bottom:1px solid rgba(0,255,136,0.06);
+  position:relative;
+}
+.sec-tag{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--cyan);
+  margin-bottom:6px;
+  opacity:0.7;
+}
+.sec-tag::before{content:'[ ';} .sec-tag::after{content:' ]';}
+.sec-title{
+  font-family:'Orbitron',sans-serif;
+  font-weight:700;
+  font-size:22px;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--white);
+  margin-bottom:8px;
+}
+.sec-lead{
+  font-size:14px;
+  color:var(--steel);
+  line-height:1.8;
+  max-width:700px;
+  font-weight:300;
+  margin-bottom:32px;
+  font-style:italic;
+}
+
+/* -- COMPANY OVERVIEW -- */
+.overview-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2px;
+}
+.ov-block{
+  background:var(--card);
+  border:1px solid var(--b1);
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.ov-block::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0.4;
+}
+.ov-block h3{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--cyan);
+  margin-bottom:12px;
+  opacity:0.8;
+}
+.ov-block p{font-size:13px;color:var(--steel);line-height:1.8;font-weight:300;}
+
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:2px;
+  margin-top:2px;
+}
+.stat{
+  background:var(--card);
+  border:1px solid var(--b1);
+  padding:22px 16px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .3s;
+}
+.stat:hover{border-color:rgba(0,255,136,0.4);}
+.stat::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+.stat:hover::after{opacity:1;}
+.stat-num{
+  font-family:'Orbitron',sans-serif;
+  font-weight:800;
+  font-size:26px;
+  color:var(--cyan);
+  line-height:1;
+  margin-bottom:6px;
+}
+.stat-num.orange{color:var(--orange);}
+.stat-lbl{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:var(--dim);
+}
+
+/* -- CAPABILITIES -- */
+.cap-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2px;
+}
+.cap{
+  background:var(--card);
+  border:1px solid var(--b1);
+  padding:24px 20px;
+  position:relative;
+  transition:all .3s;
+  overflow:hidden;
+}
+.cap::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;
+  width:2px;height:0;
+  background:var(--cyan);
+  transition:height .3s;
+}
+.cap:hover::before{height:100%;}
+.cap:hover{border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.03);}
+.cap-id{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--orange);
+  letter-spacing:2px;
+  margin-bottom:10px;
+}
+.cap-name{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--white);
+  margin-bottom:10px;
+}
+.cap-parts{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--steel);
+  line-height:2;
+}
+
+/* -- DIFF CARDS -- */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.diff{
+  background:var(--card);
+  border:1px solid var(--b1);
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.diff::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+  opacity:0.2;
+}
+.diff-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--white);
+  margin-bottom:6px;
+}
+.diff-vs{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  color:var(--orange);
+  letter-spacing:1px;
+  margin-bottom:12px;
+}
+.diff-desc{font-size:12px;color:var(--steel);line-height:1.8;font-weight:300;}
+
+/* -- REPORTS -- */
+.reports-hdr{
+  background:linear-gradient(135deg,var(--panel) 0%,rgba(0,255,136,0.03) 100%);
+  padding:40px 60px;
+  border-top:1px solid rgba(0,255,136,0.1);
+  border-bottom:1px solid rgba(0,255,136,0.1);
+  position:relative;
+  overflow:hidden;
+}
+.reports-hdr::before{
+  content:'SYSTEM READY';
+  position:absolute;
+  right:60px;bottom:20px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:rgba(0,255,136,0.08);
+}
+.reports-hdr h2{
+  font-family:'Orbitron',sans-serif;
+  font-weight:800;
+  font-size:20px;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--white);
+  margin-bottom:8px;
+}
+.reports-hdr p{font-size:13px;color:var(--steel);font-weight:300;line-height:1.7;max-width:680px;font-style:italic;}
+.tbi-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-top:14px;
+  background:rgba(212,168,67,0.06);
+  border:1px solid rgba(212,168,67,0.2);
+  padding:5px 12px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  color:var(--tbi);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+.rpt-sec{padding:32px 60px;background:var(--void);}
+.rpt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.rpt{
+  background:var(--card);
+  border:1px solid var(--b1);
+  overflow:hidden;
+  transition:all .25s;
+  position:relative;
+}
+.rpt::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:var(--cyan);
+  transform:scaleX(0);
+  transition:transform .3s;
+  transform-origin:left;
+}
+.rpt:hover::before{transform:scaleX(1);}
+.rpt:hover{border-color:rgba(0,255,136,0.3);box-shadow:0 0 20px rgba(0,255,136,0.05);}
+.rh{
+  background:rgba(0,255,136,0.04);
+  padding:10px 12px;
+  display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--b1);
+}
+.rdot{width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0;}
+.rtitle{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:rgba(0,255,136,0.7);
+}
+.rb{padding:12px;}
+.kr{display:flex;justify-content:space-between;margin-bottom:8px;}
+.kl{
+  font-family:'Share Tech Mono',monospace;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--dim);
+  margin-bottom:3px;
+}
+.kv{
+  font-family:'Orbitron',monospace;
+  font-weight:700;
+  font-size:16px;
+  color:var(--white);
+  letter-spacing:1px;
+}
+.kv.c{color:var(--cyan);}
+.kv.g{color:var(--green);}
+.kv.o{color:var(--orange);}
+.kv.r{color:var(--red);}
+
+/* Mini bar chart */
+.mbars{display:flex;align-items:flex-end;gap:2px;height:32px;margin-top:6px;}
+.mb{flex:1;background:rgba(0,255,136,0.3);border-radius:1px 1px 0 0;}
+.mb.hi{background:var(--cyan);}
+.mb.lo{background:rgba(0,255,136,0.1);}
+.mb.or{background:var(--orange);}
+
+/* Sparkline */
+.spark{height:28px;margin-top:6px;}
+.spark svg{width:100%;height:100%;}
+
+/* Progress */
+.pl{margin-top:6px;}
+.pr{margin-bottom:5px;}
+.pm{display:flex;justify-content:space-between;margin-bottom:2px;}
+.pn{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.pv{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--white);}
+.pt{height:2px;background:rgba(0,255,136,0.1);border-radius:1px;overflow:hidden;}
+.pf{height:100%;background:var(--cyan);border-radius:1px;}
+.pf.g{background:var(--green);}
+.pf.o{background:var(--orange);}
+
+/* Mini table */
+.tm{width:100%;font-size:8px;margin-top:6px;border-collapse:collapse;}
+.tm th{font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:400;padding:3px 0;text-align:left;border-bottom:1px solid var(--b1);font-size:7px;}
+.tm td{padding:3px 0;color:var(--white);border-bottom:1px solid rgba(13,31,60,0.5);font-size:8px;font-family:'Share Tech Mono',monospace;}
+.tm td:last-child{text-align:right;color:var(--green);font-size:7px;}
+
+.sdiv{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--cyan);
+  margin:20px 0 10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  opacity:0.6;
+}
+.sdiv::before{content:'//';color:var(--b2);}
+.sdiv::after{content:'';flex:1;height:1px;background:var(--b1);}
+
+/* -- ARCH -- */
+.arch{background:var(--panel);padding:48px 60px;border-top:1px solid rgba(0,255,136,0.08);border-bottom:1px solid rgba(0,255,136,0.08);}
+.arch-flow{
+  display:grid;
+  grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+  align-items:center;
+  margin-top:28px;
+  background:rgba(0,255,136,0.02);
+  border:1px solid var(--b1);
+  padding:28px 24px;
+  position:relative;
+  overflow:hidden;
+}
+.arch-flow::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(0,255,136,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,136,0.02) 1px,transparent 1px);
+  background-size:20px 20px;
+}
+.an{text-align:center;padding:8px;position:relative;z-index:1;}
+.ai{
+  width:48px;height:48px;
+  border:1px solid rgba(0,255,136,0.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 10px;
+  background:rgba(0,255,136,0.04);
+  position:relative;
+}
+.ai::after{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border:1px solid transparent;
+  background:linear-gradient(135deg,rgba(0,255,136,0.3),transparent) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;
+  mask-composite:exclude;
+}
+.al{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white);margin-bottom:3px;}
+.as2{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--dim);letter-spacing:1px;}
+.aa{color:rgba(0,255,136,0.4);font-size:18px;text-align:center;padding:0 4px;}
+.wtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:16px;}
+.wt{font-family:'Share Tech Mono',monospace;font-size:8px;padding:3px 8px;letter-spacing:0.5px;border:1px solid;}
+.wt.d{background:rgba(0,255,136,0.06);color:rgba(0,255,136,0.7);border-color:rgba(0,255,136,0.15);}
+.wt.f{background:rgba(255,94,26,0.06);color:rgba(255,130,60,0.8);border-color:rgba(255,94,26,0.15);}
+.wt.s{background:rgba(42,64,96,0.3);color:var(--dim);border-color:var(--b1);}
+
+/* -- CTA -- */
+.cta{
+  padding:60px 60px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:48px;
+  align-items:center;
+  background:linear-gradient(135deg,var(--void) 0%,var(--deep) 100%);
+  position:relative;
+  overflow:hidden;
+}
+.cta::before{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  width:600px;height:600px;
+  border-radius:50%;
+  border:1px solid rgba(0,255,136,0.04);
+  transform:translate(-50%,-50%);
+}
+.cta::after{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  width:400px;height:400px;
+  border-radius:50%;
+  border:1px solid rgba(0,255,136,0.06);
+  transform:translate(-50%,-50%);
+}
+.cta-left{position:relative;z-index:1;}
+.cta-left h2{
+  font-family:'Orbitron',sans-serif;
+  font-weight:800;
+  font-size:24px;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  color:var(--white);
+  line-height:1.2;
+  margin-bottom:14px;
+}
+.cta-left h2 em{font-style:normal;color:var(--cyan);}
+.cta-left p{font-size:13px;color:var(--steel);font-weight:300;line-height:1.8;margin-bottom:24px;font-style:italic;}
+.cta-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--cyan);
+  text-decoration:none;
+  border:1px solid rgba(0,255,136,0.3);
+  padding:12px 20px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+  transition:all .25s;
+}
+.cta-btn::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.1),transparent);
+  transition:left .4s;
+}
+.cta-btn:hover::before{left:100%;}
+.cta-btn:hover{border-color:var(--cyan);color:var(--white);box-shadow:0 0 20px rgba(0,255,136,0.1);}
+
+.cta-right{
+  background:rgba(0,255,136,0.03);
+  border:1px solid var(--b1);
+  padding:28px;
+  position:relative;
+  z-index:1;
+}
+.cta-right::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+  opacity:0.3;
+}
+.cta-right h3{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--cyan);
+  margin-bottom:16px;
+  opacity:0.8;
+}
+.fl{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.fl li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:12px;color:var(--steel);line-height:1.6;font-weight:300;
+}
+.fl li::before{
+  content:'>';
+  color:var(--cyan);
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;
+  margin-top:2px;flex-shrink:0;
+  text-shadow:0 0 8px var(--cyan);
+}
+
+/* -- FOOTER -- */
+footer{
+  background:var(--void);
+  padding:20px 60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-top:1px solid rgba(0,255,136,0.1);
+}
+.fb{display:flex;align-items:center;gap:14px;}
+.fbrand{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--orange);
+  text-shadow:0 0 10px rgba(255,94,26,0.3);
+}
+.fsep{color:var(--b2);}
+.ftbi a{
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+  font-weight:600;
+  color:var(--tbi);
+  text-decoration:none;
+  letter-spacing:1px;
+}
+.ftbi a em{font-style:normal;}
+.fr{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  color:var(--dim);
+  letter-spacing:1px;
+  text-align:right;
+  line-height:2;
+}
+
+@media(max-width:900px){
+  .hero,.sec,.arch,.cta,footer,.reports-hdr,.rpt-sec{padding-left:20px;padding-right:20px;}
+  .hero-title{font-size:32px;}
+  .overview-grid,.diff-grid,.cta{grid-template-columns:1fr;}
+  .stat-row,.cap-grid,.rpt-grid{grid-template-columns:repeat(2,1fr);}
+  .arch-flow{grid-template-columns:1fr 1fr;gap:12px;}
+  .aa{display:none;}
+  .hero-readouts{flex-direction:column;}
+  .orbit-ring,.hud-corner{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ANIMATED BACKGROUND -->
+<div class="bg-layer">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <svg class="radar" viewBox="0 0 800 800">
+    <circle cx="400" cy="400" r="380" stroke="#00FF88" stroke-width="0.5" fill="none"/>
+    <circle cx="400" cy="400" r="280" stroke="#00FF88" stroke-width="0.3" fill="none"/>
+    <circle cx="400" cy="400" r="180" stroke="#00FF88" stroke-width="0.3" fill="none"/>
+    <circle cx="400" cy="400" r="80" stroke="#00FF88" stroke-width="0.5" fill="none"/>
+    <line x1="400" y1="20" x2="400" y2="780" stroke="#00FF88" stroke-width="0.3"/>
+    <line x1="20" y1="400" x2="780" y2="400" stroke="#00FF88" stroke-width="0.3"/>
+    <!-- Sweep line -->
+    <line x1="400" y1="400" x2="400" y2="20" stroke="#00FF88" stroke-width="1.5" opacity="0.8"/>
+    <!-- Fading arc for sweep effect -->
+    <path d="M400,400 L400,20 A380,380,0,0,1,780,400" fill="rgba(0,255,136,0.03)"/>
+  </svg>
+</div>
+
+<div class="content">
+
+<!-- TBI BAR -->
+<div class="tbi-bar">
+  <div class="tbi-left">
+    <a class="tbi-logo" href="https://tailored.bi">
+      <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="2" fill="#0B1120"/>
+        <rect x="6" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+        <rect x="18" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+        <rect x="6" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+        <rect x="18" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+      </svg>
+      <span class="tbi-wordmark">Tailored<em>.BI</em></span>
+    </a>
+    <span class="tbi-sep">/</span>
+    <span>Client Showcase</span>
+    <span class="tbi-sep">/</span>
+    <span>Mars Aerospace Components</span>
+  </div>
+  <div class="tbi-right">
+    <a href="https://tailored.bi">&larr; Back to Tailored.BI</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <!-- HUD corners -->
+  <div class="hud-corner hud-tl"></div>
+  <div class="hud-corner hud-tr"></div>
+  <div class="hud-corner hud-bl"></div>
+  <div class="hud-corner hud-br"></div>
+
+  <!-- Orbit visual -->
+  <div class="hero-visual">
+    <div class="orbit-ring or1"></div>
+    <div class="orbit-ring or2"></div>
+    <div class="orbit-ring or3"></div>
+    <div class="orbit-ring or4"></div>
+  </div>
+
+  <div class="hero-eyebrow">CLIENT SHOWCASE &nbsp;|&nbsp; FICTITIOUS DEMO &nbsp;|&nbsp; POWERED BY TAILORED.BI</div>
+
+  <!-- Logo -->
+  <div class="mars-mark">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <circle cx="40" cy="40" r="38" stroke="#00FF88" stroke-width="0.75" opacity="0.3"/>
+      <circle cx="40" cy="40" r="28" stroke="#00FF88" stroke-width="0.5" opacity="0.5"/>
+      <circle cx="40" cy="40" r="18" stroke="#FF5E1A" stroke-width="1" opacity="0.6"/>
+      <ellipse cx="40" cy="40" rx="38" ry="10" stroke="#00FF88" stroke-width="0.5" opacity="0.2" transform="rotate(-30 40 40)"/>
+      <circle cx="40" cy="40" r="14" fill="rgba(255,94,26,0.08)" stroke="#FF5E1A" stroke-width="1.5"/>
+      <path d="M30 50L30 32L40 42L50 32L50 50" stroke="#00FF88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="68" cy="16" r="3.5" fill="#FF5E1A" opacity="0.8"/>
+      <circle cx="12" cy="55" r="2" fill="#00FF88" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <div class="hero-title" data-text="MARS AEROSPACE">
+    MARS <span class="hero-title-orange">AEROSPACE</span>
+  </div>
+  <div class="hero-title" data-text="COMPONENTS" style="margin-bottom:16px;">COMPONENTS</div>
+  <div class="hero-subtitle">Tucson, AZ &nbsp;&#9671;&nbsp; Est. 2001 &nbsp;&#9671;&nbsp; AS9100D Certified &nbsp;&#9671;&nbsp; Company ID: MARS</div>
+
+  <p class="hero-desc">Precision machined aerospace structures and rotating components for defense and commercial programs. Every part lot-controlled. Every shipment traceable. Every job costed to the hour.</p>
+
+  <div class="hero-readouts">
+    <div class="readout">
+      <div class="readout-label">System Status</div>
+      <div class="readout-val green">ONLINE</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Open Jobs</div>
+      <div class="readout-val c">47</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Backlog</div>
+      <div class="readout-val orange">$4.2M</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">OTD Rate</div>
+      <div class="readout-val green">94.2%</div>
+    </div>
+    <div class="readout">
+      <div class="readout-label">Lot Trace</div>
+      <div class="readout-val c">100% <span class="blink">_</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPANY PROFILE -->
+<div class="sec">
+  <div class="sec-tag">Company Profile</div>
+  <div class="sec-title">About Mars Aerospace Components</div>
+  <div class="overview-grid">
+    <div class="ov-block">
+      <h3>// The Business</h3>
+      <p>Mars Aerospace Components is a make-to-order precision machining and fabrication shop specializing in titanium, Inconel, and aluminum aerospace structures. Founded in 2001 by former Raytheon engineers, Mars serves Tier 1 aerospace primes on both defense and commercial programs. Revenue is contract-driven with long cycle times &mdash; jobs run weeks to months, not days. Cost visibility at the job level is the critical reporting challenge.</p>
+    </div>
+    <div class="ov-block">
+      <h3>// The Epicor Setup</h3>
+      <p>Mars runs Epicor Kinetic with job costing, lot and serial traceability, and multi-level bill of materials. Their data spans three years of job history, contract billing milestones, and full lot genealogy across 85+ active part numbers. The Tailored.BI warehouse connects via the SQL Server ETL lane, using SysRevChangedDate watermark filtering. JobHead and LaborDtl are the highest-volume tables at over 2M rows combined.</p>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num">$18.4M</div><div class="stat-lbl">Annual Revenue</div></div>
+    <div class="stat"><div class="stat-num">85+</div><div class="stat-lbl">Active Part Numbers</div></div>
+    <div class="stat"><div class="stat-num orange">12</div><div class="stat-lbl">Active Contracts</div></div>
+    <div class="stat"><div class="stat-num">47</div><div class="stat-lbl">Open Jobs</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Lot Traceable</div></div>
+  </div>
+</div>
+
+<!-- CAPABILITIES -->
+<div class="sec" style="background:rgba(0,255,136,0.015);">
+  <div class="sec-tag">Manufacturing Capabilities</div>
+  <div class="sec-title">Four Product Lines</div>
+  <div class="cap-grid">
+    <div class="cap">
+      <div class="cap-id">01 // STR</div>
+      <div class="cap-name">Structural Components</div>
+      <div class="cap-parts">Frames & brackets Ti-6Al-4V<br>Bulkheads Al 7075-T73<br>Spars & ribs AMS 4045<br>Longerons machined</div>
+    </div>
+    <div class="cap">
+      <div class="cap-id">02 // ROT</div>
+      <div class="cap-name">Rotating Parts</div>
+      <div class="cap-parts">Compressor discs Inconel 718<br>Turbine blisks Ti-64<br>Fan spacers machined<br>Shafts ground & balanced</div>
+    </div>
+    <div class="cap">
+      <div class="cap-id">03 // FLT</div>
+      <div class="cap-name">Flight Controls</div>
+      <div class="cap-parts">Actuator housings Al 2024<br>Control rods titanium<br>Bellcranks & clevis joints<br>Hydraulic manifolds</div>
+    </div>
+    <div class="cap">
+      <div class="cap-id">04 // SVC</div>
+      <div class="cap-name">MRO & Spares</div>
+      <div class="cap-parts">Certified replacement parts<br>FAA-PMA approved items<br>Overhaul kits per CMM<br>AOG priority support</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY DIFFERENT -->
+<div class="sec">
+  <div class="sec-tag">Architecture Insight</div>
+  <div class="sec-title">Why Mars is a Different Epicor Problem</div>
+  <div class="sec-lead">Same Tailored.BI warehouse architecture. Completely different data patterns. Mars demonstrates that the framework scales from simple make-to-stock all the way to complex make-to-order aerospace.</div>
+  <div class="diff-grid">
+    <div class="diff">
+      <div class="diff-title">Job Costing vs Standard Cost</div>
+      <div class="diff-vs">// Heartland = standard cost &nbsp;|&nbsp; Mars = job cost</div>
+      <div class="diff-desc">Every Mars job has its own estimated vs actual cost variance. Reporting needs cost-to-complete, earned value, and labor efficiency at the job and operation level. Standard cost variance reports don't apply here.</div>
+    </div>
+    <div class="diff">
+      <div class="diff-title">Lot Traceability</div>
+      <div class="diff-vs">// Heartland = no lot tracking &nbsp;|&nbsp; Mars = full genealogy</div>
+      <div class="diff-desc">Every raw material lot is tracked from receiving through production to shipment. A dedicated bridge table maps lot numbers to jobs, customers, and certificates of conformance for AS9100D compliance reporting.</div>
+    </div>
+    <div class="diff">
+      <div class="diff-title">Contract Billing vs AR Aging</div>
+      <div class="diff-vs">// Heartland = invoice aging &nbsp;|&nbsp; Mars = milestone billing</div>
+      <div class="diff-desc">Mars bills against contract milestones, not shipments. Revenue recognition is tied to program completion percentage. AR aging is replaced by contract status and earned revenue dashboards.</div>
+    </div>
+    <div class="diff">
+      <div class="diff-title">Long Cycle Times</div>
+      <div class="diff-vs">// Heartland = days &nbsp;|&nbsp; Mars = weeks to months</div>
+      <div class="diff-desc">Jobs for structural components run 6-14 weeks. WIP inventory is substantial. On-time delivery requires comparing promised vs actual at the operation level, not just the order level.</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS HEADER -->
+<div class="reports-hdr">
+  <h2>8 Power BI Report Views</h2>
+  <p>Built on the Tailored.BI Fabric data warehouse, connected directly to Mars's Epicor Kinetic data. Job costing, contract status, labor efficiency, lot traceability, and on-time delivery &mdash; all from one semantic model with one dim.Date.</p>
+  <div class="tbi-badge">
+    <svg width="11" height="11" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="2" fill="#0B1120"/>
+      <rect x="6" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+      <rect x="18" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+      <rect x="6" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+      <rect x="18" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+    </svg>
+    Tailored.BI &nbsp;|&nbsp; Microsoft Fabric Warehouse &nbsp;|&nbsp; Epicor Kinetic
+  </div>
+</div>
+
+<div class="rpt-sec">
+  <div class="sdiv">Financial</div>
+  <div class="rpt-grid" style="margin-bottom:2px;">
+    <div class="rpt">
+      <div class="rh"><div class="rdot"></div><div class="rtitle">Job Cost Variance</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Avg Var</div><div class="kv g">-2.8%</div></div>
+          <div><div class="kl">Over Budget</div><div class="kv o">7 Jobs</div></div>
+        </div>
+        <div class="pl">
+          <div class="pr"><div class="pm"><span class="pn">Labor</span><span class="pv">-1.4%</span></div><div class="pt"><div class="pf g" style="width:97%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Material</span><span class="pv">-3.2%</span></div><div class="pt"><div class="pf g" style="width:95%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Burden</span><span class="pv">+1.8%</span></div><div class="pt"><div class="pf o" style="width:60%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Subcon</span><span class="pv">+4.1%</span></div><div class="pt"><div class="pf o" style="width:45%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--amber)"></div><div class="rtitle">Contract Revenue</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Recognized YTD</div><div class="kv">$12.4M</div></div>
+          <div><div class="kl">Backlog</div><div class="kv o">$4.2M</div></div>
+        </div>
+        <div class="mbars">
+          <div class="mb lo" style="height:45%"></div><div class="mb lo" style="height:52%"></div>
+          <div class="mb" style="height:68%"></div><div class="mb" style="height:72%"></div>
+          <div class="mb hi" style="height:100%"></div><div class="mb" style="height:88%"></div>
+          <div class="mb" style="height:82%"></div><div class="mb" style="height:90%"></div>
+          <div class="mb hi" style="height:95%"></div><div class="mb" style="height:78%"></div>
+          <div class="mb lo" style="height:60%"></div><div class="mb lo" style="height:48%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--green)"></div><div class="rtitle">Income Statement</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Revenue</div><div class="kv">$18.4M</div></div>
+          <div><div class="kl">Gross Margin</div><div class="kv g">38.2%</div></div>
+        </div>
+        <table class="tm">
+          <tr><th>Account</th><th>Actual</th><th>Var</th></tr>
+          <tr><td>Revenue</td><td>$18.4M</td><td style="color:var(--green)">+3.1%</td></tr>
+          <tr><td>Dir. Labor</td><td>$4.2M</td><td style="color:var(--green)">-1.8%</td></tr>
+          <tr><td>Material</td><td>$7.1M</td><td style="color:var(--orange)">+0.9%</td></tr>
+          <tr><td>Burden</td><td>$2.0M</td><td style="color:var(--green)">-0.4%</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--steel)"></div><div class="rtitle">Purchasing & AP</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Open POs</div><div class="kv">23</div></div>
+          <div><div class="kl">AP Balance</div><div class="kv">$1.84M</div></div>
+        </div>
+        <div class="pl">
+          <div class="pr"><div class="pm"><span class="pn">TIMET</span><span class="pv">$620K</span></div><div class="pt"><div class="pf g" style="width:34%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Spec. Metals</span><span class="pv">$480K</span></div><div class="pt"><div class="pf" style="width:26%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Arconic</span><span class="pv">$390K</span></div><div class="pt"><div class="pf o" style="width:21%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sdiv">Operations</div>
+  <div class="rpt-grid">
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--orange)"></div><div class="rtitle">Labor Efficiency</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Overall Eff.</div><div class="kv g">96.4%</div></div>
+          <div><div class="kl">Direct Hrs</div><div class="kv c">8,420</div></div>
+        </div>
+        <div class="pl">
+          <div class="pr"><div class="pm"><span class="pn">5-Axis CNC</span><span class="pv">98.2%</span></div><div class="pt"><div class="pf g" style="width:98%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Turning</span><span class="pv">97.1%</span></div><div class="pt"><div class="pf g" style="width:97%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Grind</span><span class="pv">94.8%</span></div><div class="pt"><div class="pf" style="width:95%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">Inspect</span><span class="pv">92.6%</span></div><div class="pt"><div class="pf o" style="width:93%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--green)"></div><div class="rtitle">On-Time Delivery</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">OTD Rate</div><div class="kv g">94.2%</div></div>
+          <div><div class="kl">Late Jobs</div><div class="kv o">8</div></div>
+        </div>
+        <table class="tm">
+          <tr><th>Customer</th><th>Jobs</th><th>OTD</th></tr>
+          <tr><td>Raytheon</td><td>18</td><td style="color:var(--green)">97.2%</td></tr>
+          <tr><td>L3 Harris</td><td>14</td><td style="color:var(--green)">95.8%</td></tr>
+          <tr><td>Boeing DS</td><td>11</td><td style="color:var(--orange)">92.4%</td></tr>
+          <tr><td>Northrop</td><td>9</td><td style="color:var(--cyan)">94.1%</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--amber)"></div><div class="rtitle">WIP & Production</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">WIP Value</div><div class="kv">$3.8M</div></div>
+          <div><div class="kl">Open Jobs</div><div class="kv c">47</div></div>
+        </div>
+        <div class="spark">
+          <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+            <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00FF88" stop-opacity="0.3"/><stop offset="100%" stop-color="#00FF88" stop-opacity="0"/></linearGradient></defs>
+            <polyline points="0,22 10,20 20,16 30,18 40,14 50,12 60,16 70,10 80,8 90,12 100,6" fill="none" stroke="#00FF88" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,22 10,20 20,16 30,18 40,14 50,12 60,16 70,10 80,8 90,12 100,6 100,28 0,28" fill="url(#sg)"/>
+            <circle cx="100" cy="6" r="2" fill="#00FF88"/>
+          </svg>
+        </div>
+        <div class="pl" style="margin-top:4px;">
+          <div class="pr"><div class="pm"><span class="pn">STR Jobs</span><span class="pv">$1.6M</span></div><div class="pt"><div class="pf" style="width:42%"></div></div></div>
+          <div class="pr"><div class="pm"><span class="pn">ROT Jobs</span><span class="pv">$1.4M</span></div><div class="pt"><div class="pf o" style="width:37%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="rpt">
+      <div class="rh"><div class="rdot" style="background:var(--steel)"></div><div class="rtitle">Lot Traceability</div></div>
+      <div class="rb">
+        <div class="kr">
+          <div><div class="kl">Active Lots</div><div class="kv">342</div></div>
+          <div><div class="kl">CoC Complete</div><div class="kv g">100%</div></div>
+        </div>
+        <table class="tm">
+          <tr><th>Material</th><th>Lots</th><th>Jobs</th></tr>
+          <tr><td>Ti-6Al-4V</td><td>128</td><td style="color:var(--cyan)">89</td></tr>
+          <tr><td>Inconel 718</td><td>94</td><td style="color:var(--cyan)">62</td></tr>
+          <tr><td>Al 7075</td><td>72</td><td style="color:var(--cyan)">54</td></tr>
+          <tr><td>Al 2024</td><td>48</td><td style="color:var(--cyan)">38</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="arch">
+  <div class="sec-tag">Technical Architecture</div>
+  <div class="sec-title">Data Pipeline</div>
+  <div class="sec-lead">Epicor Kinetic on-premises feeds through watermark-based stored procedures into Microsoft Fabric via on-premises data gateway. A dedicated bridge.LotJobShipment table powers all AS9100D traceability queries.</div>
+  <div class="arch-flow">
+    <div class="an">
+      <div class="ai">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1" stroke="#00FF88" stroke-width="1.5"/><path d="M7 8h10M7 12h10M7 16h6" stroke="#00FF88" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="al">Epicor Kinetic</div>
+      <div class="as2">On-Prem ERP</div>
+    </div>
+    <div class="aa">&#8594;</div>
+    <div class="an">
+      <div class="ai">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3" stroke="#00FF88" stroke-width="1.5"/><path d="M4 7v5c0 1.66 3.58 3 8 3s8-1.34 8-3V7" stroke="#00FF88" stroke-width="1.5"/><path d="M4 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" stroke="#00FF88" stroke-width="1.5"/></svg>
+      </div>
+      <div class="al">SQL Server</div>
+      <div class="as2">Watermark ETL</div>
+    </div>
+    <div class="aa">&#8594;</div>
+    <div class="an">
+      <div class="ai">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#00FF88" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#00FF88" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="al">Fabric Warehouse</div>
+      <div class="as2">dim + fact + bridge</div>
+    </div>
+    <div class="aa">&#8594;</div>
+    <div class="an">
+      <div class="ai">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1" stroke="#00FF88" stroke-width="1.5"/><path d="M8 10h8M8 14h5" stroke="#00FF88" stroke-width="1.5" stroke-linecap="round"/><circle cx="17" cy="14" r="1.5" fill="#00FF88"/></svg>
+      </div>
+      <div class="al">Power BI</div>
+      <div class="as2">8 Report Areas</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">// Warehouse Tables</div>
+    <div class="wtags">
+      <span class="wt d">dim.Date</span><span class="wt d">dim.Customer</span><span class="wt d">dim.Part</span>
+      <span class="wt d">dim.Account</span><span class="wt d">dim.Department</span><span class="wt d">dim.Vendor</span>
+      <span class="wt d">dim.Employee</span><span class="wt d">dim.Contract</span>
+      <span class="wt f">fact.GL</span><span class="wt f">fact.JobCost</span><span class="wt f">fact.LaborTime</span>
+      <span class="wt f">fact.Shipment</span><span class="wt f">fact.PurchaseOrder</span>
+      <span class="wt f">fact.APInvoice</span><span class="wt f">fact.ContractRevenue</span><span class="wt f">fact.Inventory</span>
+      <span class="wt s">bridge.LotJobShipment</span><span class="wt s">bridge.JobMaterial</span><span class="wt s">staging.Watermark</span>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <div class="cta-left">
+    <h2>Want This for Your <em>Epicor</em> Data?</h2>
+    <p>Mars Aerospace Components is a fictional demo company &mdash; but the warehouse, ETL architecture, and Power BI reports are real. Whether you're running simple make-to-stock or complex aerospace job costing, the Tailored.BI architecture adapts to your Epicor configuration.</p>
+    <a class="cta-btn" href="https://tailored.bi/#contact">Contact Tailored.BI &#8594;</a>
+  </div>
+  <div class="cta-right">
+    <h3>// What You Get</h3>
+    <ul class="fl">
+      <li>A Microsoft Fabric warehouse built for your specific Epicor schema and company ID</li>
+      <li>Job costing, lot traceability, or standard cost &mdash; the architecture adapts to your manufacturing model</li>
+      <li>8 Power BI report areas with shared DAX measures and a universal dim.Date</li>
+      <li>Watermark-based incremental ETL via SQL Server gateway or Epicor REST API</li>
+      <li>AS9100D traceability reporting if your quality system requires it</li>
+      <li>Ongoing support as your Epicor data model evolves</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fb">
+    <div class="fbrand">Mars Aerospace Components</div>
+    <div class="fsep">/</div>
+    <div class="ftbi"><a href="https://tailored.bi">Tailored<em>.BI</em></a></div>
+  </div>
+  <div class="fr">
+    Fictitious company &mdash; created for Tailored.BI demonstration purposes<br>
+    &copy; 2026 Tailored.BI &nbsp;|&nbsp; tailored.bi/mars
+  </div>
+</footer>
+
+</div><!-- /content -->
+</body>
+</html>
