@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridgeline Fluid Power - Epicor Kinetic BI Demo | Tailored.BI</title>
+<meta name="description" content="See how Tailored.BI built a Microsoft Fabric data warehouse for Ridgeline Fluid Power, a fictional Epicor Kinetic hybrid MTS/MTO fluid power manufacturer in Tulsa, Oklahoma.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tailored.bi/index_Ridgeline.html">
+<meta property="og:type"        content="website">
+<meta property="og:url"         content="https://tailored.bi/index_Ridgeline.html">
+<meta property="og:title"       content="Ridgeline Fluid Power - Epicor Kinetic BI Showcase | Tailored.BI">
+<meta property="og:description" content="A Microsoft Fabric and Power BI showcase built on Epicor Kinetic ERP data for a hybrid MTS/MTO fluid power manufacturer. Warehouse schema, ETL architecture, and 6 report areas.">
+<meta property="og:site_name"   content="Tailored.BI">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"Ridgeline Fluid Power - Epicor Kinetic BI Demo","url":"https://tailored.bi/index_Ridgeline.html","description":"A demonstration of the Tailored.BI Microsoft Fabric data warehouse and Power BI solution for Epicor Kinetic ERP, using a fictional hybrid fluid power manufacturer.","isPartOf":{"@type":"WebSite","name":"Tailored.BI","url":"https://tailored.bi"}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --crimson:  #B03030;
+  --red2:     #8A2020;
+  --steel:    #4A5568;
+  --charcoal: #2C2C2C;
+  --iron:     #555E6B;
+  --silver:   #C8CDD4;
+  --smoke:    #F4F2F0;
+  --white:    #FFFFFF;
+  --amber:    #C8883A;
+  --tbi-bg:   #0B1120;
+  --tbi-gold: #D4A843;
+  --tbi-text: #E2E8F0;
+  --tbi-muted:#64748B;
+}
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--smoke);
+  color: var(--charcoal);
+  overflow-x: hidden;
+}
+
+/* TBI TOP BAR */
+.tbi-bar {
+  background: var(--tbi-bg);
+  padding: 10px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.tbi-bar-left { display: flex; align-items: center; gap: 16px; font-family: 'Outfit', sans-serif; font-size: 12px; color: var(--tbi-muted); }
+.tbi-bar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.tbi-bar-wordmark { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: var(--tbi-text); }
+.tbi-bar-wordmark em { font-style: normal; color: var(--tbi-gold); }
+.tbi-sep { color: rgba(255,255,255,0.15); }
+.tbi-bar-label { color: var(--tbi-muted); font-size: 11px; letter-spacing: 0.5px; }
+.tbi-bar-right a { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; color: var(--tbi-gold); text-decoration: none; border: 1px solid rgba(212,168,67,.3); padding: 5px 14px; border-radius: 3px; letter-spacing: 0.5px; transition: background .15s; }
+.tbi-bar-right a:hover { background: rgba(212,168,67,.08); }
+
+/* HEADER */
+.header {
+  background: var(--charcoal);
+  padding: 56px 80px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; width: 45%;
+  background: repeating-linear-gradient(-55deg, transparent, transparent 8px, rgba(176,48,48,0.06) 8px, rgba(176,48,48,0.06) 9px);
+  pointer-events: none;
+}
+.header::after {
+  content: 'RDGL';
+  position: absolute;
+  right: 60px; bottom: -20px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700; font-size: 180px;
+  color: rgba(176,48,48,0.05);
+  letter-spacing: 0.1em; line-height: 1;
+  pointer-events: none;
+}
+.header-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--crimson); opacity: 0.8; margin-bottom: 28px; }
+.logo-lockup { display: flex; align-items: center; gap: 26px; position: relative; z-index: 1; }
+.logo-name { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 40px; color: var(--white); letter-spacing: 0.02em; line-height: 1; text-transform: uppercase; }
+.logo-name span { color: var(--crimson); }
+.logo-sub { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 14px; color: var(--silver); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 5px; }
+.logo-loc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 7px; letter-spacing: 0.07em; }
+
+/* TAGLINE BAND */
+.tagline-band {
+  background: var(--crimson);
+  padding: 44px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.tagline-band::after { content: '"'; position: absolute; right: 48px; bottom: -50px; font-size: 240px; font-family: 'Oswald', sans-serif; color: rgba(255,255,255,0.05); line-height: 1; pointer-events: none; }
+.tagline-main { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 34px; color: var(--white); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.2; margin-bottom: 16px; position: relative; z-index: 1; }
+.tagline-main em { font-style: normal; color: var(--silver); }
+.tagline-sub { font-size: 16px; color: rgba(255,255,255,0.78); line-height: 1.65; max-width: 620px; font-weight: 300; position: relative; z-index: 1; }
+
+/* KPI BAND */
+.kpi-band { background: var(--white); border-bottom: 3px solid var(--crimson); display: grid; grid-template-columns: repeat(5, 1fr); }
+.kpi-cell { padding: 22px 20px; border-right: 1px solid rgba(44,44,44,0.08); text-align: center; }
+.kpi-cell:last-child { border-right: none; }
+.kpi-val { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 28px; color: var(--charcoal); line-height: 1; margin-bottom: 5px; }
+.kpi-val.red { color: var(--crimson); }
+.kpi-val.amb { color: var(--amber); }
+.kpi-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--iron); }
+
+/* SECTIONS */
+.section { padding: 64px 80px; border-bottom: 1px solid rgba(44,44,44,0.1); }
+.section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--crimson); margin-bottom: 10px; }
+.section-title { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 26px; color: var(--charcoal); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.section-lead { font-size: 16px; color: var(--iron); line-height: 1.7; max-width: 680px; margin-bottom: 40px; font-weight: 300; }
+
+/* OVERVIEW */
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 8px; }
+.overview-block h3 { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--crimson); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--crimson); display: inline-block; }
+.overview-block p { font-size: 15px; line-height: 1.75; color: var(--iron); }
+
+.stat-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; margin-top: 40px; }
+.stat-block { background: var(--charcoal); padding: 28px 24px; text-align: center; }
+.stat-val { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 32px; color: var(--silver); line-height: 1; margin-bottom: 6px; }
+.stat-val.red { color: var(--crimson); }
+.stat-val.amb { color: var(--amber); }
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.38); }
+
+/* PRODUCT LINES */
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.product-card { background: var(--white); padding: 28px 20px; border-top: 3px solid var(--crimson); }
+.product-card:nth-child(2) { border-top-color: var(--red2); }
+.product-card:nth-child(3) { border-top-color: var(--steel); }
+.product-card:nth-child(4) { border-top-color: var(--charcoal); }
+.product-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--crimson); margin-bottom: 10px; }
+.product-name { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--charcoal); margin-bottom: 10px; }
+.product-examples { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--iron); line-height: 1.8; }
+.product-tag { display: inline-block; margin-top: 12px; font-family: 'Oswald', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 2px; }
+.tag-mts { background: rgba(176,48,48,0.08); color: var(--crimson); border: 1px solid rgba(176,48,48,0.2); }
+.tag-mto { background: rgba(74,85,104,0.1); color: var(--steel); border: 1px solid rgba(74,85,104,0.2); }
+
+/* HYBRID CALLOUT */
+.hybrid-section { padding: 56px 80px; background: var(--white); border-bottom: 1px solid rgba(44,44,44,0.1); }
+.hybrid-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: 28px; }
+.hybrid-card { padding: 28px; background: var(--smoke); }
+.hybrid-card:nth-child(odd) { border-left: 3px solid var(--crimson); }
+.hybrid-card:nth-child(even) { border-left: 3px solid var(--steel); }
+.hybrid-title { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--charcoal); margin-bottom: 4px; }
+.hybrid-vs { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--crimson); letter-spacing: 0.05em; margin-bottom: 12px; }
+.hybrid-desc { font-size: 14px; color: var(--iron); line-height: 1.7; font-weight: 300; }
+
+/* REPORTS */
+.reports-intro { background: var(--charcoal); padding: 48px 80px; border-bottom: 3px solid var(--crimson); }
+.reports-intro h2 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 28px; color: var(--white); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+.reports-intro p { font-size: 15px; color: rgba(255,255,255,0.6); font-weight: 300; line-height: 1.65; max-width: 680px; }
+.tbi-badge { display: inline-flex; align-items: center; gap: 7px; margin-top: 20px; background: rgba(212,168,67,0.12); border: 1px solid rgba(212,168,67,0.25); padding: 7px 14px; border-radius: 3px; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; color: var(--tbi-gold); letter-spacing: 0.5px; }
+
+.reports-section { padding: 56px 80px; background: var(--smoke); border-bottom: 1px solid rgba(44,44,44,0.1); }
+.reports-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.report-card { background: var(--white); border: 1px solid rgba(44,44,44,0.1); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(44,44,44,0.06); transition: box-shadow 0.2s, transform 0.2s; }
+.report-card:hover { box-shadow: 0 6px 24px rgba(44,44,44,0.12); transform: translateY(-2px); }
+.report-header { background: var(--charcoal); padding: 13px 16px; display: flex; align-items: center; gap: 9px; }
+.report-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--crimson); flex-shrink: 0; }
+.report-dot.amb { background: var(--amber); }
+.report-dot.sil { background: var(--silver); }
+.report-title { font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white); }
+.report-body { padding: 16px; }
+.kpi-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--iron); margin-bottom: 3px; }
+.kpi-value { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 17px; color: var(--charcoal); }
+.kpi-value.red { color: var(--crimson); }
+.kpi-value.amb { color: var(--amber); }
+.kpi-value.pos { color: #2D6A2D; }
+
+.mini-bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 38px; margin-top: 8px; }
+.bar { flex: 1; border-radius: 2px 2px 0 0; background: var(--crimson); opacity: 0.45; }
+.bar.acc { opacity: 1; }
+.bar.low { background: var(--steel); opacity: 0.18; }
+.bar.amb { background: var(--amber); opacity: 0.75; }
+
+.sparkline { height: 34px; margin-top: 8px; }
+.sparkline svg { width: 100%; height: 100%; }
+
+.progress-list { margin-top: 6px; }
+.progress-row { margin-bottom: 7px; }
+.prog-meta { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.prog-name { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--iron); text-transform: uppercase; letter-spacing: 0.06em; }
+.prog-val { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--charcoal); font-weight: 500; }
+.prog-track { height: 5px; background: rgba(44,44,44,0.1); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; background: var(--crimson); }
+.prog-fill.amb { background: var(--amber); }
+.prog-fill.sil { background: var(--steel); }
+
+.tmini { width: 100%; font-size: 9px; margin-top: 6px; border-collapse: collapse; }
+.tmini th { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--iron); font-weight: 500; padding: 4px 0; text-align: left; border-bottom: 1px solid rgba(44,44,44,0.1); font-size: 8px; }
+.tmini td { padding: 4px 0; color: var(--charcoal); border-bottom: 1px solid rgba(44,44,44,0.05); font-size: 9px; }
+.tmini td:last-child { text-align: right; color: var(--crimson); font-family: 'JetBrains Mono', monospace; font-size: 8.5px; }
+
+.section-divider { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--iron); margin: 24px 0 10px; display: flex; align-items: center; gap: 12px; }
+.section-divider::after { content: ''; flex: 1; height: 1px; background: rgba(44,44,44,0.1); }
+
+/* ARCH */
+.arch-section { padding: 64px 80px; background: var(--white); border-bottom: 1px solid rgba(44,44,44,0.1); }
+.arch-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: center; gap: 0; margin-top: 32px; background: var(--charcoal); padding: 32px 40px; border-radius: 4px; }
+.arch-node { text-align: center; padding: 8px; }
+.arch-icon { width: 48px; height: 48px; border-radius: 6px; background: rgba(176,48,48,0.12); border: 1px solid rgba(176,48,48,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+.arch-label { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--white); margin-bottom: 4px; }
+.arch-sub { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: rgba(255,255,255,0.35); letter-spacing: 0.05em; }
+.arch-arrow { color: var(--crimson); font-size: 20px; opacity: 0.7; text-align: center; padding: 0 4px; }
+.warehouse-tables { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px; }
+.wt { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 5px 10px; border-radius: 3px; letter-spacing: 0.05em; }
+.wt.d { background: rgba(176,48,48,0.08); color: var(--crimson); border: 1px solid rgba(176,48,48,0.2); }
+.wt.f { background: rgba(200,136,58,0.1); color: var(--amber); border: 1px solid rgba(200,136,58,0.2); }
+.wt.s { background: rgba(74,85,104,0.1); color: #7788aa; border: 1px solid rgba(74,85,104,0.2); }
+
+/* CTA */
+.cta-section { background: var(--charcoal); padding: 64px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.cta-left h2 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 28px; color: var(--white); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.2; margin-bottom: 16px; }
+.cta-left h2 em { font-style: normal; color: var(--crimson); }
+.cta-left p { font-size: 15px; color: rgba(255,255,255,0.6); font-weight: 300; line-height: 1.7; margin-bottom: 24px; }
+.cta-link { display: inline-flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: var(--tbi-gold); text-decoration: none; border: 1px solid rgba(212,168,67,.35); padding: 11px 22px; border-radius: 4px; letter-spacing: 0.5px; transition: background .15s; }
+.cta-link:hover { background: rgba(212,168,67,.08); }
+.cta-right { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 32px; }
+.cta-right h3 { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--silver); margin-bottom: 20px; }
+.fact-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.fact-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+.fact-list li::before { content: '◆'; color: var(--crimson); font-size: 8px; margin-top: 5px; flex-shrink: 0; }
+
+/* FOOTER */
+footer { background: #1A1A1A; padding: 28px 80px; display: flex; align-items: center; justify-content: space-between; }
+.foot-left { display: flex; align-items: center; gap: 20px; }
+.foot-rdgl { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--crimson); }
+.foot-sep { color: rgba(255,255,255,0.12); }
+.foot-tbi a { font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; color: var(--tbi-gold); text-decoration: none; letter-spacing: 0.3px; }
+.foot-tbi a em { font-style: normal; }
+.foot-right { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
+
+@media (max-width: 900px) {
+  .header, .tagline-band, .section, .arch-section, .hybrid-section,
+  .reports-intro, .reports-section, .cta-section, footer { padding-left: 24px; padding-right: 24px; }
+  .logo-name { font-size: 28px; }
+  .stat-row, .kpi-band { grid-template-columns: repeat(2,1fr); }
+  .product-grid { grid-template-columns: repeat(2,1fr); }
+  .reports-grid { grid-template-columns: 1fr 1fr; }
+  .hybrid-grid { grid-template-columns: 1fr; }
+  .arch-flow { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .arch-arrow { display: none; }
+  .cta-section { grid-template-columns: 1fr; gap: 32px; }
+  .overview-grid { grid-template-columns: 1fr; }
+  .tbi-bar { flex-direction: column; gap: 8px; padding: 12px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TBI BAR -->
+<div class="tbi-bar">
+  <div class="tbi-bar-left">
+    <a class="tbi-bar-logo" href="https://tailored.bi">
+      <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="2" fill="#0B1120"/>
+        <rect x="6" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+        <rect x="18" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+        <rect x="6" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+        <rect x="18" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+      </svg>
+      <span class="tbi-bar-wordmark">Tailored<em>.BI</em></span>
+    </a>
+    <span class="tbi-sep">/</span>
+    <span class="tbi-bar-label">Client Showcase</span>
+    <span class="tbi-sep">/</span>
+    <span class="tbi-bar-label">Ridgeline Fluid Power</span>
+  </div>
+  <div class="tbi-bar-right">
+    <a href="https://tailored.bi">&larr; Back to Tailored.BI</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-label">Client Showcase &nbsp;·&nbsp; Fictitious Demo &nbsp;·&nbsp; Powered by Tailored.BI</div>
+  <div class="logo-lockup">
+    <svg width="72" height="72" viewBox="0 0 90 90" fill="none">
+      <polygon points="45,6 78,24 78,66 45,84 12,66 12,24" fill="#1A1A1A" stroke="#B03030" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="45" cy="45" r="22" fill="#1A1A1A" stroke="#B03030" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="14" fill="none" stroke="rgba(176,48,48,0.35)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <path d="M31 45 Q38 36 45 45 Q52 54 59 45" stroke="#B03030" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M56 41 L59 45 L56 49" stroke="#B03030" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <div>
+      <div class="logo-name">Ridgeline <span>Fluid</span> Power</div>
+      <div class="logo-sub">Hydraulic &amp; Pneumatic Components</div>
+      <div class="logo-loc">RDGL &nbsp;·&nbsp; Tulsa, Oklahoma &nbsp;·&nbsp; Est. 1993</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAGLINE BAND -->
+<div class="tagline-band">
+  <div class="tagline-main">Standard catalog. <em>Custom engineering.</em> One Epicor instance.</div>
+  <div class="tagline-sub">Ridgeline Fluid Power manufactures hydraulic valves, cylinders, and fittings from stock — and builds custom manifold assemblies and OEM-spec power units to order. This page demonstrates how Tailored.BI built a Microsoft Fabric data warehouse that handles both fulfillment models from a single Epicor Kinetic company.</div>
+</div>
+
+<!-- KPI BAND -->
+<div class="kpi-band">
+  <div class="kpi-cell"><div class="kpi-val">$24.6M</div><div class="kpi-lbl">Annual Revenue</div></div>
+  <div class="kpi-cell"><div class="kpi-val red">1,240</div><div class="kpi-lbl">MTS SKUs</div></div>
+  <div class="kpi-cell"><div class="kpi-val">34</div><div class="kpi-lbl">Open MTO Jobs</div></div>
+  <div class="kpi-cell"><div class="kpi-val">96.8%</div><div class="kpi-lbl">Catalog Fill Rate</div></div>
+  <div class="kpi-cell"><div class="kpi-val amb">91.4%</div><div class="kpi-lbl">MTO On-Time Del.</div></div>
+</div>
+
+<!-- COMPANY OVERVIEW -->
+<div class="section">
+  <div class="section-label">Company Profile</div>
+  <div class="section-title">About Ridgeline Fluid Power</div>
+  <div class="overview-grid">
+    <div class="overview-block">
+      <h3>The Business</h3>
+      <p>Ridgeline Fluid Power is a mid-size manufacturer of hydraulic and pneumatic components headquartered in Tulsa, Oklahoma. Founded in 1993 by former Parker Hannifin engineers, Ridgeline serves agricultural OEMs, oil &amp; gas equipment builders, and industrial machinery manufacturers across the South-Central U.S. Their catalog line ships standard valves, fittings, and cylinders from stock. Their custom line builds manifold assemblies and OEM-spec power units to order with lead times of 2–6 weeks.</p>
+    </div>
+    <div class="overview-block">
+      <h3>The Epicor Setup</h3>
+      <p>Ridgeline runs Epicor Kinetic on-premises managing both MTS and MTO workflows in a single company. Their data spans four years of GL, inventory transactions, job cost, and AR/AP — MTS parts generating high-volume, low-complexity transactions alongside MTO jobs generating lower-volume, high-complexity cost records. The Tailored.BI warehouse connects via the SQL Server ETL lane using SysRevChangedDate watermark filtering. PartTran and JobHead are the highest-volume tables.</p>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-block"><div class="stat-val">$24.6M</div><div class="stat-label">Annual Revenue</div></div>
+    <div class="stat-block"><div class="stat-val red">58%</div><div class="stat-label">MTS Revenue Share</div></div>
+    <div class="stat-block"><div class="stat-val amb">42%</div><div class="stat-label">MTO Revenue Share</div></div>
+    <div class="stat-block"><div class="stat-val">1,240</div><div class="stat-label">Catalog SKUs</div></div>
+    <div class="stat-block"><div class="stat-val">68</div><div class="stat-label">Open Purchase Orders</div></div>
+  </div>
+</div>
+
+<!-- PRODUCT LINES -->
+<div class="section" style="background:var(--white);">
+  <div class="section-label">Manufacturing Scope</div>
+  <div class="section-title">Four Product Lines. Two Fulfillment Models.</div>
+  <div class="section-lead">The catalog line runs make-to-stock with tight reorder points tied to seasonal OEM demand cycles. The custom line runs make-to-order with job costing, routing, and BOM-driven material planning — all inside the same Epicor company.</div>
+  <div class="product-grid">
+    <div class="product-card">
+      <div class="product-code">LINE-01</div>
+      <div class="product-name">Directional Valves</div>
+      <div class="product-examples">D03 / D05 / D08 Patterns<br>Solenoid &amp; Manual Actuation<br>2-Position / 3-Position<br>240 Active SKUs</div>
+      <div class="product-tag tag-mts">Make-to-Stock</div>
+    </div>
+    <div class="product-card">
+      <div class="product-code">LINE-02</div>
+      <div class="product-name">Cylinders &amp; Fittings</div>
+      <div class="product-examples">Hydraulic Bore 1.5"–6"<br>JIC / SAE / NPT / BSPP<br>Parker &amp; Sun Interchange<br>580 Active SKUs</div>
+      <div class="product-tag tag-mts">Make-to-Stock</div>
+    </div>
+    <div class="product-card">
+      <div class="product-code">LINE-03</div>
+      <div class="product-name">Custom Manifolds</div>
+      <div class="product-examples">D03 / D05 Circuit Boards<br>CNC Machined Aluminum<br>Customer-Spec Drawing<br>OEM Approval Required</div>
+      <div class="product-tag tag-mto">Make-to-Order</div>
+    </div>
+    <div class="product-card">
+      <div class="product-code">LINE-04</div>
+      <div class="product-name">OEM Assemblies</div>
+      <div class="product-examples">Packaged Power Units<br>Integrated Valve Stacks<br>Ag, O&amp;G, Industrial<br>2–6 Week Lead Time</div>
+      <div class="product-tag tag-mto">Make-to-Order</div>
+    </div>
+  </div>
+</div>
+
+<!-- HYBRID COMPLEXITY -->
+<div class="hybrid-section">
+  <div class="section-label">Epicor Challenge</div>
+  <div class="section-title">Why Hybrid Is the Hardest Epicor Problem</div>
+  <div class="section-lead">Heartland is pure make-to-stock. Mars is pure make-to-order. Ridgeline is both — and that creates reporting complexity that neither simple nor complex shops face on their own.</div>
+  <div class="hybrid-grid">
+    <div class="hybrid-card">
+      <div class="hybrid-title">Inventory &amp; Demand Planning</div>
+      <div class="hybrid-vs">MTS = SKU-level min/max &nbsp;|&nbsp; MTO = job-driven material demand</div>
+      <div class="hybrid-desc">MTS SKUs need reorder point logic tied to seasonal OEM demand. MTO jobs consume the same inventory on a per-job basis. A single part can be both a catalog item and a job component — the warehouse has to report it both ways without double-counting.</div>
+    </div>
+    <div class="hybrid-card">
+      <div class="hybrid-title">Revenue &amp; Margin</div>
+      <div class="hybrid-vs">MTS = ship-and-invoice &nbsp;|&nbsp; MTO = job-completion billing</div>
+      <div class="hybrid-desc">MTS revenue closes at shipment. MTO revenue closes when the job completes. The GL sees both, but the P&amp;L story requires separating catalog margin from custom job margin — two different gross profit models inside one Epicor company ID.</div>
+    </div>
+    <div class="hybrid-card">
+      <div class="hybrid-title">Cost Accounting</div>
+      <div class="hybrid-vs">Standard cost (catalog) &nbsp;|&nbsp; Actual job cost (custom)</div>
+      <div class="hybrid-desc">Catalog parts run standard cost with periodic variance reporting. Custom jobs run actual cost with estimated-vs-actual at the job level. The warehouse uses a dim.MfgModel flag on dim.Part to keep the two cost models cleanly separated in every report.</div>
+    </div>
+    <div class="hybrid-card">
+      <div class="hybrid-title">AR Aging by Segment</div>
+      <div class="hybrid-vs">Catalog = many small invoices &nbsp;|&nbsp; Custom = few large invoices</div>
+      <div class="hybrid-desc">An MTS customer might have 40 small invoices open at once. An MTO customer might have two large job-completion invoices on 45-day terms. Standard AR aging reports are meaningless without a segment filter — catalog and custom age completely differently.</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS INTRO -->
+<div class="reports-intro">
+  <h2>Power BI Report Suite</h2>
+  <p>Built on the Tailored.BI Fabric data warehouse, connected directly to Ridgeline's Epicor Kinetic data. MTS inventory, MTO job costing, blended P&amp;L, and segmented AR aging — all from one semantic model with a shared dim.Date and a dim.MfgModel that splits catalog from custom throughout every report.</p>
+  <div class="tbi-badge">
+    <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="2" fill="#0B1120"/>
+      <rect x="6" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+      <rect x="18" y="6" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+      <rect x="6" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.4"/>
+      <rect x="18" y="18" width="8" height="8" rx="1" fill="#D4A843" opacity="0.9"/>
+    </svg>
+    Tailored.BI Fabric Warehouse &nbsp;·&nbsp; 6 Report Areas &nbsp;·&nbsp; 4 Yrs GL Data
+  </div>
+</div>
+
+<!-- REPORTS GRID -->
+<div class="reports-section">
+  <div class="reports-grid">
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot amb"></div><div class="report-title">GL &amp; Blended P&amp;L</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">Gross Margin</div><div class="kpi-value">34.2%</div></div>
+          <div><div class="kpi-label">MTO Margin</div><div class="kpi-value amb">41.8%</div></div>
+        </div>
+        <div class="mini-bar-chart">
+          <div class="bar low" style="height:52%"></div><div class="bar" style="height:60%"></div>
+          <div class="bar" style="height:56%"></div><div class="bar amb" style="height:70%"></div>
+          <div class="bar" style="height:64%"></div><div class="bar" style="height:67%"></div>
+          <div class="bar acc" style="height:74%"></div><div class="bar" style="height:68%"></div>
+          <div class="bar" style="height:65%"></div><div class="bar amb" style="height:78%"></div>
+          <div class="bar acc" style="height:84%"></div><div class="bar" style="height:76%"></div>
+        </div>
+        <div class="progress-list" style="margin-top:10px;">
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">MTS Margin</span><span class="prog-val">28.4%</span></div><div class="prog-track"><div class="prog-fill sil" style="width:68%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">MTO Margin</span><span class="prog-val">41.8%</span></div><div class="prog-track"><div class="prog-fill amb" style="width:100%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot"></div><div class="report-title">MTS Inventory &amp; Fill Rate</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">Fill Rate</div><div class="kpi-value pos">96.8%</div></div>
+          <div><div class="kpi-label">Stockouts</div><div class="kpi-value red">12</div></div>
+        </div>
+        <table class="tmini">
+          <tr><th>Product Line</th><th>SKUs</th><th>Fill %</th></tr>
+          <tr><td>Dir. Valves</td><td>240</td><td>98.2%</td></tr>
+          <tr><td>Cylinders</td><td>580</td><td>97.4%</td></tr>
+          <tr><td>Fittings</td><td>420</td><td>95.1%</td></tr>
+        </table>
+        <div class="progress-list" style="margin-top:10px;">
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">In Stock</span><span class="prog-val">1,228</span></div><div class="prog-track"><div class="prog-fill" style="width:99%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Stockouts</span><span class="prog-val">12</span></div><div class="prog-track"><div class="prog-fill sil" style="width:1%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot amb"></div><div class="report-title">MTO Job Costing</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">Open Jobs</div><div class="kpi-value red">34</div></div>
+          <div><div class="kpi-label">Avg Est. Margin</div><div class="kpi-value amb">38.6%</div></div>
+        </div>
+        <div class="progress-list">
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Manifolds</span><span class="prog-val">$1.4M WIP</span></div><div class="prog-track"><div class="prog-fill amb" style="width:70%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Assemblies</span><span class="prog-val">$0.9M WIP</span></div><div class="prog-track"><div class="prog-fill" style="width:45%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Specials</span><span class="prog-val">$0.3M WIP</span></div><div class="prog-track"><div class="prog-fill sil" style="width:15%"></div></div></div>
+        </div>
+        <div class="section-divider">WIP Total</div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;color:var(--charcoal);">$2.6M</div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot"></div><div class="report-title">AR Aging by Segment</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">Total Open AR</div><div class="kpi-value">$3.2M</div></div>
+          <div><div class="kpi-label">&gt;60 Days</div><div class="kpi-value red">$182K</div></div>
+        </div>
+        <table class="tmini">
+          <tr><th>Segment</th><th>Open AR</th><th>&gt;60 Days</th></tr>
+          <tr><td>MTS Catalog</td><td>$1.8M</td><td style="color:var(--charcoal)">$84K</td></tr>
+          <tr><td>MTO Custom</td><td>$1.4M</td><td style="color:var(--amber)">$98K</td></tr>
+        </table>
+        <div class="progress-list" style="margin-top:10px;">
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Current</span><span class="prog-val">$2.84M</span></div><div class="prog-track"><div class="prog-fill" style="width:89%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">30-60 Days</span><span class="prog-val">$178K</span></div><div class="prog-track"><div class="prog-fill amb" style="width:6%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">&gt;60 Days</span><span class="prog-val">$182K</span></div><div class="prog-track"><div class="prog-fill sil" style="width:5%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot sil"></div><div class="report-title">On-Time Delivery</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">MTO OTD Rate</div><div class="kpi-value pos">91.4%</div></div>
+          <div><div class="kpi-label">Late Jobs</div><div class="kpi-value red">3</div></div>
+        </div>
+        <table class="tmini">
+          <tr><th>Customer</th><th>Jobs</th><th>OTD</th></tr>
+          <tr><td>AGCO Corp</td><td>12</td><td style="color:var(--charcoal)">95.1%</td></tr>
+          <tr><td>Vermeer Mfg</td><td>9</td><td style="color:var(--charcoal)">93.8%</td></tr>
+          <tr><td>NOV Inc</td><td>8</td><td style="color:var(--amber)">88.2%</td></tr>
+          <tr><td>Caterpillar</td><td>5</td><td style="color:var(--charcoal)">92.0%</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-header"><div class="report-dot amb"></div><div class="report-title">Purchasing &amp; Supply Chain</div></div>
+      <div class="report-body">
+        <div class="kpi-row">
+          <div><div class="kpi-label">Open POs</div><div class="kpi-value amb">68</div></div>
+          <div><div class="kpi-label">PO Value</div><div class="kpi-value">$1.1M</div></div>
+        </div>
+        <div class="sparkline">
+          <svg viewBox="0 0 100 34" preserveAspectRatio="none">
+            <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B03030" stop-opacity="0.2"/><stop offset="100%" stop-color="#B03030" stop-opacity="0"/></linearGradient></defs>
+            <polyline points="0,28 10,24 20,26 30,20 40,22 50,16 60,18 70,13 80,16 90,11 100,8" fill="none" stroke="#B03030" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,28 10,24 20,26 30,20 40,22 50,16 60,18 70,13 80,16 90,11 100,8 100,34 0,34" fill="url(#sg)"/>
+            <circle cx="100" cy="8" r="2.5" fill="#B03030"/>
+          </svg>
+        </div>
+        <div class="progress-list" style="margin-top:4px;">
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Raw Material</span><span class="prog-val">$680K</span></div><div class="prog-track"><div class="prog-fill amb" style="width:62%"></div></div></div>
+          <div class="progress-row"><div class="prog-meta"><span class="prog-name">Components</span><span class="prog-val">$420K</span></div><div class="prog-track"><div class="prog-fill sil" style="width:38%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="arch-section">
+  <div class="section-label">Technical Architecture</div>
+  <div class="section-title">ETL Pipeline &amp; Warehouse Design</div>
+  <div class="section-lead">Epicor Kinetic on-premises feeds through watermark-based stored procedures into Microsoft Fabric via on-premises data gateway. A dim.MfgModel flag on dim.Part drives MTS vs MTO segmentation across every report — one warehouse, one semantic model, two manufacturing worlds.</div>
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="arch-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1" stroke="#B03030" stroke-width="1.5"/><path d="M7 8h10M7 12h10M7 16h6" stroke="#B03030" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="arch-label">Epicor Kinetic</div>
+      <div class="arch-sub">On-Prem ERP</div>
+    </div>
+    <div class="arch-arrow">&#8594;</div>
+    <div class="arch-node">
+      <div class="arch-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3" stroke="#B03030" stroke-width="1.5"/><path d="M4 7v5c0 1.66 3.58 3 8 3s8-1.34 8-3V7" stroke="#B03030" stroke-width="1.5"/><path d="M4 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" stroke="#B03030" stroke-width="1.5"/></svg></div>
+      <div class="arch-label">SQL Server</div>
+      <div class="arch-sub">Watermark ETL</div>
+    </div>
+    <div class="arch-arrow">&#8594;</div>
+    <div class="arch-node">
+      <div class="arch-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#B03030" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#B03030" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+      <div class="arch-label">Fabric Warehouse</div>
+      <div class="arch-sub">dim + fact + staging</div>
+    </div>
+    <div class="arch-arrow">&#8594;</div>
+    <div class="arch-node">
+      <div class="arch-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1" stroke="#B03030" stroke-width="1.5"/><path d="M8 10h8M8 14h5" stroke="#B03030" stroke-width="1.5" stroke-linecap="round"/><circle cx="17" cy="14" r="1.5" fill="#B03030"/></svg></div>
+      <div class="arch-label">Power BI</div>
+      <div class="arch-sub">6 Report Areas</div>
+    </div>
+  </div>
+  <div class="warehouse-tables">
+    <span class="wt d">dim.Date</span><span class="wt d">dim.Customer</span><span class="wt d">dim.Part</span>
+    <span class="wt d">dim.Account</span><span class="wt d">dim.Department</span><span class="wt d">dim.Vendor</span>
+    <span class="wt d">dim.Employee</span><span class="wt d">dim.MfgModel</span>
+    <span class="wt f">fact.GL</span><span class="wt f">fact.Inventory</span><span class="wt f">fact.JobCost</span>
+    <span class="wt f">fact.Shipment</span><span class="wt f">fact.PurchaseOrder</span>
+    <span class="wt f">fact.ARInvoice</span><span class="wt f">fact.LaborTime</span><span class="wt f">fact.PartTran</span>
+    <span class="wt s">staging.Watermark</span><span class="wt s">staging.PartTran</span><span class="wt s">staging.JobHead</span>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-left">
+    <h2>Want This for Your <em>Epicor</em> Data?</h2>
+    <p>Ridgeline Fluid Power is a fictional demo company — but the warehouse, ETL architecture, and Power BI reports are real. If you're running Epicor Kinetic with a hybrid MTS/MTO model and struggling to see both worlds clearly, that's exactly what Tailored.BI is built for.</p>
+    <a class="cta-link" href="https://tailored.bi/index.html#contact">Contact Tailored.BI &rarr;</a>
+  </div>
+  <div class="cta-right">
+    <h3>What You Get</h3>
+    <ul class="fact-list">
+      <li>A Microsoft Fabric warehouse built for your Epicor company ID — MTS, MTO, or both</li>
+      <li>A dim.MfgModel that segments catalog vs custom throughout every report without duplication</li>
+      <li>Separate cost model reporting — standard cost variance for catalog, job cost actual for custom</li>
+      <li>6 Power BI report areas with shared DAX measures and a universal dim.Date</li>
+      <li>Watermark-based incremental ETL via SQL Server gateway — PartTran and JobHead optimized for volume</li>
+      <li>Ongoing support as your Epicor configuration evolves</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-left">
+    <div class="foot-rdgl">Ridgeline Fluid Power</div>
+    <span class="foot-sep">/</span>
+    <div class="foot-tbi"><a href="https://tailored.bi">Tailored<em>.BI</em></a></div>
+  </div>
+  <div class="foot-right">
+    Fictitious company &mdash; created for Tailored.BI demonstration purposes<br>
+    &copy; 2026 Tailored.BI &nbsp;|&nbsp; tailored.bi/index_Ridgeline.html
+  </div>
+</footer>
+
+</body>
+</html>
