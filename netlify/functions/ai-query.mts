@@ -310,17 +310,14 @@ chartType rules:
       }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
+    const token = await getFabricToken(tenantId, clientId, clientSecret);
+    const tokenPreview = token ? `token OK (${token.length} chars)` : "token EMPTY";
+
     let fabricResult: { columns: string[]; rows: Record<string, unknown>[] };
     try {
-      fabricResult = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
+      fabricResult = await executeFabricSQL(parsed.sql, token);
     } catch (fabricErr) {
-      // Fall back to token-based auth
-      const token = await getFabricToken(tenantId, clientId, clientSecret);
-      try {
-        fabricResult = await executeFabricSQL(parsed.sql, token);
-      } catch (tokenErr) {
-        throw new Error(`SPN auth: ${String(fabricErr).substring(0, 200)} | Token auth: ${String(tokenErr).substring(0, 200)}`);
-      }
+      throw new Error(`${tokenPreview} | TDS error: ${String(fabricErr).substring(0, 300)}`);
     }
     const { columns, rows } = fabricResult;
 
