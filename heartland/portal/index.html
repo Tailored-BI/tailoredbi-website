@@ -225,6 +225,7 @@ function showTab(name, el) {
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('tab-' + name).classList.add('active');
   el.classList.add('active');
+  if (name === 'briefing') { statusData = null; loadStatus(); }
   if ((name === 'status' || name === 'workspace') && !statusData) loadStatus();
 }
 
