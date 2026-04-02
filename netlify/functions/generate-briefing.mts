@@ -2,6 +2,8 @@ import type { Context, Config } from "@netlify/functions";
 
 const GITHUB_RAW = "https://raw.githubusercontent.com/Tailored-BI/tailoredbi-clients/main";
 const GITHUB_API = "https://api.github.com";
+const BRIEFING_HISTORY_PATH = "clients/heartland/status/briefing-history.json";
+const MAX_HISTORY_DAYS = 7;
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
 const FABRIC_DB = "Heartland_Warehouse";
 
@@ -52,6 +54,41 @@ async function commitToGitHub(content: string, token: string): Promise<void> {
       ...(existing?.sha ? { sha: existing.sha } : {})
     })
   });
+}
+
+async function getAndUpdateHistory(newBriefing: Record<string, unknown>, githubToken: string): Promise<Record<string, unknown>[]> {
+  const headers = {
+    "Authorization": `token ${githubToken}`,
+    "Accept": "application/vnd.github.v3+json"
+  };
+
+  let history: Record<string, unknown>[] = [];
+  const getRes = await fetch(`${GITHUB_API}/repos/Tailored-BI/tailoredbi-clients/contents/${BRIEFING_HISTORY_PATH}`, { headers });
+
+  if (getRes.ok) {
+    const file = await getRes.json();
+    const content = Buffer.from(file.content, "base64").toString("utf8");
+    history = JSON.parse(content);
+  }
+
+  history.unshift(newBriefing);
+  if (history.length > MAX_HISTORY_DAYS) history = history.slice(0, MAX_HISTORY_DAYS);
+
+  const updatedContent = JSON.stringify(history, null, 2);
+  const getRes2 = await fetch(`${GITHUB_API}/repos/Tailored-BI/tailoredbi-clients/contents/${BRIEFING_HISTORY_PATH}`, { headers });
+  const existing = getRes2.ok ? await getRes2.json() : null;
+
+  await fetch(`${GITHUB_API}/repos/Tailored-BI/tailoredbi-clients/contents/${BRIEFING_HISTORY_PATH}`, {
+    method: "PUT",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: `briefing: update history ${new Date().toISOString().split('T')[0]}`,
+      content: Buffer.from(updatedContent).toString("base64"),
+      ...(existing?.sha ? { sha: existing.sha } : {})
+    })
+  });
+
+  return history;
 }
 
 export default async (req: Request, context: Context) => {
@@ -121,6 +158,20 @@ export default async (req: Request, context: Context) => {
       vendorLeadTimes: vendorLeadTime
     }, null, 2);
 
+    let priorHistory: Record<string, unknown>[] = [];
+    try {
+      const histRes = await fetch(`${GITHUB_RAW}/${BRIEFING_HISTORY_PATH}`, {
+        headers: {
+          "Authorization": `token ${githubToken}`,
+          "Accept": "application/vnd.github.v3.raw"
+        }
+      });
+      if (histRes.ok) {
+        priorHistory = await histRes.json();
+        if (priorHistory.length > MAX_HISTORY_DAYS) priorHistory = priorHistory.slice(0, MAX_HISTORY_DAYS);
+      }
+    } catch { priorHistory = []; }
+
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -131,9 +182,17 @@ export default async (req: Request, context: Context) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1500,
-        system: `You are a business intelligence advisor for Heartland Ag Parts Co., a make-to-stock agricultural parts manufacturer in Lohrville, Iowa.
+        system: `You are the Tailored.BI AI Advisor for Heartland Ag Parts Co., a make-to-stock agricultural parts manufacturer in Lohrville, Iowa.
 
-You receive fresh warehouse data every morning after their Epicor pipeline runs. Your job is to identify 3-5 specific, actionable insights the owner or CFO should know about today.
+You receive fresh warehouse data every morning after their Epicor pipeline runs. You also receive the last 7 days of prior briefings so you can reason across time — spotting trends, tracking whether flagged issues improved or worsened, and avoiding repeating the same insight every day unless it is genuinely escalating.
+
+Your job is to identify 3-5 specific, actionable insights the owner or CFO should know about today.
+
+Use prior briefings to:
+- Note if a flagged issue is getting worse ("the Midwest Equipment Co. balance flagged yesterday has now grown to X")
+- Note if something improved ("the overdue AR flagged Monday has been partially resolved — down from X to Y")
+- Avoid repeating the same low-priority insight multiple days in a row unless it is escalating
+- Identify trends that are only visible across multiple days
 
 Be specific with numbers. Be direct. Write like a trusted advisor, not a software system.
 Use plain English — no SQL, no technical terms.
@@ -146,7 +205,7 @@ Return ONLY a JSON object with this structure — no markdown, no extra text:
     {
       "severity": "alert" | "warning" | "good" | "info",
       "title": "Short headline (max 8 words)",
-      "text": "2-3 sentences with specific numbers and context",
+      "text": "2-3 sentences with specific numbers and context. If this relates to a prior briefing, note the change.",
       "action": "What to do about it (1 sentence)",
       "suggestedQuery": "A question the user could ask in the Ask tab to dig deeper"
     }
@@ -161,9 +220,14 @@ Severity guide:
         messages: [{
           role: "user",
           content: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
-Here is Heartland's warehouse data from this morning's pipeline run:
 
+Here is Heartland's warehouse data from this morning's pipeline run:
 ${dataContext}
+
+${priorHistory.length > 0 ? `Here are the last ${priorHistory.length} day(s) of prior briefings for context:
+${JSON.stringify(priorHistory.map((h: Record<string, unknown>) => ({ date: h.dataDate, insights: (h.insights as Record<string, unknown>[])?.map((i: Record<string, unknown>) => ({ severity: i.severity, title: i.title, text: i.text })) })), null, 2)}
+
+Use this history to track trends, note changes, and avoid repeating static low-priority items.` : 'This is the first briefing — no prior history available.'}
 
 Generate the daily briefing.`
         }]
@@ -181,8 +245,9 @@ Generate the daily briefing.`
 
     const briefingJson = JSON.stringify(briefing, null, 2);
     await commitToGitHub(briefingJson, githubToken);
+    const updatedHistory = await getAndUpdateHistory(briefing, githubToken);
 
-    return new Response(JSON.stringify({ success: true, insightCount: briefing.insights.length }), {
+    return new Response(JSON.stringify({ success: true, insightCount: briefing.insights.length, historyDays: updatedHistory.length }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });

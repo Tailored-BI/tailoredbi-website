@@ -280,7 +280,7 @@ chartType rules:
     if (!claudeRes.ok) {
       const errBody = await claudeRes.text();
       return new Response(JSON.stringify({
-        error: "Claude API error",
+        error: "Tailored.BI AI Advisor error",
         status: claudeRes.status,
         detail: errBody.substring(0, 500)
       }), { status: 502, headers: { "Content-Type": "application/json" } });
