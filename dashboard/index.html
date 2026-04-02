@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tailored.BI — Pipeline Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
+body{background:#0b1120;color:#e2e8f0;min-height:100vh;}
+.header{background:#111827;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.header h1{color:#D4A843;font-size:15px;font-weight:700;}
+.header-sub{color:rgba(255,255,255,0.35);font-size:11px;margin-top:2px;}
+.checked{color:rgba(255,255,255,0.3);font-size:10px;}
+.body{padding:20px;max-width:1100px;margin:0 auto;}
+.col-heads{display:grid;grid-template-columns:200px 90px 1fr 110px 80px 80px;gap:12px;padding:6px 18px;margin-bottom:6px;}
+.col-h{color:rgba(255,255,255,0.25);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.client-grid{display:flex;flex-direction:column;gap:10px;}
+.cc{background:#111827;border:1px solid rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.cc:hover{border-color:rgba(212,168,67,0.25);}
+.cc.open{border-color:rgba(212,168,67,0.2);}
+.ch{padding:14px 18px;display:grid;grid-template-columns:200px 90px 1fr 110px 80px 80px;gap:12px;align-items:center;}
+.cn{color:#fff;font-size:12px;font-weight:700;}
+.cm{color:rgba(255,255,255,0.3);font-size:10px;margin-top:2px;}
+.pub{color:rgba(212,168,67,0.5);font-size:9px;text-decoration:none;margin-left:6px;}
+.pub:hover{color:#D4A843;}
+.s-ok{background:#1a3a1a;color:#6dbe6d;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;display:inline-block;}
+.s-fail{background:#3a1a1a;color:#e07050;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;display:inline-block;}
+.s-pend{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;display:inline-block;}
+.streak{display:flex;gap:3px;}
+.sk{width:9px;height:9px;border-radius:50%;background:#6dbe6d;}
+.sf{width:9px;height:9px;border-radius:50%;background:#e07050;}
+.sg{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.1);}
+.val{color:rgba(255,255,255,0.6);font-size:11px;}
+.val-ok{color:#6dbe6d;font-weight:700;font-size:11px;}
+.detail{border-top:1px solid rgba(255,255,255,0.05);padding:16px 18px;display:none;}
+.detail.open{display:block;}
+.tabs{display:flex;gap:8px;margin-bottom:12px;}
+.tab{padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);}
+.tab.active{background:rgba(212,168,67,0.1);border-color:rgba(212,168,67,0.3);color:#D4A843;}
+.dtable{width:100%;border-collapse:collapse;}
+.dtable th{padding:6px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.3);border-bottom:1px solid rgba(255,255,255,0.05);}
+.dtable td{padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.6);border-bottom:1px solid rgba(255,255,255,0.04);}
+.dtable tr:last-child td{border-bottom:none;}
+.dtable tr:hover td{background:rgba(255,255,255,0.02);}
+.tok{color:#6dbe6d;font-weight:700;}
+.tfail{color:#e07050;font-weight:700;}
+.tskip{color:#c4963a;font-weight:700;}
+.tpos{color:#6dbe6d;}
+.tneg{color:#e07050;}
+.ttod{color:#c4963a;font-weight:600;}
+.wt{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:inline-block;}
+.wm{background:rgba(26,64,128,0.3);color:#7aa8e8;}
+.wp{background:rgba(138,48,16,0.3);color:#e8a878;}
+.wpg{background:rgba(74,16,128,0.3);color:#c878e8;}
+.wlive{background:#1a3a1a;color:#6dbe6d;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block;}
+.wprog{background:#3a2a0a;color:#c4963a;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block;}
+.wplan{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block;}
+.loading{color:rgba(255,255,255,0.3);font-size:11px;padding:12px 0;}
+@media(max-width:700px){.col-heads{display:none;}.ch{grid-template-columns:1fr 90px;}.ch>*:nth-child(n+3){display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>Tailored.BI &mdash; Pipeline Monitor</h1>
+    <div class="header-sub">All clients &middot; Updated each morning after pipeline runs</div>
+  </div>
+  <div class="checked" id="checked">Loading...</div>
+</div>
+<div class="body">
+  <div class="col-heads">
+    <div class="col-h">Client</div>
+    <div class="col-h">Status</div>
+    <div class="col-h">7-day streak</div>
+    <div class="col-h">Last run</div>
+    <div class="col-h">Duration</div>
+    <div class="col-h">Tables</div>
+  </div>
+  <div class="client-grid" id="grid">
+    <div class="loading" style="padding:30px;text-align:center;">Loading client status...</div>
+  </div>
+</div>
+<script>
+var CLIENTS=[
+  {id:'heartland',name:'Heartland Ag Parts',meta:'HRTL \u00b7 Lohrville IA \u00b7 Make to Stock'},
+  {id:'ridgeline',name:'Ridgeline Fluid Power',meta:'RDGL \u00b7 Tulsa OK \u00b7 Hybrid MTS/MTO'},
+  {id:'mars',name:'Mars Aerospace',meta:'MARS \u00b7 Tucson AZ \u00b7 Make to Order'}
+];
+var TM={dataModel:{l:'Data Model',c:'wm'},powerbi:{l:'Power BI',c:'wp'},paginated:{l:'Paginated',c:'wpg'}};
+var SC={live:'wlive',inprogress:'wprog',planned:'wplan'};
+var ST={live:'Live',inprogress:'In progress',planned:'Planned'};
+
+function dots(s){
+  if(!s)return'<span style="color:rgba(255,255,255,0.15);font-size:10px;">Not yet active</span>';
+  return s.split(',').map(function(d){return'<div class="'+(d==='ok'?'sk':d==='fail'?'sf':'sg')+'"></div>';}).join('');
+}
+function vs(v){
+  if(!v||v==='\u2014')return'<span style="color:rgba(255,255,255,0.2);">\u2014</span>';
+  if(v.startsWith('+'))return'<span class="tpos">'+v+'</span>';
+  if(v.startsWith('-'))return'<span class="tneg">'+v+'</span>';
+  return v;
+}
+
+function buildCard(client,data){
+  var p=data&&data.pipeline;
+  var inv=data&&data.inventory;
+  var ok=p&&p.overallStatus==='SUCCESS';
+  var pend=!p;
+
+  var badge=pend?'<span class="s-pend">Pending</span>':ok?'<span class="s-ok">Success</span>':'<span class="s-fail">Failed</span>';
+
+  var pRows=pend?'':(p.tables||[]).map(function(t){
+    var s=t.status==='Success'?'<span class="tok">\u2713</span>':t.status==='Skipped'?'<span class="tskip">\u2014</span>':'<span class="tfail">\u2717</span>';
+    return'<tr><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vs(t.vsLastRun)+'</td><td>'+(t.duration||'\u2014')+'</td><td class="ttod">'+(t.freshness||'\u2014')+'</td></tr>';
+  }).join('');
+
+  var iRows=!inv?'':(inv.items||[]).map(function(i){
+    var t=TM[i.type]||{l:i.type,c:'wm'};
+    return'<tr><td><span class="wt '+t.c+'">'+t.l+'</span></td><td><strong style="color:rgba(255,255,255,0.8);">'+i.name+'</strong></td><td style="font-size:9px;">'+i.detail+'</td><td><span class="'+(SC[i.status]||'wplan')+'">'+(ST[i.status]||i.status)+'</span></td></tr>';
+  }).join('');
+
+  var detailContent=pend?'<div class="loading">Pipeline not yet active.</div>':
+    '<div class="tabs"><div class="tab active" onclick="tab(event,\''+client.id+'\',\'pipe\')">Pipeline ('+(p&&p.tablesSuccess)+'/'+((p&&p.tablesTotal)||0)+')</div><div class="tab" onclick="tab(event,\''+client.id+'\',\'inv\')">Workspace ('+((inv&&inv.items&&inv.items.length)||0)+')</div></div>'+
+    '<div id="t-pipe-'+client.id+'"><table class="dtable"><thead><tr><th>Table</th><th>Status</th><th>Rows</th><th>vs Last</th><th>Duration</th><th>Freshness</th></tr></thead><tbody>'+pRows+'</tbody></table></div>'+
+    '<div id="t-inv-'+client.id+'" style="display:none;">'+((!inv)?'<div class="loading">No inventory data.</div>':'<table class="dtable"><thead><tr><th>Type</th><th>Name</th><th>Detail</th><th>Status</th></tr></thead><tbody>'+iRows+'</tbody></table>')+'</div>';
+
+  return'<div class="cc" id="cc-'+client.id+'" onclick="toggle(\''+client.id+'\')"><div class="ch"><div><div class="cn">'+client.name+' <a class="pub" href="/'+client.id+'/status" onclick="event.stopPropagation()">\u2197 public</a></div><div class="cm">'+client.meta+'</div></div><div>'+badge+'</div><div class="streak">'+dots(p&&p.streakDays)+'</div><div class="val">'+(p&&p.lastRunMT||'\u2014')+'</div><div class="val">'+(p&&p.duration||'\u2014')+'</div><div class="'+(ok?'val-ok':'val')+'">'+(pend?'\u2014':(p.tablesSuccess+'/'+p.tablesTotal))+'</div></div><div class="detail" id="d-'+client.id+'">'+detailContent+'</div></div>';
+}
+
+function toggle(id){
+  document.getElementById('d-'+id).classList.toggle('open');
+  document.getElementById('cc-'+id).classList.toggle('open');
+}
+function tab(e,id,t){
+  e.stopPropagation();
+  ['pipe','inv'].forEach(function(n){
+    var el=document.getElementById('t-'+n+'-'+id);
+    if(el)el.style.display=n===t?'block':'none';
+  });
+  e.currentTarget.parentElement.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+  e.currentTarget.classList.add('active');
+}
+
+async function loadAll(){
+  var results=await Promise.all(CLIENTS.map(async function(c){
+    try{
+      var r=await fetch('/api/client-status?client='+c.id);
+      return r.ok?await r.json():null;
+    }catch(e){return null;}
+  }));
+  document.getElementById('grid').innerHTML=CLIENTS.map(function(c,i){return buildCard(c,results[i]);}).join('');
+  document.getElementById('checked').textContent='Last checked: '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+}
+loadAll();
+</script>
+</body>
+</html>

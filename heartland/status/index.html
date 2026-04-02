@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Heartland Ag Parts — Pipeline Status · Tailored.BI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
+body{background:#f5f2ed;color:#3d2b0e;}
+.topbar{background:#0b1120;height:36px;display:flex;align-items:center;padding:0 20px;justify-content:space-between;}
+.topbar-brand{color:#D4A843;font-size:11px;font-weight:700;text-decoration:none;}
+.topbar-back{color:rgba(255,255,255,0.4);font-size:10px;text-decoration:none;}
+.topbar-back:hover{color:#D4A843;}
+.header{background:#3d2b0e;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;}
+.header h1{color:#f5f0e8;font-size:18px;font-weight:700;margin-bottom:3px;}
+.header p{color:#8a7040;font-size:11px;}
+.badge{background:rgba(109,190,109,0.15);border:1px solid rgba(109,190,109,0.3);border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:6px;}
+.badge-dot{width:8px;height:8px;border-radius:50%;background:#6dbe6d;}
+.badge-text{color:#6dbe6d;font-size:10px;font-weight:700;}
+.badge-fail{background:rgba(224,112,112,0.15);border-color:rgba(224,112,112,0.3);}
+.badge-fail .badge-dot{background:#e07070;}
+.badge-fail .badge-text{color:#e07070;}
+.body{padding:16px;max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.card{background:#fff;border:1px solid #e2dbd2;border-radius:10px;overflow:hidden;}
+.card-header{background:#f9f6f2;padding:9px 16px;border-bottom:1px solid #e2dbd2;display:flex;justify-content:space-between;align-items:center;}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8a7a6a;}
+.card-meta{font-size:10px;color:#aaa;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);}
+.stat{padding:14px 16px;border-right:1px solid #e2dbd2;}
+.stat:last-child{border-right:none;}
+.stat-val{font-size:20px;font-weight:700;color:#3d2b0e;margin-bottom:3px;}
+.stat-ok{color:#6dbe6d;}
+.stat-fail{color:#e07070;}
+.stat-label{font-size:9px;color:#8a7a6a;text-transform:uppercase;letter-spacing:.06em;}
+.streak{display:flex;gap:4px;margin-top:5px;}
+.sk{width:11px;height:11px;border-radius:50%;background:#6dbe6d;}
+.sf{width:11px;height:11px;border-radius:50%;background:#e07050;}
+.sg{width:11px;height:11px;border-radius:50%;background:#e2dbd2;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f9f6f2;padding:7px 14px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8a7a6a;border-bottom:1px solid #e2dbd2;}
+td{padding:7px 14px;font-size:11px;border-bottom:1px solid #f0ebe4;color:#3d2b0e;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#faf7f4;}
+.ok{color:#6dbe6d;font-weight:700;}
+.fail{color:#e07050;font-weight:700;}
+.skip{color:#c4963a;font-weight:700;}
+.pos{color:#6dbe6d;}
+.neg{color:#e07050;}
+.today{color:#c4511a;font-weight:600;font-size:10px;}
+.ws-type{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:3px;display:inline-block;white-space:nowrap;}
+.ws-model{background:#e8f0ff;color:#1a4080;}
+.ws-pbi{background:#fff0e8;color:#8a3010;}
+.ws-paged{background:#f0e8ff;color:#4a1080;}
+.ws-live{background:#1a3a1a;color:#6dbe6d;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;display:inline-block;}
+.ws-prog{background:#3a2a0a;color:#c4963a;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;display:inline-block;}
+.ws-plan{background:#2a2a2a;color:#888;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;display:inline-block;}
+.cta{background:#1a1008;padding:32px 24px;text-align:center;}
+.cta-eye{color:#c4963a;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.cta h2{color:#f5f0e8;font-size:18px;font-weight:700;margin-bottom:8px;}
+.cta p{color:rgba(245,240,232,0.6);font-size:13px;line-height:1.6;margin-bottom:20px;max-width:560px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.btn-o{background:#c4511a;color:#fff;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;}
+.btn-g{border:1px solid rgba(196,150,58,0.5);color:#c4963a;padding:9px 20px;border-radius:8px;font-weight:600;font-size:13px;text-decoration:none;}
+.loading{padding:40px;text-align:center;color:#8a7a6a;font-size:13px;}
+.err{padding:16px;background:#fff8f0;border:1px solid #e2dbd2;border-radius:8px;color:#8a3010;font-size:12px;text-align:center;}
+@media(max-width:600px){
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .stat:nth-child(2){border-right:none;}
+  .hide-mob{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="https://tailored.bi" class="topbar-brand">Tailored.BI</a>
+  <a href="/heartland" class="topbar-back">&larr; Heartland Showcase</a>
+</div>
+<div class="header" id="pageHeader">
+  <div>
+    <h1>Heartland Ag Parts Co. &mdash; Live Pipeline Status</h1>
+    <p>Make to Stock &middot; Ag Manufacturing &middot; Lohrville, Iowa &middot; Fictitious demo company</p>
+  </div>
+  <div class="badge" id="statusBadge">
+    <div class="badge-dot"></div>
+    <div class="badge-text" id="badgeText">Loading...</div>
+  </div>
+</div>
+<div class="body">
+  <div id="loadingMsg" class="loading">Fetching live pipeline status...</div>
+  <div id="content" style="display:none;flex-direction:column;gap:12px;"></div>
+</div>
+<div class="cta">
+  <div class="cta-eye">Make to Stock &middot; Powered by Tailored.BI</div>
+  <h2>Want this running on your Epicor data?</h2>
+  <p>This is a live pipeline running every morning on fictional Heartland data. Your subscription delivers the same &mdash; your warehouse, your reports, your brand. Starting at $1,500/month.</p>
+  <div class="cta-btns">
+    <a href="https://tailored.bi/#pricing" class="btn-o">See pricing &rarr;</a>
+    <a href="https://tailored.bi/#contact" class="btn-g">Start a conversation &rarr;</a>
+  </div>
+</div>
+<script>
+const statusMap={live:'Live',inprogress:'In progress',planned:'Coming soon'};
+const typeMap={dataModel:{label:'Data Model',cls:'ws-model'},powerbi:{label:'Power BI',cls:'ws-pbi'},paginated:{label:'Paginated',cls:'ws-paged'}};
+const statusCls={live:'ws-live',inprogress:'ws-prog',planned:'ws-plan'};
+
+function dots(s){
+  if(!s)return'';
+  return s.split(',').map(d=>'<div class="'+(d==='ok'?'sk':d==='fail'?'sf':'sg')+'"></div>').join('');
+}
+function vsLast(v){
+  if(!v||v==='\u2014')return'<span style="color:#aaa">\u2014</span>';
+  if(v.startsWith('+'))return'<span class="pos">'+v+'</span>';
+  if(v.startsWith('-'))return'<span class="neg">'+v+'</span>';
+  return v;
+}
+
+function renderPipeline(p){
+  if(!p)return'<div class="err">Pipeline status unavailable \u2014 check back soon.</div>';
+  var ok=p.overallStatus==='SUCCESS';
+  var badge=document.getElementById('statusBadge');
+  var text=document.getElementById('badgeText');
+  text.textContent=ok?'All systems running':'Pipeline issue detected';
+  if(!ok)badge.classList.add('badge-fail');
+
+  var rows=(p.tables||[]).map(function(t){
+    var s=t.status==='Success'?'<span class="ok">\u2713</span>':t.status==='Skipped'?'<span class="skip">\u2014</span>':'<span class="fail">\u2717</span>';
+    return'<tr><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vsLast(t.vsLastRun)+'</td><td class="hide-mob">'+(t.duration||'\u2014')+'</td><td class="today">'+(t.freshness||'\u2014')+'</td></tr>';
+  }).join('');
+
+  return'<div class="card"><div class="card-header"><div class="card-title">Pipeline status</div><div class="card-meta">Next run: '+(p.nextRun||'tomorrow at 8:00 AM MT')+'</div></div><div class="stat-row"><div class="stat"><div class="stat-val '+(ok?'stat-ok':'stat-fail')+'">'+(p.tablesSuccess||0)+'/'+(p.tablesTotal||16)+'</div><div class="stat-label">Tables loaded</div></div><div class="stat"><div class="stat-val">'+(p.lastRunMT||'\u2014')+'</div><div class="stat-label">Last run</div></div><div class="stat"><div class="stat-val">'+(p.duration||'\u2014')+'</div><div class="stat-label">Duration</div></div><div class="stat"><div class="stat-label" style="margin-bottom:5px;">7-day streak</div><div class="streak">'+dots(p.streakDays)+'</div></div></div></div><div class="card"><div class="card-header"><div class="card-title">Table detail</div><div class="card-meta">'+(p.tablesTotal||16)+' Epicor tables</div></div><table><thead><tr><th>Table</th><th>Status</th><th>Warehouse rows</th><th>vs Last run</th><th class="hide-mob">Duration</th><th>Freshness</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function renderInventory(inv){
+  if(!inv)return'';
+  var rows=(inv.items||[]).map(function(item){
+    var t=typeMap[item.type]||{label:item.type,cls:'ws-model'};
+    var sc=statusCls[item.status]||'ws-plan';
+    return'<tr><td><span class="ws-type '+t.cls+'">'+t.label+'</span></td><td><strong>'+item.name+'</strong></td><td style="color:#6a5a4a;font-size:10px;">'+item.detail+'</td><td><span class="'+sc+'">'+(statusMap[item.status]||item.status)+'</span></td></tr>';
+  }).join('');
+  return'<div class="card"><div class="card-header"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables</div></div><table><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+async function load(){
+  try{
+    var res=await fetch('/api/client-status?client=heartland');
+    if(!res.ok)throw new Error();
+    var data=await res.json();
+    var c=document.getElementById('content');
+    c.innerHTML=renderPipeline(data.pipeline)+renderInventory(data.inventory);
+    c.style.display='flex';
+    document.getElementById('loadingMsg').style.display='none';
+  }catch(e){
+    document.getElementById('loadingMsg').innerHTML='<div class="err">Unable to load pipeline status. Please try again shortly.</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
