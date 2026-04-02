@@ -117,6 +117,57 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
   return data.access_token;
 }
 
+function executeFabricSQLWithSPN(query: string, tenantId: string, clientId: string, clientSecret: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
+  return new Promise((resolve, reject) => {
+    const config = {
+      server: FABRIC_HOST,
+      authentication: {
+        type: "azure-active-directory-service-principal-secret" as const,
+        options: {
+          clientId,
+          clientSecret,
+          tenantId
+        }
+      },
+      options: {
+        database: FABRIC_DB,
+        encrypt: true,
+        port: 1433,
+        connectTimeout: 30000,
+        requestTimeout: 30000
+      }
+    };
+
+    const connection = new Connection(config);
+    connection.on("connect", (err) => {
+      if (err) { reject(err); return; }
+
+      const columns: string[] = [];
+      const rows: Record<string, unknown>[] = [];
+
+      const request = new TdsRequest(query, (err) => {
+        connection.close();
+        if (err) { reject(err); return; }
+        resolve({ columns, rows });
+      });
+
+      request.on("columnMetadata", (cols) => {
+        for (const col of cols) columns.push(col.colName);
+      });
+
+      request.on("row", (rowCols) => {
+        const row: Record<string, unknown> = {};
+        for (const col of rowCols) row[col.metadata.colName] = col.value;
+        rows.push(row);
+      });
+
+      connection.execSql(request);
+    });
+
+    connection.connect();
+  });
+}
+
 function executeFabricSQL(query: string, token: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
   return new Promise((resolve, reject) => {
     const config = {
@@ -259,8 +310,7 @@ chartType rules:
       }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const token = await getFabricToken(tenantId, clientId, clientSecret);
-    const { columns, rows } = await executeFabricSQL(parsed.sql, token);
+    const { columns, rows } = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
 
     return new Response(JSON.stringify({
       question,
