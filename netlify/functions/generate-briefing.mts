@@ -189,9 +189,13 @@ export default async (req: Request, context: Context) => {
           options: { clientId, clientSecret, tenantId }
         });
       } catch (spnErr) {
-        const tMsg = tokenErr instanceof Error ? tokenErr.message : String(tokenErr);
-        const sMsg = spnErr instanceof Error ? spnErr.message : String(spnErr);
-        throw new Error(`Token: ${tMsg.substring(0, 300)} | SPN: ${sMsg.substring(0, 300)}`);
+        function errDetail(e: unknown): string {
+          if (!e) return 'null';
+          if (e instanceof AggregateError) return e.errors.map(x => x?.message || String(x)).join('; ');
+          if (e instanceof Error) return e.message || e.constructor.name;
+          try { return JSON.stringify(e).substring(0, 300); } catch { return String(e); }
+        }
+        throw new Error(`Token: ${errDetail(tokenErr)} | SPN: ${errDetail(spnErr)}`);
       }
     }
 
@@ -304,7 +308,10 @@ Generate the daily briefing.`
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
+    const msg = err instanceof AggregateError
+      ? err.errors.map((x: any) => x?.message || String(x)).join('; ')
+      : (err instanceof Error ? err.message : String(err));
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
