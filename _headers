@@ -1,0 +1,11 @@
+/heartland/portal/*
+  Cache-Control: no-store, must-revalidate
+
+/heartland/status/*
+  Cache-Control: no-store, must-revalidate
+
+/dashboard/*
+  Cache-Control: no-store, must-revalidate
+
+/api/*
+  Cache-Control: no-store
