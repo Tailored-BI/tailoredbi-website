@@ -294,14 +294,46 @@ function renderWorkspace() {
 }
 
 function renderBriefing() {
+  var b = statusData && statusData.briefing;
   var p = statusData && statusData.pipeline;
-  var date = (p && p.lastRunMT) || new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('briefingDate').textContent = date;
-  document.getElementById('briefingBody').innerHTML =
-    '<div class="insight"><div class="ins-icon ii-red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0201a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="ins-body"><div class="ins-label il-red">Overdue AR \u2014 action needed</div><div class="ins-text">4 invoices totalling <strong>$47,230</strong> are now 90+ days overdue \u2014 up from 2 invoices last week. Midwest Equipment Co. accounts for $31,400 of this balance.</div><span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'Show me all AR invoices over 90 days overdue with customer names and balances\')">Dig into this \u2192</span></div></div>'+
-    '<div class="insight"><div class="ins-icon ii-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4511a" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="ins-body"><div class="ins-label il-amber">Seasonal demand \u2014 tracking ahead</div><div class="ins-text">Planting season orders are tracking <strong>18% above</strong> this point last year. Planter hardware and tillage components moving faster than plan \u2014 3 SKUs could hit stockout before April 20.</div><span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'Show me inventory transaction counts by part for the last 30 days sorted by highest activity\')">Check inventory \u2192</span></div></div>'+
-    '<div class="insight"><div class="ins-icon ii-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a5c1a" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ins-body"><div class="ins-label il-green">Revenue \u2014 strong month</div><div class="ins-text">March revenue closed at <strong>$892,400</strong>, up 12% vs March last year. Combine wear parts drove outperformance \u2014 $124K above the monthly average for that product line.</div><span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'Show me total revenue by month for the last 12 months\')">See revenue trend \u2192</span></div></div>'+
-    '<div class="insight"><div class="ins-icon ii-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div><div class="ins-body"><div class="ins-label il-blue">Purchasing \u2014 vendor lead times extending</div><div class="ins-text">Average receipt-to-PO gap for your top 5 vendors has grown from 14 to 22 days over the past 6 weeks. Consider placing spring raw material orders earlier than last year.</div><span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'Show me average days between PO order date and received date by vendor for the last 90 days\')">View purchasing \u2192</span></div></div>';
+  var dateEl = document.getElementById('briefingDate');
+  var bodyEl = document.getElementById('briefingBody');
+
+  if (!b || !b.insights) {
+    dateEl.textContent = (p && p.lastRunMT) || '\u2014';
+    bodyEl.innerHTML = '<div class="briefing-empty">' +
+      '<div style="margin-bottom:8px;">No briefing generated yet for today.</div>' +
+      '<div style="font-size:11px;color:#aaa;">The daily briefing generates automatically after each successful pipeline run at 8:30 AM MT.</div>' +
+    '</div>';
+    return;
+  }
+
+  dateEl.textContent = b.dataDate || (p && p.lastRunMT) || '\u2014';
+
+  var severityMap = {
+    alert: { cls:'ii-red', lcls:'il-red', label:'Action needed',
+      icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0201a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' },
+    warning: { cls:'ii-amber', lcls:'il-amber', label:'Watch closely',
+      icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4511a" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+    good: { cls:'ii-green', lcls:'il-green', label:'Good news',
+      icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a5c1a" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' },
+    info: { cls:'ii-blue', lcls:'il-blue', label:'FYI',
+      icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' }
+  };
+
+  bodyEl.innerHTML = b.insights.map(function(ins) {
+    var s = severityMap[ins.severity] || severityMap.info;
+    var query = ins.suggestedQuery ? '<span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'' + ins.suggestedQuery.replace(/'/g,"\\'") + '\')">\u2192 Dig into this</span>' : '';
+    return '<div class="insight">' +
+      '<div class="ins-icon ' + s.cls + '">' + s.icon + '</div>' +
+      '<div class="ins-body">' +
+        '<div class="ins-label ' + s.lcls + '">' + s.label + ' \u2014 ' + ins.title + '</div>' +
+        '<div class="ins-text">' + ins.text + '</div>' +
+        (ins.action ? '<div style="font-size:11px;color:#6a5a4a;margin-bottom:4px;font-style:italic;">' + ins.action + '</div>' : '') +
+        query +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function addMessage(role, content) {
