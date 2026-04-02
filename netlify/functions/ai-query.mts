@@ -99,7 +99,7 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
     grant_type: "client_credentials",
     client_id: clientId,
     client_secret: clientSecret,
-    scope: "https://database.windows.net/.default"
+    scope: "https://analysis.windows.net/powerbi/api/.default"
   });
 
   const res = await fetch(tokenUrl, {
@@ -310,14 +310,18 @@ chartType rules:
       }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const token = await getFabricToken(tenantId, clientId, clientSecret);
-    const tokenPreview = token ? `token OK (${token.length} chars)` : "token EMPTY";
-
     let fabricResult: { columns: string[]; rows: Record<string, unknown>[] };
+
+    // Try access-token auth first, fall back to direct SPN auth
     try {
+      const token = await getFabricToken(tenantId, clientId, clientSecret);
       fabricResult = await executeFabricSQL(parsed.sql, token);
-    } catch (fabricErr) {
-      throw new Error(`${tokenPreview} | TDS error: ${String(fabricErr).substring(0, 300)}`);
+    } catch (tokenErr) {
+      try {
+        fabricResult = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
+      } catch (spnErr) {
+        throw new Error(`Token auth: ${String(tokenErr).substring(0, 200)} | SPN auth: ${String(spnErr).substring(0, 200)}`);
+      }
     }
     const { columns, rows } = fabricResult;
 
