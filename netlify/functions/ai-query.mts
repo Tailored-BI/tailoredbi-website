@@ -213,6 +213,15 @@ chartType rules:
       })
     });
 
+    if (!claudeRes.ok) {
+      const errBody = await claudeRes.text();
+      return new Response(JSON.stringify({
+        error: "Claude API error",
+        status: claudeRes.status,
+        detail: errBody.substring(0, 500)
+      }), { status: 502, headers: { "Content-Type": "application/json" } });
+    }
+
     const claudeData = await claudeRes.json();
     const rawText = claudeData.content?.[0]?.text || "";
 
