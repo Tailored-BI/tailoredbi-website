@@ -1,4 +1,5 @@
 import type { Context, Config } from "@netlify/functions";
+import sql from "mssql";
 
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
 const FABRIC_DB = "Heartland_Warehouse";
@@ -116,40 +117,30 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
   return data.access_token;
 }
 
-async function executeFabricSQL(sql: string, token: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
-  const endpoint = `https://${FABRIC_HOST}/v1/databases/${FABRIC_DB}/query`;
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
+async function executeFabricSQL(query: string, token: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
+  const pool = await sql.connect({
+    server: FABRIC_HOST,
+    database: FABRIC_DB,
+    port: 1433,
+    authentication: {
+      type: "azure-active-directory-access-token",
+      options: { token }
     },
-    body: JSON.stringify({ query: sql })
-  });
+    options: {
+      encrypt: true,
+      connectTimeout: 30000,
+      requestTimeout: 30000
+    }
+  } as sql.config);
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Fabric query failed (${res.status}) [${endpoint}]: ${err.substring(0, 300)}`);
-  }
-
-  const data = await res.json();
-
-  if (data.results && Array.isArray(data.results) && data.results.length > 0) {
-    const result = data.results[0];
-    return {
-      columns: result.columnNames || [],
-      rows: result.rows || []
-    };
-  }
-
-  if (data.value && Array.isArray(data.value)) {
-    const rows = data.value;
+  try {
+    const result = await pool.request().query(query);
+    const rows = result.recordset || [];
     const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
     return { columns, rows };
+  } finally {
+    await pool.close();
   }
-
-  return { columns: [], rows: [] };
 }
 
 export default async (req: Request, context: Context) => {

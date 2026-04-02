@@ -1,0 +1,7 @@
+{
+  "name": "tailoredbi-website",
+  "private": true,
+  "dependencies": {
+    "mssql": "^11.0.1"
+  }
+}
