@@ -117,17 +117,22 @@ function vsLast(v){
 function renderPipeline(p){
   if(!p)return'<div class="err">Pipeline status unavailable \u2014 check back soon.</div>';
   var ok=p.overallStatus==='SUCCESS';
+  var partial=p.overallStatus==='PARTIAL';
   var badge=document.getElementById('statusBadge');
   var text=document.getElementById('badgeText');
-  text.textContent=ok?'All systems running':'Pipeline issue detected';
+  text.textContent=ok?'All systems running':partial?'Mostly running \u2014 '+p.tablesFailed+' table resolving':'Pipeline issue \u2014 being resolved';
   if(!ok)badge.classList.add('badge-fail');
 
+  var alertHtml=(!ok&&p.errorSummary)?'<div style="background:#fff8f0;border:1px solid #e2c8a0;border-radius:10px;padding:16px 20px;margin-bottom:12px;"><div style="font-weight:700;color:#8a3010;font-size:12px;margin-bottom:6px;">'+(partial?'One table needs attention \u2014 everything else is current':'Today\'s pipeline run encountered an issue')+'</div><div style="color:#6a5a4a;font-size:11px;line-height:1.5;margin-bottom:8px;">'+p.tablesFailed+' of '+p.tablesTotal+' table'+(p.tablesFailed>1?'s':'')+' failed to load during the '+p.lastRunMT+' run. The remaining '+p.tablesSuccess+' tables loaded successfully and your data is current.</div><div style="color:#8a7a6a;font-size:10px;line-height:1.5;">Your Power BI reports continue to show data from the last successful load for any affected tables. No action needed from you \u2014 we are already resolving this.</div></div>':'';
+
   var rows=(p.tables||[]).map(function(t){
-    var s=t.status==='Success'?'<span class="ok">\u2713</span>':t.status==='Skipped'?'<span class="skip">\u2014</span>':'<span class="fail">\u2717</span>';
-    return'<tr><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vsLast(t.vsLastRun)+'</td><td class="hide-mob">'+(t.duration||'\u2014')+'</td><td class="today">'+(t.freshness||'\u2014')+'</td></tr>';
+    var failed=t.status!=='Success'&&t.status!=='Skipped'&&t.status!=='SUCCESS';
+    var s=t.status==='Success'||t.status==='SUCCESS'?'<span class="ok">\u2713</span>':t.status==='Skipped'?'<span class="skip">\u2014</span>':'<span class="fail">\u2717</span>';
+    var fresh=failed?'<span style="color:#aaa;font-size:9px;">Last: '+(t.lastSuccessful||'\u2014')+'</span>':'<span class="today">'+(t.freshness||'\u2014')+'</span>';
+    return'<tr style="'+(failed?'background:#fff8f6;':'')+'"><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vsLast(t.vsLastRun)+'</td><td class="hide-mob">'+(t.duration||'\u2014')+'</td><td>'+fresh+'</td></tr>';
   }).join('');
 
-  return'<div class="card"><div class="card-header"><div class="card-title">Pipeline status</div><div class="card-meta">Next run: '+(p.nextRun||'tomorrow at 8:00 AM MT')+'</div></div><div class="stat-row"><div class="stat"><div class="stat-val '+(ok?'stat-ok':'stat-fail')+'">'+(p.tablesSuccess||0)+'/'+(p.tablesTotal||16)+'</div><div class="stat-label">Tables loaded</div></div><div class="stat"><div class="stat-val">'+(p.lastRunMT||'\u2014')+'</div><div class="stat-label">Last run</div></div><div class="stat"><div class="stat-val">'+(p.duration||'\u2014')+'</div><div class="stat-label">Duration</div></div><div class="stat"><div class="stat-label" style="margin-bottom:5px;">7-day streak</div><div class="streak">'+dots(p.streakDays)+'</div></div></div></div><div class="card"><div class="card-header"><div class="card-title">Table detail</div><div class="card-meta">'+(p.tablesTotal||16)+' Epicor tables</div></div><table><thead><tr><th>Table</th><th>Status</th><th>Warehouse rows</th><th>vs Last run</th><th class="hide-mob">Duration</th><th>Freshness</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  return alertHtml+'<div class="card"><div class="card-header"><div class="card-title">Pipeline status</div><div class="card-meta">Next run: '+(p.nextRun||'tomorrow at 8:00 AM MT')+'</div></div><div class="stat-row"><div class="stat"><div class="stat-val '+(ok?'stat-ok':'stat-fail')+'">'+(p.tablesSuccess||0)+'/'+(p.tablesTotal||16)+'</div><div class="stat-label">Tables loaded</div></div><div class="stat"><div class="stat-val">'+(p.lastRunMT||'\u2014')+'</div><div class="stat-label">Last run</div></div><div class="stat"><div class="stat-val">'+(p.duration||'\u2014')+'</div><div class="stat-label">Duration</div></div><div class="stat"><div class="stat-label" style="margin-bottom:5px;">7-day streak</div><div class="streak">'+dots(p.streakDays)+'</div></div></div></div><div class="card"><div class="card-header"><div class="card-title">Table detail</div><div class="card-meta">'+(p.tablesTotal||16)+' Epicor tables</div></div><table><thead><tr><th>Table</th><th>Status</th><th>Warehouse rows</th><th>vs Last run</th><th class="hide-mob">Duration</th><th>Freshness</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
 function renderInventory(inv){

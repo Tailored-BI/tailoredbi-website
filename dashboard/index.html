@@ -105,13 +105,16 @@ function buildCard(client,data){
   var p=data&&data.pipeline;
   var inv=data&&data.inventory;
   var ok=p&&p.overallStatus==='SUCCESS';
+  var partial=p&&p.overallStatus==='PARTIAL';
   var pend=!p;
 
-  var badge=pend?'<span class="s-pend">Pending</span>':ok?'<span class="s-ok">Success</span>':'<span class="s-fail">Failed</span>';
+  var badge=pend?'<span class="s-pend">Pending</span>':ok?'<span class="s-ok">Success</span>':partial?'<span style="background:#3a2a0a;color:#c4963a;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;">Partial</span>':'<span class="s-fail">Failed</span>';
 
   var pRows=pend?'':(p.tables||[]).map(function(t){
-    var s=t.status==='Success'?'<span class="tok">\u2713</span>':t.status==='Skipped'?'<span class="tskip">\u2014</span>':'<span class="tfail">\u2717</span>';
-    return'<tr><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vs(t.vsLastRun)+'</td><td>'+(t.duration||'\u2014')+'</td><td class="ttod">'+(t.freshness||'\u2014')+'</td></tr>';
+    var failed=t.status!=='Success'&&t.status!=='Skipped'&&t.status!=='SUCCESS';
+    var s=t.status==='Success'||t.status==='SUCCESS'?'<span class="tok">\u2713</span>':t.status==='Skipped'?'<span class="tskip">\u2014</span>':'<span class="tfail">\u2717</span>';
+    var freshCell=failed?'<span style="color:rgba(255,255,255,0.25);font-size:9px;">Last: '+(t.lastSuccessful||'\u2014')+'</span>':'<span class="ttod">'+(t.freshness||'\u2014')+'</span>';
+    return'<tr'+(failed?' style="background:rgba(224,112,80,0.08);"':'')+' ><td>'+t.name+'</td><td>'+s+'</td><td>'+(t.warehouseRows||0).toLocaleString()+'</td><td>'+vs(t.vsLastRun)+'</td><td>'+(t.duration||'\u2014')+'</td><td>'+freshCell+'</td></tr>';
   }).join('');
 
   var iRows=!inv?'':(inv.items||[]).map(function(i){
@@ -119,9 +122,11 @@ function buildCard(client,data){
     return'<tr><td><span class="wt '+t.c+'">'+t.l+'</span></td><td><strong style="color:rgba(255,255,255,0.8);">'+i.name+'</strong></td><td style="font-size:9px;">'+i.detail+'</td><td><span class="'+(SC[i.status]||'wplan')+'">'+(ST[i.status]||i.status)+'</span></td></tr>';
   }).join('');
 
+  var alertBlock=(!ok&&!pend&&p.errorSummary)?'<div style="background:rgba(224,112,80,0.08);border:1px solid rgba(224,112,80,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;"><div style="font-weight:700;color:#e07050;font-size:10px;margin-bottom:4px;">'+p.tablesFailed+' table'+(p.tablesFailed>1?'s':'')+' failed \u00b7 '+p.tablesSuccess+'/'+p.tablesTotal+' loaded successfully</div><div style="color:rgba(255,255,255,0.4);font-size:9px;">'+p.errorSummary+'</div></div>':'';
+
   var detailContent=pend?'<div class="loading">Pipeline not yet active.</div>':
-    '<div class="tabs"><div class="tab active" onclick="tab(event,\''+client.id+'\',\'pipe\')">Pipeline ('+(p&&p.tablesSuccess)+'/'+((p&&p.tablesTotal)||0)+')</div><div class="tab" onclick="tab(event,\''+client.id+'\',\'inv\')">Workspace ('+((inv&&inv.items&&inv.items.length)||0)+')</div></div>'+
-    '<div id="t-pipe-'+client.id+'"><table class="dtable"><thead><tr><th>Table</th><th>Status</th><th>Rows</th><th>vs Last</th><th>Duration</th><th>Freshness</th></tr></thead><tbody>'+pRows+'</tbody></table></div>'+
+    alertBlock+'<div class="tabs"><div class="tab active" onclick="tab(event,\''+client.id+'\',\'pipe\')">Pipeline ('+(p&&p.tablesSuccess)+'/'+((p&&p.tablesTotal)||0)+')</div><div class="tab" onclick="tab(event,\''+client.id+'\',\'inv\')">Workspace ('+((inv&&inv.items&&inv.items.length)||0)+')</div></div>'+
+    '<div id="t-pipe-'+client.id+'"><table class="dtable"><thead><tr><th>Table</th><th>Status</th><th>Rows</th><th>vs Last</th><th>Duration</th><th>Freshness / Last OK</th></tr></thead><tbody>'+pRows+'</tbody></table></div>'+
     '<div id="t-inv-'+client.id+'" style="display:none;">'+((!inv)?'<div class="loading">No inventory data.</div>':'<table class="dtable"><thead><tr><th>Type</th><th>Name</th><th>Detail</th><th>Status</th></tr></thead><tbody>'+iRows+'</tbody></table>')+'</div>';
 
   return'<div class="cc" id="cc-'+client.id+'" onclick="toggle(\''+client.id+'\')"><div class="ch"><div><div class="cn">'+client.name+' <a class="pub" href="/'+client.id+'/status" onclick="event.stopPropagation()">\u2197 public</a></div><div class="cm">'+client.meta+'</div></div><div>'+badge+'</div><div class="streak">'+dots(p&&p.streakDays)+'</div><div class="val">'+(p&&p.lastRunMT||'\u2014')+'</div><div class="val">'+(p&&p.duration||'\u2014')+'</div><div class="'+(ok?'val-ok':'val')+'">'+(pend?'\u2014':(p.tablesSuccess+'/'+p.tablesTotal))+'</div></div><div class="detail" id="d-'+client.id+'">'+detailContent+'</div></div>';
