@@ -151,7 +151,7 @@ table.dt tr:hover td{background:#faf7f4;}
 
 <div class="nav">
   <div class="nav-tab active" onclick="showTab('briefing',this)">Daily briefing</div>
-  <div class="nav-tab" onclick="showTab('ask',this)">Ask your data</div>
+  <div class="nav-tab" onclick="showTab('ask',this)">Ask Thread</div>
   <div class="nav-tab" onclick="showTab('status',this)">Pipeline status</div>
   <div class="nav-tab" onclick="showTab('workspace',this)">Workspace</div>
 </div>
@@ -189,7 +189,7 @@ table.dt tr:hover td{background:#faf7f4;}
       <div class="sug" onclick="askQuestion(this.textContent)">How does this month's revenue compare to last year?</div>
     </div>
     <div class="chat-input-row">
-      <input class="chat-input" id="chatInput" type="text" placeholder="Ask a question about your Heartland data..." onkeydown="if(event.key==='Enter')sendQuestion()"/>
+      <input class="chat-input" id="chatInput" type="text" placeholder="Ask Thread anything about your Heartland data..." onkeydown="if(event.key==='Enter')sendQuestion()"/>
       <button class="chat-btn" id="chatBtn" onclick="sendQuestion()">Ask &rarr;</button>
     </div>
     <div class="chat-note">Thread by Tailored.BI &middot; Read-only access to your live warehouse &middot; Always verify important figures in your Power BI reports</div>
@@ -324,7 +324,7 @@ function renderBriefing() {
 
   bodyEl.innerHTML = b.insights.map(function(ins) {
     var s = severityMap[ins.severity] || severityMap.info;
-    var query = ins.suggestedQuery ? '<span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'' + ins.suggestedQuery.replace(/'/g,"\\'") + '\')">\u2192 Dig into this</span>' : '';
+    var query = ins.suggestedQuery ? '<span class="ins-action" onclick="showTab(\'ask\',document.querySelectorAll(\'.nav-tab\')[1]);askQuestion(\'' + ins.suggestedQuery.replace(/'/g,"\\'") + '\')">\u2192 Ask Thread</span>' : '';
     return '<div class="insight">' +
       '<div class="ins-icon ' + s.cls + '">' + s.icon + '</div>' +
       '<div class="ins-body">' +
