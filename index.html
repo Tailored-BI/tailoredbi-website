@@ -320,7 +320,7 @@ footer p { font-size:12px; color:var(--muted); }
   <ul class="nav-links">
     <li><a href="#how-it-works">How It Works</a></li>
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="#ai-advisor">AI Advisor</a></li>
+    <li><a href="#ai-advisor">Thread</a></li>
     <li><a href="#examples">Reports</a></li>
     <li><a href="#showcases">Showcases</a></li>
     <li><a href="#architecture">Security</a></li>
@@ -521,20 +521,42 @@ footer p { font-size:12px; color:var(--muted); }
 <hr class="div"/>
 
 <!-- CAPABILITIES -->
-<section class="sec" id="capabilities">
-<div class="sec-inner">
-  <p class="kicker">Capabilities</p>
-  <h2 class="sec-title">Reporting that fits<br/>your actual operations</h2>
-  <p class="sec-lead">Every Epicor installation is different. Every client's reporting needs are different. The models built here reflect your business — not a generic template.</p>
-  <div class="caps">
-    <div class="cap"><div class="cap-n">01</div><h3>Data Warehouse Design</h3><p>Star-schema Fabric warehouses sourced directly from Epicor — Finance, Sales, AR, AP, Purchasing, Inventory, Operations, and Shipping.</p><div class="cap-tag">Fabric SQL</div></div>
-    <div class="cap"><div class="cap-n">02</div><h3>Power BI Semantic Models</h3><p>Production-grade models with clean DAX measures, multi-calendar time intelligence, and drill-through architecture built for executive reporting.</p><div class="cap-tag">Power BI · DAX</div></div>
-    <div class="cap"><div class="cap-n">03</div><h3>Incremental ETL Pipelines</h3><p>Watermark-based incremental refresh via Fabric Pipelines — through a local SQL Server gateway or directly via the Epicor BAQ REST API.</p><div class="cap-tag">Fabric Pipelines</div></div>
-    <div class="cap"><div class="cap-n">04</div><h3>Financial Reporting</h3><p>P&amp;L, Budget vs. Actual, rolling 12-month, department drill-through — built on your Epicor chart of accounts, not a generic finance template.</p><div class="cap-tag">GL · Finance</div></div>
-    <div class="cap"><div class="cap-n">05</div><h3>Managed Daily Pipeline</h3><p>Watermark-driven incremental refresh via a secure SQL Server connection to your Epicor database — only changed rows move, your ERP is untouched, and your reports are current every morning.</p><div class="cap-tag">SQL Server · Epicor</div></div>
-    <div class="cap"><div class="cap-n">06</div><h3>Multi-Calendar Time Intelligence</h3><p>Standard Gregorian, Fiscal Gregorian, and Retail 4-4-5 / 4-5-4 / 5-4-4 — pre-computed in a universal date table, configured per client deployment.</p><div class="cap-tag">445 · 454 · 544</div></div>
+<section id="capabilities" style="padding:5rem 0;background:var(--bg2);">
+  <div style="max-width:900px;margin:0 auto;padding:0 2rem;">
+    <p style="color:var(--gold);font-size:0.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">What you can finally answer</p>
+    <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">The questions your Epicor data already knows.</h2>
+    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Your Epicor system holds the answers to every important question about your business. Tailored.BI surfaces them — in a dashboard you can check from your phone, every morning before your team arrives.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+
+      <div style="background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1.5rem;">
+        <div style="color:var(--gold);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.75rem;">Finance</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"How does this month compare to last year?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"Which customers are about to go to collections?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;">"What's my true gross margin by product line?"</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1.5rem;">
+        <div style="color:var(--gold);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.75rem;">Operations</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"Which parts are going to stock out before next season?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"Are my vendors delivering on time?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;">"Where are my jobs running over budget?"</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1.5rem;">
+        <div style="color:var(--gold);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.75rem;">Sales</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"Which customers are growing and which are shrinking?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">"What's in the backlog and when does it ship?"</div>
+          <div style="color:var(--muted2);font-size:0.9rem;line-height:1.5;padding:0.5rem 0;">"Are we tracking ahead or behind last year's season?"</div>
+        </div>
+      </div>
+
+    </div>
   </div>
-</div>
 </section>
 
 <hr class="div"/>
@@ -794,7 +816,7 @@ footer p { font-size:12px; color:var(--muted); }
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Email monitoring + alerts</li>
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Monthly check-in call</li>
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Paginated reports — print-ready invoices and statements</li>
-          <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Tailored.BI AI Advisor — daily briefing + ask your data</li>
+          <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Thread — daily briefing + ask your data</li>
         </ul>
         <a href="#contact" style="display:block;text-align:center;padding:0.75rem;border:1px solid rgba(212,168,67,0.4);border-radius:8px;color:var(--gold);font-size:0.9rem;font-weight:600;text-decoration:none;">Get started &#8594;</a>
       </div>
@@ -818,7 +840,7 @@ footer p { font-size:12px; color:var(--muted); }
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Bi-weekly check-in + quarterly review</li>
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Email monitoring + priority support</li>
           <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Paginated reports — print-ready invoices, statements, management reports</li>
-          <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Tailored.BI AI Advisor — daily briefing + ask your data</li>
+          <li style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.5rem 0;color:var(--muted2);font-size:0.9rem;"><span style="color:var(--gold);margin-top:2px;">&#10003;</span>Thread — daily briefing + ask your data</li>
         </ul>
         <a href="#contact" style="display:block;text-align:center;padding:0.75rem;background:var(--gold);border-radius:8px;color:#0B1120;font-size:0.9rem;font-weight:700;text-decoration:none;">Get started &#8594;</a>
       </div>
@@ -967,8 +989,8 @@ footer p { font-size:12px; color:var(--muted); }
 <section id="ai-advisor" style="padding:5rem 0;background:var(--bg2);">
   <div style="max-width:900px;margin:0 auto;padding:0 2rem;">
     <p style="color:var(--gold);font-size:0.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Included in every subscription</p>
-    <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">Tailored.BI AI Advisor</h2>
-    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Not a dashboard you have to read. An advisor that watches your Epicor data every morning and tells you what changed, what to act on, and what to watch — based on your actual numbers, your seasonal patterns, and your business history.</p>
+    <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">Meet Thread</h2>
+    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Thread is your Tailored.BI business advisor — built on Microsoft Fabric and woven into your Epicor data. Every morning Thread reviews your numbers, follows the threads that matter, and tells you what changed, what to act on, and what to watch.</p>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-bottom:3rem;">
 
@@ -977,7 +999,7 @@ footer p { font-size:12px; color:var(--muted); }
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;">Daily morning briefing</h3>
-        <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Every morning after your data refreshes, the AI Advisor reviews your warehouse and surfaces what matters — overdue AR, inventory risks, revenue trends, vendor performance. Delivered automatically, no prompting required.</p>
+        <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Every morning after your data refreshes, Thread reviews your warehouse and surfaces what matters — overdue AR, inventory risks, revenue trends, vendor performance. Delivered automatically, no prompting required.</p>
       </div>
 
       <div style="background:var(--bg3);border:1px solid rgba(212,168,67,0.15);border-radius:12px;padding:1.75rem;">
@@ -993,15 +1015,15 @@ footer p { font-size:12px; color:var(--muted); }
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
         <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;">Gets smarter over time</h3>
-        <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">The AI Advisor tracks context across days — noting when a flagged issue worsens, when something improves, and identifying trends that only become visible over time. Your history makes every briefing more meaningful.</p>
+        <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Thread tracks context across days — noting when a flagged issue worsens, when something improves, and identifying trends only visible over time. The longer Thread knows your business, the more useful it becomes.</p>
       </div>
 
     </div>
 
     <div style="background:var(--bg3);border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:1.5rem 2rem;display:flex;gap:2rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
       <div>
-        <p style="color:var(--text);font-weight:600;margin-bottom:0.25rem;">Built for Epicor manufacturers</p>
-        <p style="color:var(--muted2);font-size:0.875rem;">This isn't generic AI connected to your data. It's an advisor that understands Epicor's data structure, your manufacturing model, and your seasonal patterns.</p>
+        <p style="color:var(--text);font-weight:600;margin-bottom:0.25rem;">Built on Microsoft Fabric. Built for Epicor manufacturers.</p>
+        <p style="color:var(--muted2);font-size:0.875rem;">Thread isn't generic AI. It's woven into your Epicor data on Microsoft Fabric — understanding your manufacturing model, your seasonal patterns, and your business history.</p>
       </div>
       <a href="#contact" style="display:inline-block;padding:0.75rem 1.5rem;background:var(--gold);border-radius:8px;color:#0B1120;font-size:0.9rem;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">See it in action &#8594;</a>
     </div>
