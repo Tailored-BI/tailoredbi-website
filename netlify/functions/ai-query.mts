@@ -99,7 +99,7 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
     grant_type: "client_credentials",
     client_id: clientId,
     client_secret: clientSecret,
-    scope: "https://analysis.windows.net/powerbi/api/.default"
+    scope: "https://database.windows.net/.default"
   });
 
   const res = await fetch(tokenUrl, {
