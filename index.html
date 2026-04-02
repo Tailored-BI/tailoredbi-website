@@ -965,8 +965,8 @@ footer p { font-size:12px; color:var(--muted); }
 <section class="sec" id="showcases">
 <div class="sec-inner">
   <p class="kicker">Client Showcases</p>
-  <h2 class="sec-title">Three industries. Three Epicor configurations. One platform.</h2>
-  <p class="sec-lead">Each showcase is a <strong>fully functional fictitious company</strong> &mdash; real Epicor data structures, real warehouse architecture, real Power BI reports &mdash; built to show exactly what Tailored.BI delivers for manufacturers in your industry. Click any showcase to explore live data and see what your subscription could look like.</p>
+  <h2 class="sec-title">Make to Stock. Make to Order. Hybrid. We've built all three.</h2>
+  <p class="sec-lead">Each showcase is a <strong>fully functional fictitious company</strong> built around a real manufacturing model. Explore the one that matches how you operate &mdash; the reports, the KPIs, and the data structure will feel familiar because they're built specifically for that type of Epicor deployment.</p>
   <div class="showcases-grid">
 
     <!-- Heartland Ag Parts -->
@@ -991,8 +991,8 @@ footer p { font-size:12px; color:var(--muted); }
       <div class="showcase-body">
         <div class="showcase-desc">Make-to-stock manufacturer of agricultural replacement parts — tillage components, combine wear parts, planter hardware, and service kits. Strong seasonal demand tied to planting and harvest cycles.</div>
         <div class="showcase-tags">
+          <span class="showcase-tag mfg">Make to Stock</span>
           <span class="showcase-tag ag">Ag Manufacturing</span>
-          <span class="showcase-tag mfg">Make-to-Stock</span>
           <span class="showcase-tag bi">8 Report Views</span>
           <span class="showcase-tag bi">3 Yrs GL Data</span>
         </div>
@@ -1022,8 +1022,8 @@ footer p { font-size:12px; color:var(--muted); }
       <div class="showcase-body">
         <div class="showcase-desc">Hybrid manufacturer of hydraulic and pneumatic assemblies &mdash; standard catalog valves, fittings, and cylinders made to stock alongside custom-engineered manifolds and OEM-spec units built to order for ag, oil &amp; gas, and industrial OEMs.</div>
         <div class="showcase-tags">
-          <span class="showcase-tag ind">Fluid Power</span>
           <span class="showcase-tag ind">Hybrid MTS/MTO</span>
+          <span class="showcase-tag ind">Fluid Power</span>
           <span class="showcase-tag bi">6 Report Views</span>
           <span class="showcase-tag bi">4 Yrs GL Data</span>
         </div>
@@ -1050,9 +1050,8 @@ footer p { font-size:12px; color:var(--muted); }
       <div class="showcase-body">
         <div class="showcase-desc">Make-to-order precision machining for defense and commercial aerospace &mdash; titanium structures, rotating parts, and flight controls. AS9100D certified with full lot traceability, job costing, and contract-milestone billing.</div>
         <div class="showcase-tags">
-          <span class="showcase-tag mfg">Aerospace MFG</span>
-          <span class="showcase-tag mfg">Job Costing</span>
-          <span class="showcase-tag ag">Lot Traceability</span>
+          <span class="showcase-tag mfg">Make to Order</span>
+          <span class="showcase-tag mfg">Aerospace &middot; Job Costing</span>
           <span class="showcase-tag bi">8 Report Views</span>
         </div>
         <div class="showcase-cta">
@@ -1251,7 +1250,7 @@ footer p { font-size:12px; color:var(--muted); }
             </div>
             <div>
               <p style="color:var(--text);font-weight:600;font-size:0.9rem;margin-bottom:0.15rem;">We have a 30-minute call</p>
-              <p style="color:var(--muted2);font-size:0.85rem;line-height:1.5;">We walk you through the Heartland demo and show what your subscription would look like.</p>
+              <p style="color:var(--muted2);font-size:0.85rem;line-height:1.5;">We walk you through the showcase that matches your manufacturing model — Make to Stock, Make to Order, or Hybrid — and show what your subscription would look like.</p>
             </div>
           </div>
           <div style="display:flex;gap:0.75rem;align-items:flex-start;">
@@ -1292,6 +1291,18 @@ footer p { font-size:12px; color:var(--muted); }
             <label style="display:block;color:var(--muted2);font-size:0.8rem;font-weight:600;margin-bottom:0.4rem;letter-spacing:.04em;text-transform:uppercase;">Company</label>
             <input type="text" name="company" placeholder="Your company name"
               style="width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.75rem 1rem;color:var(--text);font-size:0.95rem;outline:none;box-sizing:border-box;"/>
+          </div>
+
+          <div>
+            <label style="display:block;color:var(--muted2);font-size:0.8rem;font-weight:600;margin-bottom:0.4rem;letter-spacing:.04em;text-transform:uppercase;">How do you manufacture?</label>
+            <select name="manufacturing_model"
+              style="width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.75rem 1rem;color:var(--text);font-size:0.95rem;outline:none;box-sizing:border-box;">
+              <option value="">Select your model</option>
+              <option value="mts">Make to Stock — I build to inventory, sell from stock</option>
+              <option value="mto">Make to Order — I build when a customer orders</option>
+              <option value="hybrid">Hybrid — I do both depending on the product</option>
+              <option value="unsure">Not sure / mixed</option>
+            </select>
           </div>
 
           <div>
