@@ -23,14 +23,11 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
   return (await res.json()).access_token;
 }
 
-function queryFabric(sql: string, token: string): Promise<Record<string, unknown>[]> {
+function openConnection(authConfig: Record<string, unknown>): Promise<Connection> {
   return new Promise((resolve, reject) => {
-    const config = {
+    const connection = new Connection({
       server: FABRIC_HOST,
-      authentication: {
-        type: "azure-active-directory-access-token" as const,
-        options: { token }
-      },
+      authentication: authConfig,
       options: {
         database: FABRIC_DB,
         encrypt: true,
@@ -38,71 +35,42 @@ function queryFabric(sql: string, token: string): Promise<Record<string, unknown
         connectTimeout: 30000,
         requestTimeout: 30000
       }
-    };
-
-    const connection = new Connection(config);
+    } as any);
     connection.on("connect", (err) => {
       if (err) { reject(err); return; }
-
-      const rows: Record<string, unknown>[] = [];
-      const request = new TdsRequest(sql, (err) => {
-        connection.close();
-        if (err) { reject(err); return; }
-        resolve(rows);
-      });
-
-      request.on("row", (rowCols) => {
-        const row: Record<string, unknown> = {};
-        for (const col of rowCols) row[col.metadata.colName] = col.value;
-        rows.push(row);
-      });
-
-      connection.execSql(request);
+      resolve(connection);
     });
-
     connection.connect();
   });
 }
 
-function queryFabricWithSPN(sql: string, tenantId: string, clientId: string, clientSecret: string): Promise<Record<string, unknown>[]> {
+function execQuery(conn: Connection, sql: string): Promise<Record<string, unknown>[]> {
   return new Promise((resolve, reject) => {
-    const config = {
-      server: FABRIC_HOST,
-      authentication: {
-        type: "azure-active-directory-service-principal-secret" as const,
-        options: { clientId, clientSecret, tenantId }
-      },
-      options: {
-        database: FABRIC_DB,
-        encrypt: true,
-        port: 1433,
-        connectTimeout: 30000,
-        requestTimeout: 30000
-      }
-    };
-
-    const connection = new Connection(config);
-    connection.on("connect", (err) => {
+    const rows: Record<string, unknown>[] = [];
+    const request = new TdsRequest(sql, (err) => {
       if (err) { reject(err); return; }
-
-      const rows: Record<string, unknown>[] = [];
-      const request = new TdsRequest(sql, (err) => {
-        connection.close();
-        if (err) { reject(err); return; }
-        resolve(rows);
-      });
-
-      request.on("row", (rowCols) => {
-        const row: Record<string, unknown> = {};
-        for (const col of rowCols) row[col.metadata.colName] = col.value;
-        rows.push(row);
-      });
-
-      connection.execSql(request);
+      resolve(rows);
     });
-
-    connection.connect();
+    request.on("row", (rowCols) => {
+      const row: Record<string, unknown> = {};
+      for (const col of rowCols) row[col.metadata.colName] = col.value;
+      rows.push(row);
+    });
+    conn.execSql(request);
   });
+}
+
+async function runAllQueries(queries: string[], authConfig: Record<string, unknown>): Promise<Record<string, unknown>[][]> {
+  const conn = await openConnection(authConfig);
+  try {
+    const results: Record<string, unknown>[][] = [];
+    for (const sql of queries) {
+      results.push(await execQuery(conn, sql));
+    }
+    return results;
+  } finally {
+    conn.close();
+  }
 }
 
 async function commitToGitHub(content: string, token: string): Promise<void> {
@@ -206,23 +174,24 @@ export default async (req: Request, context: Context) => {
         GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`
     ];
 
-    // Get token once, then run all queries in parallel (each opens its own connection)
+    // Single connection, sequential queries — avoids Fabric connection throttling
     let results: Record<string, unknown>[][];
     try {
       const token = await getFabricToken(tenantId, clientId, clientSecret);
-      results = await Promise.all(queries.map(sql => queryFabric(sql, token)));
+      results = await runAllQueries(queries, {
+        type: "azure-active-directory-access-token" as const,
+        options: { token }
+      });
     } catch (tokenErr) {
       try {
-        results = await Promise.all(queries.map(sql => queryFabricWithSPN(sql, tenantId, clientId, clientSecret)));
+        results = await runAllQueries(queries, {
+          type: "azure-active-directory-service-principal-secret" as const,
+          options: { clientId, clientSecret, tenantId }
+        });
       } catch (spnErr) {
-        function extractMsg(e: unknown): string {
-          if (e && typeof e === 'object' && 'errors' in e && Array.isArray((e as any).errors)) {
-            return (e as any).errors.map((x: any) => x?.message || String(x)).join('; ');
-          }
-          if (e instanceof Error) return e.message || e.name;
-          return String(e);
-        }
-        throw new Error(`Token: ${extractMsg(tokenErr).substring(0, 300)} | SPN: ${extractMsg(spnErr).substring(0, 300)}`);
+        const tMsg = tokenErr instanceof Error ? tokenErr.message : String(tokenErr);
+        const sMsg = spnErr instanceof Error ? spnErr.message : String(spnErr);
+        throw new Error(`Token: ${tMsg.substring(0, 300)} | SPN: ${sMsg.substring(0, 300)}`);
       }
     }
 
