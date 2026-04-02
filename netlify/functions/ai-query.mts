@@ -310,7 +310,19 @@ chartType rules:
       }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const { columns, rows } = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
+    let fabricResult: { columns: string[]; rows: Record<string, unknown>[] };
+    try {
+      fabricResult = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
+    } catch (fabricErr) {
+      // Fall back to token-based auth
+      const token = await getFabricToken(tenantId, clientId, clientSecret);
+      try {
+        fabricResult = await executeFabricSQL(parsed.sql, token);
+      } catch (tokenErr) {
+        throw new Error(`SPN auth: ${String(fabricErr).substring(0, 200)} | Token auth: ${String(tokenErr).substring(0, 200)}`);
+      }
+    }
+    const { columns, rows } = fabricResult;
 
     return new Response(JSON.stringify({
       question,
