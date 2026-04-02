@@ -163,7 +163,7 @@ export default async (req: Request, context: Context) => {
         WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`,
       `SELECT TOP 5 p.PartDescription,
         ROUND(ActLaborCost - EstLaborCost,2) AS LaborVariance,
-        ROUND(ActMaterialCost - EstMaterialCost,2) AS MaterialVariance
+        ROUND(ActMtlCost - EstMtlCost,2) AS MaterialVariance
         FROM fact.Production pr JOIN dim.Part p ON pr.PartKey = p.PartKey
         WHERE pr.JobComplete = 1 AND ABS(ActLaborCost - EstLaborCost) > 500
         ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`,
