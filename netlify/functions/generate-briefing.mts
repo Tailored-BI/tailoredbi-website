@@ -215,9 +215,14 @@ export default async (req: Request, context: Context) => {
       try {
         results = await Promise.all(queries.map(sql => queryFabricWithSPN(sql, tenantId, clientId, clientSecret)));
       } catch (spnErr) {
-        const tokenMsg = tokenErr instanceof Error ? tokenErr.message : String(tokenErr);
-        const spnMsg = spnErr instanceof Error ? spnErr.message : String(spnErr);
-        throw new Error(`Token: ${tokenMsg.substring(0, 300)} | SPN: ${spnMsg.substring(0, 300)}`);
+        function extractMsg(e: unknown): string {
+          if (e && typeof e === 'object' && 'errors' in e && Array.isArray((e as any).errors)) {
+            return (e as any).errors.map((x: any) => x?.message || String(x)).join('; ');
+          }
+          if (e instanceof Error) return e.message || e.name;
+          return String(e);
+        }
+        throw new Error(`Token: ${extractMsg(tokenErr).substring(0, 300)} | SPN: ${extractMsg(spnErr).substring(0, 300)}`);
       }
     }
 
