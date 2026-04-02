@@ -1,4 +1,5 @@
 import type { Context, Config } from "@netlify/functions";
+import { Connection, Request as TdsRequest } from "tedious";
 
 const GITHUB_RAW = "https://raw.githubusercontent.com/Tailored-BI/tailoredbi-clients/main";
 const GITHUB_API = "https://api.github.com";
@@ -22,17 +23,86 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
   return (await res.json()).access_token;
 }
 
-async function queryFabric(sql: string, token: string): Promise<Record<string, unknown>[]> {
-  const res = await fetch(`https://${FABRIC_HOST}/v1/databases/${FABRIC_DB}/query`, {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query: sql })
+function queryFabric(sql: string, token: string): Promise<Record<string, unknown>[]> {
+  return new Promise((resolve, reject) => {
+    const config = {
+      server: FABRIC_HOST,
+      authentication: {
+        type: "azure-active-directory-access-token" as const,
+        options: { token }
+      },
+      options: {
+        database: FABRIC_DB,
+        encrypt: true,
+        port: 1433,
+        connectTimeout: 30000,
+        requestTimeout: 30000
+      }
+    };
+
+    const connection = new Connection(config);
+    connection.on("connect", (err) => {
+      if (err) { reject(err); return; }
+
+      const rows: Record<string, unknown>[] = [];
+      const request = new TdsRequest(sql, (err) => {
+        connection.close();
+        if (err) { reject(err); return; }
+        resolve(rows);
+      });
+
+      request.on("row", (rowCols) => {
+        const row: Record<string, unknown> = {};
+        for (const col of rowCols) row[col.metadata.colName] = col.value;
+        rows.push(row);
+      });
+
+      connection.execSql(request);
+    });
+
+    connection.connect();
   });
-  if (!res.ok) throw new Error(`Fabric query failed: ${await res.text()}`);
-  const data = await res.json();
-  if (data.results?.[0]?.rows) return data.results[0].rows;
-  if (data.value) return data.value;
-  return [];
+}
+
+function queryFabricWithSPN(sql: string, tenantId: string, clientId: string, clientSecret: string): Promise<Record<string, unknown>[]> {
+  return new Promise((resolve, reject) => {
+    const config = {
+      server: FABRIC_HOST,
+      authentication: {
+        type: "azure-active-directory-service-principal-secret" as const,
+        options: { clientId, clientSecret, tenantId }
+      },
+      options: {
+        database: FABRIC_DB,
+        encrypt: true,
+        port: 1433,
+        connectTimeout: 30000,
+        requestTimeout: 30000
+      }
+    };
+
+    const connection = new Connection(config);
+    connection.on("connect", (err) => {
+      if (err) { reject(err); return; }
+
+      const rows: Record<string, unknown>[] = [];
+      const request = new TdsRequest(sql, (err) => {
+        connection.close();
+        if (err) { reject(err); return; }
+        resolve(rows);
+      });
+
+      request.on("row", (rowCols) => {
+        const row: Record<string, unknown> = {};
+        for (const col of rowCols) row[col.metadata.colName] = col.value;
+        rows.push(row);
+      });
+
+      connection.execSql(request);
+    });
+
+    connection.connect();
+  });
 }
 
 async function commitToGitHub(content: string, token: string): Promise<void> {
@@ -103,48 +173,56 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const token = await getFabricToken(tenantId, clientId, clientSecret);
+    // Helper: try token auth first, fall back to direct SPN auth
+    async function runQuery(sql: string): Promise<Record<string, unknown>[]> {
+      try {
+        const token = await getFabricToken(tenantId, clientId, clientSecret);
+        return await queryFabric(sql, token);
+      } catch {
+        return await queryFabricWithSPN(sql, tenantId, clientId, clientSecret);
+      }
+    }
 
     const [arOverdue, arByBucket, revenueThisMonth, revenueLastYear,
            inventoryFast, apDue, productionVariance, vendorLeadTime] = await Promise.all([
 
-      queryFabric(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalOverdue
-        FROM fact.ARInvoice WHERE AgingBucket = '90+' AND BalanceDue > 0`, token),
+      runQuery(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalOverdue
+        FROM fact.ARInvoice WHERE AgingBucket = '90+' AND BalanceDue > 0`),
 
-      queryFabric(`SELECT AgingBucket, COUNT(*) AS Invoices, ROUND(SUM(BalanceDue),2) AS Balance
+      runQuery(`SELECT AgingBucket, COUNT(*) AS Invoices, ROUND(SUM(BalanceDue),2) AS Balance
         FROM fact.ARInvoice WHERE BalanceDue > 0
-        GROUP BY AgingBucket ORDER BY AgingBucket`, token),
+        GROUP BY AgingBucket ORDER BY AgingBucket`),
 
-      queryFabric(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue, COUNT(DISTINCT CustomerKey) AS Customers
+      runQuery(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue, COUNT(DISTINCT CustomerKey) AS Customers
         FROM fact.SalesOrder so JOIN dim.Date d ON so.OrderDateKey = d.DateKey
-        WHERE d.IsCurrentMonth = 1`, token),
+        WHERE d.IsCurrentMonth = 1`),
 
-      queryFabric(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue
+      runQuery(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue
         FROM fact.SalesOrder so JOIN dim.Date d ON so.OrderDateKey = d.DateKey
-        WHERE d.Year = YEAR(GETDATE())-1 AND d.Month = MONTH(GETDATE())`, token),
+        WHERE d.Year = YEAR(GETDATE())-1 AND d.Month = MONTH(GETDATE())`),
 
-      queryFabric(`SELECT TOP 5 p.PartDescription, COUNT(*) AS Transactions
+      runQuery(`SELECT TOP 5 p.PartDescription, COUNT(*) AS Transactions
         FROM fact.Inventory i JOIN dim.Part p ON i.PartKey = p.PartKey
         JOIN dim.Date d ON i.TranDateKey = d.DateKey
         WHERE d.DaysFromToday >= -30
-        GROUP BY p.PartDescription ORDER BY Transactions DESC`, token),
+        GROUP BY p.PartDescription ORDER BY Transactions DESC`),
 
-      queryFabric(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalDue
+      runQuery(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalDue
         FROM fact.APInvoice ap JOIN dim.Date d ON ap.DueDateKey = d.DateKey
-        WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`, token),
+        WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`),
 
-      queryFabric(`SELECT TOP 5 p.PartDescription,
+      runQuery(`SELECT TOP 5 p.PartDescription,
         ROUND(ActLaborCost - EstLaborCost,2) AS LaborVariance,
         ROUND(ActMaterialCost - EstMaterialCost,2) AS MaterialVariance
         FROM fact.Production pr JOIN dim.Part p ON pr.PartKey = p.PartKey
         WHERE pr.JobComplete = 1 AND ABS(ActLaborCost - EstLaborCost) > 500
-        ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`, token),
+        ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`),
 
-      queryFabric(`SELECT TOP 5 v.VendorName,
+      runQuery(`SELECT TOP 5 v.VendorName,
         ROUND(AVG(CAST(DATEDIFF(day, po.OrderDate, po.DueDate) AS float)),1) AS AvgLeadDays
         FROM fact.PurchaseOrder po JOIN dim.Vendor v ON po.VendorKey = v.VendorKey
         WHERE po.OrderDate >= DATEADD(day,-90,GETDATE())
-        GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`, token)
+        GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`)
     ]);
 
     const dataContext = JSON.stringify({
