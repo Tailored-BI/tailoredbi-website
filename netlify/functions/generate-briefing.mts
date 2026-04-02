@@ -191,8 +191,11 @@ export default async (req: Request, context: Context) => {
       } catch (spnErr) {
         function errDetail(e: unknown): string {
           if (!e) return 'null';
-          if (e instanceof AggregateError) return e.errors.map(x => x?.message || String(x)).join('; ');
-          if (e instanceof Error) return e.message || e.constructor.name;
+          if (e instanceof AggregateError) return `AggregateError(${e.errors.length}): ` + e.errors.map((x: any) => x?.message || x?.code || String(x)).join('; ');
+          if (e instanceof Error) {
+            const parts = [e.constructor.name, e.message, (e as any).code].filter(Boolean);
+            return parts.join(' | ') || JSON.stringify(Object.getOwnPropertyNames(e).reduce((o, k) => { (o as any)[k] = (e as any)[k]; return o; }, {})).substring(0, 300);
+          }
           try { return JSON.stringify(e).substring(0, 300); } catch { return String(e); }
         }
         throw new Error(`Token: ${errDetail(tokenErr)} | SPN: ${errDetail(spnErr)}`);
@@ -308,9 +311,15 @@ Generate the daily briefing.`
     });
 
   } catch (err) {
-    const msg = err instanceof AggregateError
-      ? err.errors.map((x: any) => x?.message || String(x)).join('; ')
-      : (err instanceof Error ? err.message : String(err));
+    let msg: string;
+    if (err instanceof AggregateError) {
+      msg = `AggregateError(${err.errors.length}): ` + err.errors.map((x: any) => x?.message || x?.code || String(x)).join('; ');
+    } else if (err instanceof Error) {
+      msg = [err.constructor.name, err.message, (err as any).code].filter(Boolean).join(' | ');
+      if (!msg) msg = JSON.stringify(Object.getOwnPropertyNames(err).reduce((o, k) => { (o as any)[k] = (err as any)[k]; return o; }, {})).substring(0, 500);
+    } else {
+      msg = String(err);
+    }
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
