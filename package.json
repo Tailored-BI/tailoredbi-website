@@ -2,6 +2,6 @@
   "name": "tailoredbi-website",
   "private": true,
   "dependencies": {
-    "mssql": "^11.0.1"
+    "tedious": "^19.0.0"
   }
 }

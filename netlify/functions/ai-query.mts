@@ -1,5 +1,5 @@
 import type { Context, Config } from "@netlify/functions";
-import sql from "mssql";
+import { Connection, Request as TdsRequest, TYPES } from "tedious";
 
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
 const FABRIC_DB = "Heartland_Warehouse";
@@ -117,30 +117,52 @@ async function getFabricToken(tenantId: string, clientId: string, clientSecret: 
   return data.access_token;
 }
 
-async function executeFabricSQL(query: string, token: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
-  const pool = await sql.connect({
-    server: FABRIC_HOST,
-    database: FABRIC_DB,
-    port: 1433,
-    authentication: {
-      type: "azure-active-directory-access-token",
-      options: { token }
-    },
-    options: {
-      encrypt: true,
-      connectTimeout: 30000,
-      requestTimeout: 30000
-    }
-  } as sql.config);
+function executeFabricSQL(query: string, token: string): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
+  return new Promise((resolve, reject) => {
+    const config = {
+      server: FABRIC_HOST,
+      authentication: {
+        type: "azure-active-directory-access-token" as const,
+        options: { token }
+      },
+      options: {
+        database: FABRIC_DB,
+        encrypt: true,
+        port: 1433,
+        connectTimeout: 30000,
+        requestTimeout: 30000,
+        rowCollectionOnRequestCompletion: true
+      }
+    };
 
-  try {
-    const result = await pool.request().query(query);
-    const rows = result.recordset || [];
-    const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-    return { columns, rows };
-  } finally {
-    await pool.close();
-  }
+    const connection = new Connection(config);
+    connection.on("connect", (err) => {
+      if (err) { reject(err); return; }
+
+      const columns: string[] = [];
+      const rows: Record<string, unknown>[] = [];
+
+      const request = new TdsRequest(query, (err, rowCount, resultRows) => {
+        connection.close();
+        if (err) { reject(err); return; }
+        resolve({ columns, rows });
+      });
+
+      request.on("columnMetadata", (cols) => {
+        for (const col of cols) columns.push(col.colName);
+      });
+
+      request.on("row", (rowCols) => {
+        const row: Record<string, unknown> = {};
+        for (const col of rowCols) row[col.metadata.colName] = col.value;
+        rows.push(row);
+      });
+
+      connection.execSql(request);
+    });
+
+    connection.connect();
+  });
 }
 
 export default async (req: Request, context: Context) => {
