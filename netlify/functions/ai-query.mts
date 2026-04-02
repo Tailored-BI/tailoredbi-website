@@ -218,12 +218,15 @@ chartType rules:
 
     let parsed: { sql: string; explanation: string; chartType: string };
     try {
-      const clean = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(clean);
+      const start = rawText.indexOf("{");
+      const end = rawText.lastIndexOf("}");
+      if (start === -1 || end === -1) throw new Error("No JSON object found");
+      parsed = JSON.parse(rawText.substring(start, end + 1));
     } catch {
       return new Response(JSON.stringify({
         error: "Could not parse AI response",
-        explanation: "Please try rephrasing your question."
+        explanation: "Please try rephrasing your question.",
+        rawText: rawText.substring(0, 500)
       }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 
