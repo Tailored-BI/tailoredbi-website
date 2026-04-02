@@ -173,57 +173,60 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    // Helper: try token auth first, fall back to direct SPN auth
-    async function runQuery(sql: string): Promise<Record<string, unknown>[]> {
-      try {
-        const token = await getFabricToken(tenantId, clientId, clientSecret);
-        return await queryFabric(sql, token);
-      } catch {
-        return await queryFabricWithSPN(sql, tenantId, clientId, clientSecret);
-      }
-    }
-
-    const [arOverdue, arByBucket, revenueThisMonth, revenueLastYear,
-           inventoryFast, apDue, productionVariance, vendorLeadTime] = await Promise.all([
-
-      runQuery(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalOverdue
-        FROM fact.ARInvoice WHERE AgingBucket = '90+' AND BalanceDue > 0`),
-
-      runQuery(`SELECT AgingBucket, COUNT(*) AS Invoices, ROUND(SUM(BalanceDue),2) AS Balance
+    const queries = [
+      `SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalOverdue
+        FROM fact.ARInvoice WHERE AgingBucket = '90+' AND BalanceDue > 0`,
+      `SELECT AgingBucket, COUNT(*) AS Invoices, ROUND(SUM(BalanceDue),2) AS Balance
         FROM fact.ARInvoice WHERE BalanceDue > 0
-        GROUP BY AgingBucket ORDER BY AgingBucket`),
-
-      runQuery(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue, COUNT(DISTINCT CustomerKey) AS Customers
+        GROUP BY AgingBucket ORDER BY AgingBucket`,
+      `SELECT ROUND(SUM(ExtPrice),2) AS Revenue, COUNT(DISTINCT CustomerKey) AS Customers
         FROM fact.SalesOrder so JOIN dim.Date d ON so.OrderDateKey = d.DateKey
-        WHERE d.IsCurrentMonth = 1`),
-
-      runQuery(`SELECT ROUND(SUM(ExtPrice),2) AS Revenue
+        WHERE d.IsCurrentMonth = 1`,
+      `SELECT ROUND(SUM(ExtPrice),2) AS Revenue
         FROM fact.SalesOrder so JOIN dim.Date d ON so.OrderDateKey = d.DateKey
-        WHERE d.Year = YEAR(GETDATE())-1 AND d.Month = MONTH(GETDATE())`),
-
-      runQuery(`SELECT TOP 5 p.PartDescription, COUNT(*) AS Transactions
+        WHERE d.Year = YEAR(GETDATE())-1 AND d.Month = MONTH(GETDATE())`,
+      `SELECT TOP 5 p.PartDescription, COUNT(*) AS Transactions
         FROM fact.Inventory i JOIN dim.Part p ON i.PartKey = p.PartKey
         JOIN dim.Date d ON i.TranDateKey = d.DateKey
         WHERE d.DaysFromToday >= -30
-        GROUP BY p.PartDescription ORDER BY Transactions DESC`),
-
-      runQuery(`SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalDue
+        GROUP BY p.PartDescription ORDER BY Transactions DESC`,
+      `SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalDue
         FROM fact.APInvoice ap JOIN dim.Date d ON ap.DueDateKey = d.DateKey
-        WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`),
-
-      runQuery(`SELECT TOP 5 p.PartDescription,
+        WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`,
+      `SELECT TOP 5 p.PartDescription,
         ROUND(ActLaborCost - EstLaborCost,2) AS LaborVariance,
         ROUND(ActMaterialCost - EstMaterialCost,2) AS MaterialVariance
         FROM fact.Production pr JOIN dim.Part p ON pr.PartKey = p.PartKey
         WHERE pr.JobComplete = 1 AND ABS(ActLaborCost - EstLaborCost) > 500
-        ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`),
-
-      runQuery(`SELECT TOP 5 v.VendorName,
+        ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`,
+      `SELECT TOP 5 v.VendorName,
         ROUND(AVG(CAST(DATEDIFF(day, po.OrderDate, po.DueDate) AS float)),1) AS AvgLeadDays
         FROM fact.PurchaseOrder po JOIN dim.Vendor v ON po.VendorKey = v.VendorKey
         WHERE po.OrderDate >= DATEADD(day,-90,GETDATE())
-        GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`)
-    ]);
+        GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`
+    ];
+
+    // Run queries sequentially on a single connection — try token auth, fall back to SPN
+    let results: Record<string, unknown>[][];
+    try {
+      const token = await getFabricToken(tenantId, clientId, clientSecret);
+      results = [];
+      for (const sql of queries) {
+        results.push(await queryFabric(sql, token));
+      }
+    } catch (tokenErr) {
+      try {
+        results = [];
+        for (const sql of queries) {
+          results.push(await queryFabricWithSPN(sql, tenantId, clientId, clientSecret));
+        }
+      } catch (spnErr) {
+        throw new Error(`Token: ${String(tokenErr).substring(0, 200)} | SPN: ${String(spnErr).substring(0, 200)}`);
+      }
+    }
+
+    const [arOverdue, arByBucket, revenueThisMonth, revenueLastYear,
+           inventoryFast, apDue, productionVariance, vendorLeadTime] = results;
 
     const dataContext = JSON.stringify({
       arOverdue90Plus: arOverdue[0] || {},
