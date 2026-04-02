@@ -62,7 +62,8 @@ body{background:#f5f2ed;color:#3d2b0e;}
 .msg{display:flex;gap:8px;align-items:flex-start;}
 .msg-r{flex-direction:row-reverse;}
 .av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-.av-ai{background:#3d2b0e;color:#c4963a;}
+.av-ai{background:#3d2b0e;color:#c4963a;padding:0;}
+.av-ai svg{display:block;}
 .av-u{background:#c4511a;color:#fff;}
 .bubble{max-width:82%;padding:9px 13px;font-size:12px;line-height:1.55;}
 .b-ai{background:#f9f6f2;border:1px solid #e2dbd2;border-radius:0 8px 8px 8px;color:#3d2b0e;}
@@ -159,7 +160,7 @@ table.dt tr:hover td{background:#faf7f4;}
   <div class="card" id="briefingCard">
     <div class="card-hdr">
       <div class="card-title">This morning's briefing</div>
-      <div class="card-meta"><span class="ai-pill">Thread</span><span id="briefingDate">Loading...</span></div>
+      <div class="card-meta"><div style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg><span class="ai-pill">Thread</span></div><span id="briefingDate">Loading...</span></div>
     </div>
     <div class="card-body" id="briefingBody">
       <div class="briefing-empty">Generating your daily briefing from today's warehouse data...</div>
@@ -171,11 +172,11 @@ table.dt tr:hover td{background:#faf7f4;}
   <div class="card">
     <div class="card-hdr">
       <div class="card-title">Ask your data</div>
-      <div class="card-meta"><span class="ai-pill">Thread</span><span>Your live Fabric warehouse &middot; Updated daily</span></div>
+      <div class="card-meta"><div style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg><span class="ai-pill">Thread</span></div><span>Your live Fabric warehouse &middot; Updated daily</span></div>
     </div>
     <div class="chat-msgs" id="chatMsgs">
       <div class="msg">
-        <div class="av av-ai">TB</div>
+        <div class="av av-ai"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><line x1="10" y1="11" x2="18" y2="11" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="14" x2="18" y2="14" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="17" x2="18" y2="17" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><path d="M18 11.5 C21 10 23 10 24 10.5" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><path d="M18 16.5 C21 17 23 17.5 24 18" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg></div>
         <div class="bubble b-ai">Hi &mdash; I'm Thread, your Tailored.BI advisor for Heartland Ag Parts. I have access to your live warehouse data and can answer questions about revenue, AR aging, inventory, purchasing trends, production, and more. What would you like to know?</div>
       </div>
     </div>
@@ -340,7 +341,8 @@ function addMessage(role, content) {
   var msgs = document.getElementById('chatMsgs');
   var div = document.createElement('div');
   div.className = 'msg'+(role==='user'?' msg-r':'');
-  div.innerHTML = '<div class="av '+(role==='user'?'av-u':'av-ai')+'">'+(role==='user'?'HB':'TB')+'</div><div class="bubble '+(role==='user'?'b-u':'b-ai')+'">'+content+'</div>';
+  var threadIcon = '<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><line x1="10" y1="11" x2="18" y2="11" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="14" x2="18" y2="14" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="17" x2="18" y2="17" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><path d="M18 11.5 C21 10 23 10 24 10.5" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><path d="M18 16.5 C21 17 23 17.5 24 18" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg>';
+  div.innerHTML = '<div class="av '+(role==='user'?'av-u':'av-ai')+'">'+(role==='user'?'HB':threadIcon)+'</div><div class="bubble '+(role==='user'?'b-u':'b-ai')+'">'+content+'</div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -350,7 +352,7 @@ function addThinking() {
   var div = document.createElement('div');
   div.className = 'msg';
   div.id = 'thinking-msg';
-  div.innerHTML = '<div class="av av-ai">TB</div><div class="bubble b-thinking">Looking up your data...</div>';
+  div.innerHTML = '<div class="av av-ai"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><line x1="10" y1="11" x2="18" y2="11" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="14" x2="18" y2="14" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="17" x2="18" y2="17" stroke="#3d2b0e" stroke-width="0.8" opacity="0.3"/><path d="M18 11.5 C21 10 23 10 24 10.5" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><path d="M18 16.5 C21 17 23 17.5 24 18" stroke="#c4963a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg></div><div class="bubble b-thinking">Looking up your data...</div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
