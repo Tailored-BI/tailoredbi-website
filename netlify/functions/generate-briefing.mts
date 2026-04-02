@@ -206,22 +206,18 @@ export default async (req: Request, context: Context) => {
         GROUP BY v.VendorName ORDER BY AvgLeadDays DESC`
     ];
 
-    // Run queries sequentially on a single connection — try token auth, fall back to SPN
+    // Get token once, then run all queries in parallel (each opens its own connection)
     let results: Record<string, unknown>[][];
     try {
       const token = await getFabricToken(tenantId, clientId, clientSecret);
-      results = [];
-      for (const sql of queries) {
-        results.push(await queryFabric(sql, token));
-      }
+      results = await Promise.all(queries.map(sql => queryFabric(sql, token)));
     } catch (tokenErr) {
       try {
-        results = [];
-        for (const sql of queries) {
-          results.push(await queryFabricWithSPN(sql, tenantId, clientId, clientSecret));
-        }
+        results = await Promise.all(queries.map(sql => queryFabricWithSPN(sql, tenantId, clientId, clientSecret)));
       } catch (spnErr) {
-        throw new Error(`Token: ${String(tokenErr).substring(0, 200)} | SPN: ${String(spnErr).substring(0, 200)}`);
+        const tokenMsg = tokenErr instanceof Error ? tokenErr.message : String(tokenErr);
+        const spnMsg = spnErr instanceof Error ? spnErr.message : String(spnErr);
+        throw new Error(`Token: ${tokenMsg.substring(0, 300)} | SPN: ${spnMsg.substring(0, 300)}`);
       }
     }
 
