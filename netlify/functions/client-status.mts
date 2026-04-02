@@ -20,11 +20,15 @@ export default async (req: Request, context: Context) => {
   }
 
   const base = `${GITHUB_RAW}/clients/${clientId}/status`;
+  const ghToken = Netlify.env.get("GITHUB_TOKEN");
+  const ghHeaders: Record<string, string> = ghToken
+    ? { "Authorization": `token ${ghToken}`, "Accept": "application/vnd.github.v3.raw" }
+    : {};
 
   try {
     const [pipelineRes, inventoryRes] = await Promise.all([
-      fetch(`${base}/pipeline-status.json`),
-      fetch(`${base}/workspace-inventory.json`)
+      fetch(`${base}/pipeline-status.json`, { headers: ghHeaders }),
+      fetch(`${base}/workspace-inventory.json`, { headers: ghHeaders })
     ]);
 
     const pipeline = pipelineRes.ok ? await pipelineRes.json() : null;
