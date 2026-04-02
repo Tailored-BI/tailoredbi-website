@@ -306,11 +306,40 @@ function removeThinking() {
 }
 
 function renderResult(data) {
-  if (data.error) return '<span style="color:#8a1010;">'+data.error+'</span>';
-  var html = '<div style="margin-bottom:6px;">'+data.explanation+'</div>';
-  if (data.note) {
-    html += '<div style="background:#f0e8ff;border:1px solid #d4b8f0;border-radius:6px;padding:8px 12px;font-size:11px;color:#4a1080;margin-top:6px;"><strong>Demo mode:</strong> AI generated this SQL query \u2014 Fabric execution coming soon.<br><span class="sql-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">\u25B6 View generated SQL</span><div class="sql-block">'+data.sql.replace(/</g,'&lt;')+'</div></div>';
+  if (data.error) {
+    return '<div style="color:#8a1010;margin-bottom:4px;">'+data.error+'</div>'+(data.explanation?'<div style="color:#6a5a4a;font-size:11px;">'+data.explanation+'</div>':'');
   }
+
+  var html = '<div style="margin-bottom:8px;">'+data.explanation+'</div>';
+
+  if (data.rows && data.rows.length > 0) {
+    if (data.chartType === 'number' && data.rows.length === 1) {
+      var val = Object.values(data.rows[0])[0];
+      var formatted = typeof val === 'number' ? val.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) : String(val);
+      html += '<div class="res-number">'+formatted+'</div>';
+      if (data.columns&&data.columns[0]) html += '<div class="res-label">'+data.columns[0]+'</div>';
+    } else {
+      var cols = data.columns || (data.rows.length > 0 ? Object.keys(data.rows[0]) : []);
+      var headers = cols.map(function(c){return '<th>'+c+'</th>';}).join('');
+      var bodyRows = data.rows.slice(0,50).map(function(row){
+        var cells = cols.map(function(c){
+          var v = row[c];
+          var isNum = typeof v === 'number';
+          var isAmt = isNum && (c.toLowerCase().indexOf('amt')!==-1 || c.toLowerCase().indexOf('price')!==-1 || c.toLowerCase().indexOf('cost')!==-1 || c.toLowerCase().indexOf('balance')!==-1 || c.toLowerCase().indexOf('revenue')!==-1);
+          var isDays = isNum && c.toLowerCase().indexOf('day')!==-1;
+          var display = isAmt ? '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : isNum ? Number(v).toLocaleString() : (v == null ? '\u2014' : String(v));
+          return '<td class="'+(isAmt?'amt':isNum?'num':'')+' '+(isDays&&v>60?'hi':'')+'">'+display+'</td>';
+        }).join('');
+        return '<tr>'+cells+'</tr>';
+      }).join('');
+      html += '<table class="res-table"><thead><tr>'+headers+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
+      if (data.rowCount > 50) html += '<div style="font-size:10px;color:#aaa;margin-top:4px;">Showing 50 of '+data.rowCount+' rows</div>';
+    }
+  } else if (data.rows && data.rows.length === 0) {
+    html += '<div style="color:#8a7a6a;font-size:11px;padding:8px 0;">No results found for this query.</div>';
+  }
+
+  html += '<div style="margin-top:8px;"><span class="sql-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">\u25B6 View SQL</span><div class="sql-block">'+(data.sql||'').replace(/</g,'&lt;')+'</div></div>';
   return html;
 }
 
