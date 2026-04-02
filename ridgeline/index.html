@@ -583,48 +583,89 @@ footer { background: #1A1A1A; padding: 28px 80px; display: flex; align-items: ce
   </div>
 </div>
 
-<!-- CTA -->
-<div class="cta-section">
-  <div class="cta-left">
-    <h2>Want This for Your <em>Epicor</em> Data?</h2>
-    <p>Ridgeline Fluid Power is a fictional demo company — but the warehouse, ETL architecture, and Power BI reports are real. If you're running Epicor Kinetic with a hybrid MTS/MTO model and struggling to see both worlds clearly, that's exactly what Tailored.BI is built for.</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;">Most Epicor Kinetic customers invest <strong style="color:rgba(255,255,255,0.8);">$500K&ndash;$2M+</strong> over five years in their ERP. The hybrid MTS/MTO model makes that investment even harder to see &mdash; without a proper BI layer, catalog and custom margins blend into noise and the real profitability story disappears.</p>
-    <a class="cta-link" href="https://tailored.bi/#contact">Contact Tailored.BI &rarr;</a>
+<!-- HOW YOUR DATA FLOWS -->
+<section style="padding:4rem 2rem;background:#f4f2f0;">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="color:var(--crimson);font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.5rem;font-family:Oswald,sans-serif;">How your data flows</p>
+    <h2 style="font-family:Oswald,sans-serif;font-size:1.75rem;font-weight:700;color:var(--charcoal);margin-bottom:0.75rem;">One pipeline. Two product streams. One dashboard.</h2>
+    <p style="color:#555;font-size:1rem;line-height:1.7;margin-bottom:2.5rem;max-width:680px;">Ridgeline runs two distinct Epicor workflows &mdash; catalog products built to stock and custom-engineered assemblies built to order. The Tailored.BI warehouse tracks both streams separately so management always knows which revenue is predictable and which is project-driven.</p>
+
+    <div style="display:flex;flex-direction:column;gap:0;">
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:var(--charcoal);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--charcoal);margin-bottom:0.4rem;">Epicor Kinetic &mdash; tracking both models</h3>
+          <p style="color:#555;font-size:0.875rem;line-height:1.6;">Standard catalog valves, fittings, and cylinders flow through make-to-stock. Custom manifolds and OEM-spec assemblies run through make-to-order job costing. Both live in the same Epicor instance &mdash; the warehouse separates them cleanly.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:var(--crimson);opacity:0.4;"></div>
+          <span style="font-size:0.7rem;color:var(--crimson);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Read-only &middot; Incremental &middot; Encrypted</span>
+          <div style="width:2px;height:16px;background:var(--crimson);opacity:0.4;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:var(--charcoal);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--charcoal);margin-bottom:0.4rem;">Tailored.BI managed warehouse</h3>
+          <p style="color:#555;font-size:0.875rem;line-height:1.6;">Catalog revenue, job revenue, and blended margin are tracked separately. Inventory turns on standard products. Job cost variance on custom work. AP aging by vendor. AR by customer type. Every morning, only changed records move &mdash; Epicor stays fast.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:var(--crimson);opacity:0.4;"></div>
+          <span style="font-size:0.7rem;color:var(--crimson);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Refreshed daily &middot; Monitored 24/7</span>
+          <div style="width:2px;height:16px;background:var(--crimson);opacity:0.4;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:2rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:var(--charcoal);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #ddd;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--charcoal);margin-bottom:0.4rem;">Power BI &mdash; one view of both businesses</h3>
+          <p style="color:#555;font-size:0.875rem;line-height:1.6;">Management opens one dashboard and sees total revenue, margin by product stream, job backlog, open AR, and purchasing spend &mdash; all current as of this morning. Slice by catalog vs custom to see exactly where margin is made.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="background:var(--charcoal);border-radius:10px;padding:1.25rem 1.75rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;text-align:center;">
+      <div><div style="color:var(--amber);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">2</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Product streams tracked</div></div>
+      <div><div style="color:var(--amber);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Daily</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Automatic refresh</div></div>
+      <div><div style="color:var(--amber);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">6</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Report views</div></div>
+      <div><div style="color:var(--amber);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Read-only</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Epicor untouched</div></div>
+    </div>
+
   </div>
-  <div class="cta-right">
-    <h3>What You Get</h3>
-    <ul class="fact-list">
-      <li>A Microsoft Fabric warehouse built for your Epicor company ID — MTS, MTO, or both</li>
-      <li>A dim.MfgModel that segments catalog vs custom throughout every report without duplication</li>
-      <li>Separate cost model reporting — standard cost variance for catalog, job cost actual for custom</li>
-      <li>6 Power BI report areas with shared DAX measures and a universal dim.Date</li>
-      <li>Watermark-based incremental ETL via SQL Server gateway — PartTran and JobHead optimized for volume</li>
-      <li>Ongoing support as your Epicor configuration evolves</li>
-    </ul>
-  </div>
-</div>
+</section>
 
 <!-- FOOTER -->
-<footer>
-  <div class="foot-left">
-    <div class="foot-rdgl">Ridgeline Fluid Power</div>
-    <span class="foot-sep">/</span>
-    <div class="foot-tbi"><a href="https://tailored.bi">Tailored<em>.BI</em></a></div>
-  </div>
-  <div class="foot-right">
-    Fictitious company &mdash; created for Tailored.BI demonstration purposes<br>
-    &copy; 2026 Tailored.BI &nbsp;|&nbsp; tailored.bi/ridgeline
-  </div>
+<footer style="background:var(--charcoal);color:rgba(255,255,255,0.5);padding:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:0.85rem;">
+  <div><strong style="color:var(--smoke);">Ridgeline Fluid Power</strong> &nbsp;&middot;&nbsp; Tailored.BI showcase</div>
+  <div style="text-align:right;">Fictitious demo company &nbsp;&middot;&nbsp; Real Epicor architecture &nbsp;&middot;&nbsp; &copy; 2026 Tailored.BI</div>
 </footer>
 
-<section style="background:#1a1a1a;border-top:1px solid rgba(200,136,58,0.2);padding:3rem 2rem;text-align:center;">
+<!-- SUBSCRIPTION CTA -->
+<section style="background:#1a1a1a;border-top:1px solid rgba(200,136,58,0.2);padding:3.5rem 2rem;text-align:center;">
   <div style="max-width:640px;margin:0 auto;">
-    <p style="color:#C8883A;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Fictitious demo company · Powered by Tailored.BI</p>
-    <h2 style="font-size:1.75rem;font-weight:700;color:#F4F2F0;margin-bottom:1rem;">Want this for your Epicor data?</h2>
-    <p style="color:rgba(244,242,240,0.6);font-size:1rem;line-height:1.7;margin-bottom:2rem;">Ridgeline Fluid Power is a fictional Hybrid manufacturer — standard catalog products made to stock alongside custom-engineered units built to order. If your Epicor operation runs both models and you want reporting built for that complexity, starting at $1,500/month, let's talk.</p>
+    <p style="color:#C8883A;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Hybrid MTS/MTO &middot; Powered by Tailored.BI</p>
+    <h2 style="font-size:1.75rem;font-weight:700;color:#F4F2F0;margin-bottom:1rem;">Want this for your Epicor operation?</h2>
+    <p style="color:rgba(244,242,240,0.65);font-size:1rem;line-height:1.7;margin-bottom:0.75rem;">Ridgeline Fluid Power is a fictional hybrid manufacturer &mdash; but every pipeline, every warehouse table, and every report you just explored is built on real Epicor architecture.</p>
+    <p style="color:rgba(244,242,240,0.65);font-size:1rem;line-height:1.7;margin-bottom:2rem;">If you run both make-to-stock and make-to-order on Epicor Kinetic &mdash; catalog products alongside custom jobs &mdash; this is exactly what your subscription delivers. Two revenue streams, one dashboard, live every morning. Starting at <strong style="color:#F4F2F0;">$1,500/month</strong>.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#B03030;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &#8594;</a>
-      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(200,136,58,0.4);color:#C8883A;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Get in touch with Tailored.BI &#8594;</a>
+      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#B03030;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &rarr;</a>
+      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(200,136,58,0.4);color:#C8883A;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Start a conversation &rarr;</a>
     </div>
   </div>
 </section>

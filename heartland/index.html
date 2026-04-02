@@ -1169,130 +1169,89 @@ footer {
   </div>
 </div>
 
-<!-- === ETL ARCHITECTURE === -->
-<div class="arch-section">
-  <div class="section-label">Technical Architecture</div>
-  <div class="section-title">How the Data Flows</div>
-  <div class="section-lead">Heartland runs the SQL Server ETL lane - Epicor Kinetic on-premises connects through stored procedures to Microsoft Fabric via on-premises data gateway, using SysRevChangedDate watermark filtering for incremental loads.</div>
+<!-- HOW YOUR DATA FLOWS -->
+<section style="padding:4rem 2rem;background:#faf6ef;">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="color:var(--rust);font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.5rem;font-family:Oswald,sans-serif;">How your data flows</p>
+    <h2 style="font-family:Oswald,sans-serif;font-size:1.75rem;font-weight:700;color:var(--soil);margin-bottom:0.75rem;">From Epicor to your morning dashboard</h2>
+    <p style="color:#6b5744;font-size:1rem;line-height:1.7;margin-bottom:2.5rem;max-width:680px;">Every morning before your team arrives, Heartland's Epicor data moves through a secure managed pipeline &mdash; inventory transactions, AR balances, purchase orders, GL entries &mdash; shaped into clean reporting tables and delivered to Power BI. No Excel. No manual pulls. No waiting.</p>
 
-  <div class="arch-flow">
-    <div class="arch-node">
-      <div class="arch-icon">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#E8C547" stroke-width="1.5"/>
-          <path d="M7 8h10M7 12h10M7 16h6" stroke="#E8C547" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="arch-label">Epicor Kinetic</div>
-      <div class="arch-sub">On-Premises ERP</div>
-    </div>
-    <div class="arch-arrow">&rarr;</div>
-    <div class="arch-node">
-      <div class="arch-icon">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <ellipse cx="12" cy="7" rx="8" ry="3" stroke="#E8C547" stroke-width="1.5"/>
-          <path d="M4 7v5c0 1.66 3.58 3 8 3s8-1.34 8-3V7" stroke="#E8C547" stroke-width="1.5"/>
-          <path d="M4 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" stroke="#E8C547" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <div class="arch-label">SQL Server</div>
-      <div class="arch-sub">Stored Procs + Watermark</div>
-    </div>
-    <div class="arch-arrow">&rarr;</div>
-    <div class="arch-node">
-      <div class="arch-icon">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#E8C547" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#E8C547" stroke-width="1.5" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="arch-label">Fabric Warehouse</div>
-      <div class="arch-sub">dim &middot; fact &middot; bridge</div>
-    </div>
-    <div class="arch-arrow">&rarr;</div>
-    <div class="arch-node">
-      <div class="arch-icon">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <rect x="3" y="5" width="18" height="14" rx="2" stroke="#E8C547" stroke-width="1.5"/>
-          <path d="M8 10h8M8 14h5" stroke="#E8C547" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="17" cy="14" r="1.5" fill="#E8C547"/>
-        </svg>
-      </div>
-      <div class="arch-label">Power BI</div>
-      <div class="arch-sub">8 Report Areas</div>
-    </div>
-  </div>
+    <div style="display:flex;flex-direction:column;gap:0;">
 
-  <div style="margin-top:28px;">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--iron);margin-bottom:12px;">Warehouse Tables</div>
-    <div class="warehouse-tables">
-      <span class="wt d">dim.Date</span>
-      <span class="wt d">dim.Customer</span>
-      <span class="wt d">dim.Part</span>
-      <span class="wt d">dim.Account</span>
-      <span class="wt d">dim.Department</span>
-      <span class="wt d">dim.Vendor</span>
-      <span class="wt d">dim.Employee</span>
-      <span class="wt f">fact.GL</span>
-      <span class="wt f">fact.SalesOrder</span>
-      <span class="wt f">fact.ARInvoice</span>
-      <span class="wt f">fact.APInvoice</span>
-      <span class="wt f">fact.PurchaseOrder</span>
-      <span class="wt f">fact.Inventory</span>
-      <span class="wt f">fact.Production</span>
-      <span class="wt f">fact.Shipment</span>
-      <span class="wt f">fact.LaborTime</span>
-      <span class="wt s">staging.Watermark</span>
-      <span class="wt s">bridge.JobMaterial</span>
-    </div>
-  </div>
-</div>
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:#3D2B1F;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C547" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #e8ddd0;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--soil);margin-bottom:0.4rem;">Epicor Kinetic &mdash; Heartland's ERP</h3>
+          <p style="color:#6b5744;font-size:0.875rem;line-height:1.6;">Inventory transactions, sales orders, AR invoices, purchase orders, GL journal entries, labor time, and production jobs &mdash; all sitting in Epicor's on-premises database in Lohrville.</p>
+        </div>
+      </div>
 
-<!-- === CTA === -->
-<div class="cta-section">
-  <div class="cta-left">
-    <h2>Want This for Your <em>Epicor</em> Data?</h2>
-    <p>Heartland Ag Parts is a fictional demo company - but the warehouse, the ETL architecture, and the Power BI reports are real. If you're running Epicor Kinetic and want clean, reliable reporting built on Microsoft Fabric, let's talk.</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;">Most Epicor Kinetic customers invest <strong style="color:rgba(255,255,255,0.8);">$500K&ndash;$2M+</strong> over five years in their ERP. Without a proper BI layer, that investment can't answer the questions that matter most to your business.</p>
-    <a class="cta-link" href="https://tailored.bi/#contact">
-      Get in touch with Tailored.BI &rarr;
-    </a>
-  </div>
-  <div class="cta-right">
-    <h3>What You Get</h3>
-    <ul class="fact-list">
-      <li>A production-ready Microsoft Fabric data warehouse built for your Epicor schema and company ID</li>
-      <li>Incremental ETL via SQL Server stored procedures or Epicor REST API - your choice</li>
-      <li>8 Power BI report areas with shared DAX measures and a universal dim.Date</li>
-      <li>Seasonal and fiscal calendar support - standard Gregorian, fiscal, or Retail 4-4-5</li>
-      <li>Ongoing architecture support as your Epicor data model evolves</li>
-    </ul>
-  </div>
-</div>
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:#C44B20;opacity:0.4;"></div>
+          <span style="font-size:0.7rem;color:#C44B20;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Read-only &middot; Incremental &middot; Encrypted</span>
+          <div style="width:2px;height:16px;background:#C44B20;opacity:0.4;"></div>
+        </div>
+      </div>
 
-<!-- === FOOTER === -->
-<footer>
-  <div class="foot-left">
-    <div class="foot-hrtl">Heartland Ag Parts Co.</div>
-    <div class="foot-sep">/</div>
-    <div class="foot-tbi">
-      <a href="https://tailored.bi">Tailored<em>.BI</em></a>
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:#3D2B1F;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C547" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #e8ddd0;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--soil);margin-bottom:0.4rem;">Tailored.BI managed warehouse</h3>
+          <p style="color:#6b5744;font-size:0.875rem;line-height:1.6;">Only changed records move each morning &mdash; watermark-driven incremental refresh means Epicor is never slowed down. Data lands in a purpose-built Microsoft Fabric warehouse isolated to Heartland's account. Clean star-schema tables: inventory status, seasonal demand, AR aging, purchase spend, GL by account and period.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:#C44B20;opacity:0.4;"></div>
+          <span style="font-size:0.7rem;color:#C44B20;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Refreshed daily &middot; Monitored 24/7</span>
+          <div style="width:2px;height:16px;background:#C44B20;opacity:0.4;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:2rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:#3D2B1F;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C547" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #e8ddd0;border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Oswald,sans-serif;font-size:1.05rem;font-weight:600;color:var(--soil);margin-bottom:0.4rem;">Power BI &mdash; live every morning</h3>
+          <p style="color:#6b5744;font-size:0.875rem;line-height:1.6;">Heartland's team opens a browser, logs in, and sees this morning's numbers &mdash; revenue by dealer, seasonal inventory position, AR aging by customer, purchase spend by vendor. Before planting season, before harvest, before Monday morning &mdash; the data is already there.</p>
+        </div>
+      </div>
+
     </div>
+
+    <div style="background:#3D2B1F;border-radius:10px;padding:1.25rem 1.75rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;text-align:center;">
+      <div><div style="color:#E8C547;font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">16</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Epicor tables</div></div>
+      <div><div style="color:#E8C547;font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Daily</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Automatic refresh</div></div>
+      <div><div style="color:#E8C547;font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">8</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Report views</div></div>
+      <div><div style="color:#E8C547;font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Read-only</div><div style="color:rgba(255,255,255,0.6);font-size:0.8rem;">Epicor untouched</div></div>
+    </div>
+
   </div>
-  <div class="foot-right">
-    Fictitious company - created for Tailored.BI demonstration purposes<br>
-    &copy; 2026 Tailored.BI &middot; tailored.bi/heartland
-  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:var(--soil);color:rgba(255,255,255,0.5);padding:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:0.85rem;">
+  <div><strong style="color:var(--wheat);">Heartland Ag Parts Co.</strong> &nbsp;&middot;&nbsp; Tailored.BI showcase</div>
+  <div style="text-align:right;">Fictitious demo company &nbsp;&middot;&nbsp; Real Epicor architecture &nbsp;&middot;&nbsp; &copy; 2026 Tailored.BI</div>
 </footer>
 
-<section style="background:#1a1008;border-top:1px solid rgba(196,150,58,0.2);padding:3rem 2rem;text-align:center;">
+<!-- SUBSCRIPTION CTA -->
+<section style="background:#1a1008;border-top:1px solid rgba(196,150,58,0.2);padding:3.5rem 2rem;text-align:center;">
   <div style="max-width:640px;margin:0 auto;">
-    <p style="color:#c4963a;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Fictitious demo company · Powered by Tailored.BI</p>
-    <h2 style="font-size:1.75rem;font-weight:700;color:#f5f0e8;margin-bottom:1rem;">Want this for your Epicor data?</h2>
-    <p style="color:rgba(245,240,232,0.65);font-size:1rem;line-height:1.7;margin-bottom:2rem;">Heartland Ag Parts is a fictional Make to Stock manufacturer — but the warehouse, the ETL pipeline, and the Power BI reports are completely real. If you run a make-to-stock operation on Epicor Kinetic and want reporting like this, starting at $1,500/month, let's talk.</p>
+    <p style="color:#c4963a;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Make to Stock &middot; Powered by Tailored.BI</p>
+    <h2 style="font-size:1.75rem;font-weight:700;color:#f5f0e8;margin-bottom:1rem;">Want this for your Epicor operation?</h2>
+    <p style="color:rgba(245,240,232,0.65);font-size:1rem;line-height:1.7;margin-bottom:0.75rem;">Heartland Ag Parts is a fictional make-to-stock manufacturer &mdash; but every table, every pipeline, and every report you just explored is built on real Epicor architecture.</p>
+    <p style="color:rgba(245,240,232,0.65);font-size:1rem;line-height:1.7;margin-bottom:2rem;">If you run a make-to-stock operation on Epicor Kinetic &mdash; seasonal inventory, dealer AR, purchasing cycles &mdash; this is exactly what your subscription delivers. Live data, every morning, in your brand. Starting at <strong style="color:#f5f0e8;">$1,500/month</strong>.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#c4511a;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &#8594;</a>
-      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(196,150,58,0.5);color:#c4963a;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Get in touch with Tailored.BI &#8594;</a>
+      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#c4511a;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &rarr;</a>
+      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(196,150,58,0.5);color:#c4963a;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Start a conversation &rarr;</a>
     </div>
   </div>
 </section>

@@ -1254,105 +1254,93 @@ footer{
   </div>
 </div>
 
-<!-- ARCHITECTURE -->
-<div class="arch">
-  <div class="sec-tag">Technical Architecture</div>
-  <div class="sec-title">Data Pipeline</div>
-  <div class="sec-lead">Epicor Kinetic on-premises feeds through watermark-based stored procedures into Microsoft Fabric via on-premises data gateway. A dedicated bridge.LotJobShipment table powers all AS9100D traceability queries.</div>
-  <div class="arch-flow">
-    <div class="an">
-      <div class="ai">
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1" stroke="#00FF88" stroke-width="1.5"/><path d="M7 8h10M7 12h10M7 16h6" stroke="#00FF88" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </div>
-      <div class="al">Epicor Kinetic</div>
-      <div class="as2">On-Prem ERP</div>
-    </div>
-    <div class="aa">&#8594;</div>
-    <div class="an">
-      <div class="ai">
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3" stroke="#00FF88" stroke-width="1.5"/><path d="M4 7v5c0 1.66 3.58 3 8 3s8-1.34 8-3V7" stroke="#00FF88" stroke-width="1.5"/><path d="M4 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5" stroke="#00FF88" stroke-width="1.5"/></svg>
-      </div>
-      <div class="al">SQL Server</div>
-      <div class="as2">Watermark ETL</div>
-    </div>
-    <div class="aa">&#8594;</div>
-    <div class="an">
-      <div class="ai">
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#00FF88" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#00FF88" stroke-width="1.5" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="al">Fabric Warehouse</div>
-      <div class="as2">dim + fact + bridge</div>
-    </div>
-    <div class="aa">&#8594;</div>
-    <div class="an">
-      <div class="ai">
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1" stroke="#00FF88" stroke-width="1.5"/><path d="M8 10h8M8 14h5" stroke="#00FF88" stroke-width="1.5" stroke-linecap="round"/><circle cx="17" cy="14" r="1.5" fill="#00FF88"/></svg>
-      </div>
-      <div class="al">Power BI</div>
-      <div class="as2">8 Report Areas</div>
-    </div>
-  </div>
-  <div style="margin-top:16px;">
-    <div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">// Warehouse Tables</div>
-    <div class="wtags">
-      <span class="wt d">dim.Date</span><span class="wt d">dim.Customer</span><span class="wt d">dim.Part</span>
-      <span class="wt d">dim.Account</span><span class="wt d">dim.Department</span><span class="wt d">dim.Vendor</span>
-      <span class="wt d">dim.Employee</span><span class="wt d">dim.Contract</span>
-      <span class="wt f">fact.GL</span><span class="wt f">fact.JobCost</span><span class="wt f">fact.LaborTime</span>
-      <span class="wt f">fact.Shipment</span><span class="wt f">fact.PurchaseOrder</span>
-      <span class="wt f">fact.APInvoice</span><span class="wt f">fact.ContractRevenue</span><span class="wt f">fact.Inventory</span>
-      <span class="wt s">bridge.LotJobShipment</span><span class="wt s">bridge.JobMaterial</span><span class="wt s">staging.Watermark</span>
-    </div>
-  </div>
-</div>
+<!-- HOW YOUR DATA FLOWS -->
+<section style="padding:4rem 2rem;background:#020A04;border-top:1px solid rgba(0,255,136,0.08);">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="color:var(--cyan);font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.5rem;font-family:Exo 2,sans-serif;">How your data flows</p>
+    <h2 style="font-family:Orbitron,sans-serif;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.75rem;">Job cost to dashboard. Every morning.</h2>
+    <p style="color:rgba(255,255,255,0.55);font-size:1rem;line-height:1.7;margin-bottom:2.5rem;max-width:680px;">Mars runs make-to-order precision machining &mdash; every job has a contract, a cost, a delivery commitment, and a traceability requirement. The Tailored.BI warehouse captures all of it and surfaces job profitability, on-time delivery, and contract revenue in one live dashboard.</p>
 
-<!-- CTA -->
-<div class="cta">
-  <div class="cta-left">
-    <h2>Want This for Your <em>Epicor</em> Data?</h2>
-    <p>Mars Aerospace Components is a fictional demo company &mdash; but the warehouse, ETL architecture, and Power BI reports are real. Whether you're running simple make-to-stock or complex aerospace job costing, the Tailored.BI architecture adapts to your Epicor configuration.</p>
-    <p style="font-size:12px;color:var(--steel);margin-bottom:24px;">Most Epicor Kinetic customers invest <strong style="color:var(--cyan2);">$500K&ndash;$2M+</strong> over five years in their ERP. Without a proper BI layer, that investment can't answer the questions that matter most to your business.</p>
-    <a class="cta-btn" href="https://tailored.bi/#contact">Contact Tailored.BI &#8594;</a>
+    <div style="display:flex;flex-direction:column;gap:0;">
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Exo 2,sans-serif;font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:0.4rem;">Epicor Kinetic &mdash; job shop configuration</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.875rem;line-height:1.6;">Every aerospace job has a work order, estimated and actual labor hours, material costs, lot numbers, and a contract milestone. Epicor tracks all of it &mdash; but the native reporting doesn't surface job profitability or delivery performance at a glance.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:var(--cyan);opacity:0.3;"></div>
+          <span style="font-size:0.7rem;color:var(--cyan);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Read-only &middot; Incremental &middot; Encrypted</span>
+          <div style="width:2px;height:16px;background:var(--cyan);opacity:0.3;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Exo 2,sans-serif;font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:0.4rem;">Tailored.BI managed warehouse</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.875rem;line-height:1.6;">Job cost variance, lot traceability, contract milestone billing, labor efficiency, and on-time delivery &mdash; all extracted nightly from Epicor and shaped into clean reporting tables. Only changed records move. AS9100D audit trails preserved.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="width:2px;height:16px;background:var(--cyan);opacity:0.3;"></div>
+          <span style="font-size:0.7rem;color:var(--cyan);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Refreshed daily &middot; Monitored 24/7</span>
+          <div style="width:2px;height:16px;background:var(--cyan);opacity:0.3;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:2rem;">
+        <div style="flex-shrink:0;width:44px;height:44px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:10px;padding:1.25rem 1.5rem;">
+          <h3 style="font-family:Exo 2,sans-serif;font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:0.4rem;">Power BI &mdash; job profitability at a glance</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.875rem;line-height:1.6;">Finance opens the dashboard and sees this morning's job cost variance, contract revenue recognized, on-time delivery rate, and open AP. No waiting for a report run. No asking operations for the numbers. The data is already there.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;padding:1.25rem 1.75rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;text-align:center;">
+      <div><div style="color:var(--cyan);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Full</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Job cost traceability</div></div>
+      <div><div style="color:var(--cyan);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Daily</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Automatic refresh</div></div>
+      <div><div style="color:var(--cyan);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">8</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Report views</div></div>
+      <div><div style="color:var(--cyan);font-weight:700;font-size:1.1rem;margin-bottom:0.2rem;">Read-only</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Epicor untouched</div></div>
+    </div>
+
   </div>
-  <div class="cta-right">
-    <h3>// What You Get</h3>
-    <ul class="fl">
-      <li>A Microsoft Fabric warehouse built for your specific Epicor schema and company ID</li>
-      <li>Job costing, lot traceability, or standard cost &mdash; the architecture adapts to your manufacturing model</li>
-      <li>8 Power BI report areas with shared DAX measures and a universal dim.Date</li>
-      <li>Watermark-based incremental ETL via SQL Server gateway or Epicor REST API</li>
-      <li>AS9100D traceability reporting if your quality system requires it</li>
-      <li>Ongoing support as your Epicor data model evolves</li>
-    </ul>
-  </div>
-</div>
+</section>
 
 <!-- FOOTER -->
-<footer>
-  <div class="fb">
-    <div class="fbrand">Mars Aerospace Components</div>
-    <div class="fsep">/</div>
-    <div class="ftbi"><a href="https://tailored.bi">Tailored<em>.BI</em></a></div>
-  </div>
-  <div class="fr">
-    Fictitious company &mdash; created for Tailored.BI demonstration purposes<br>
-    &copy; 2026 Tailored.BI &nbsp;|&nbsp; tailored.bi/mars
-  </div>
+<footer style="background:#020A04;border-top:1px solid rgba(0,255,136,0.08);color:rgba(255,255,255,0.35);padding:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:0.85rem;font-family:Share Tech Mono,monospace;">
+  <div><strong style="color:rgba(0,255,136,0.7);">Mars Aerospace Components</strong> &nbsp;&middot;&nbsp; Tailored.BI showcase</div>
+  <div style="text-align:right;">Fictitious demo company &nbsp;&middot;&nbsp; Real Epicor architecture &nbsp;&middot;&nbsp; &copy; 2026 Tailored.BI</div>
 </footer>
 
-</div><!-- /content -->
-
-<section style="background:#020A04;border-top:1px solid rgba(0,255,136,0.15);padding:3rem 2rem;text-align:center;">
+<!-- SUBSCRIPTION CTA -->
+<section style="background:#020A04;border-top:1px solid rgba(0,255,136,0.15);padding:3.5rem 2rem;text-align:center;">
   <div style="max-width:640px;margin:0 auto;">
-    <p style="color:#00FF88;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Fictitious demo company · Powered by Tailored.BI</p>
-    <h2 style="font-size:1.75rem;font-weight:700;color:#fff;margin-bottom:1rem;">Want this for your Epicor data?</h2>
-    <p style="color:rgba(255,255,255,0.55);font-size:1rem;line-height:1.7;margin-bottom:2rem;">Mars Aerospace Components is a fictional Make to Order manufacturer — precision aerospace machining with full job costing, lot traceability, and contract milestone billing. If you run a make-to-order or job shop operation on Epicor Kinetic, starting at $1,500/month, let's talk.</p>
+    <p style="color:#00FF88;font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Make to Order &middot; Powered by Tailored.BI</p>
+    <h2 style="font-size:1.75rem;font-weight:700;color:#fff;margin-bottom:1rem;">Want this for your Epicor operation?</h2>
+    <p style="color:rgba(255,255,255,0.55);font-size:1rem;line-height:1.7;margin-bottom:0.75rem;">Mars Aerospace Components is a fictional make-to-order manufacturer &mdash; but every pipeline, every warehouse table, and every report you just explored is built on real Epicor architecture.</p>
+    <p style="color:rgba(255,255,255,0.55);font-size:1rem;line-height:1.7;margin-bottom:2rem;">If you run a make-to-order or job shop on Epicor Kinetic &mdash; job costing, lot traceability, contract billing &mdash; this is exactly what your subscription delivers. Job profitability, delivery performance, contract revenue, live every morning. Starting at <strong style="color:#fff;">$1,500/month</strong>.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#FF5E1A;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &#8594;</a>
-      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(0,255,136,0.3);color:#00FF88;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Get in touch with Tailored.BI &#8594;</a>
+      <a href="https://tailored.bi/#pricing" style="display:inline-block;padding:0.75rem 1.75rem;background:#FF5E1A;color:#fff;border-radius:8px;font-weight:700;font-size:0.95rem;text-decoration:none;">See pricing &rarr;</a>
+      <a href="https://tailored.bi/#contact" style="display:inline-block;padding:0.75rem 1.75rem;border:1px solid rgba(0,255,136,0.3);color:#00FF88;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;">Start a conversation &rarr;</a>
     </div>
   </div>
 </section>
 
+</div><!-- /content -->
 </body>
 </html>
