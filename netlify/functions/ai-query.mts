@@ -130,7 +130,7 @@ async function executeFabricSQL(sql: string, token: string): Promise<{ columns: 
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Fabric query failed (${res.status}): ${err.substring(0, 200)}`);
+    throw new Error(`Fabric query failed (${res.status}) [${endpoint}]: ${err.substring(0, 300)}`);
   }
 
   const data = await res.json();
@@ -269,7 +269,7 @@ chartType rules:
     const msg = String(err);
     return new Response(JSON.stringify({
       error: "Query failed",
-      detail: msg.substring(0, 300),
+      detail: msg.substring(0, 500),
       explanation: msg.includes("Token") ? "Authentication issue — please try again." : "The query could not be completed. Try rephrasing your question."
     }), {
       status: 500,
