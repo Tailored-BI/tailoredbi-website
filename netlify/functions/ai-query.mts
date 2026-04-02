@@ -320,7 +320,7 @@ chartType rules:
       try {
         fabricResult = await executeFabricSQLWithSPN(parsed.sql, tenantId, clientId, clientSecret);
       } catch (spnErr) {
-        throw new Error(`Token auth: ${String(tokenErr).substring(0, 200)} | SPN auth: ${String(spnErr).substring(0, 200)}`);
+        throw new Error(`clientId=${clientId} | Token auth: ${String(tokenErr).substring(0, 200)} | SPN auth: ${String(spnErr).substring(0, 200)}`);
       }
     }
     const { columns, rows } = fabricResult;
