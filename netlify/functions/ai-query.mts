@@ -71,8 +71,9 @@ fact.LaborTime (1,481 rows)
 
 fact.Production (6,104 rows)
   ProductionKey int, PartKey varchar, CreateDateKey int, DueDateKey int,
-  CreateDate date, DueDate date, EstLaborCost decimal, ActLaborCost decimal,
-  EstMaterialCost decimal, ActMaterialCost decimal, CostVariance decimal,
+  CreateDate date, DueDate date, ProdQty decimal, QtyCompleted decimal, CompletionPct decimal,
+  EstLaborCost decimal, EstBurdenCost decimal, EstMtlCost decimal, EstTotalCost decimal,
+  ActLaborCost decimal, ActBurdenCost decimal, ActMtlCost decimal, ActTotalCost decimal, CostVariance decimal,
   JobReleased bit, JobComplete bit, JobClosed bit
   Join to dim.Part on PartKey
 

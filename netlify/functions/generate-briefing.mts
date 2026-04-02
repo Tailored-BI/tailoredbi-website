@@ -162,11 +162,12 @@ export default async (req: Request, context: Context) => {
         FROM fact.APInvoice ap JOIN dim.Date d ON ap.DueDateKey = d.DateKey
         WHERE d.DaysFromToday BETWEEN 0 AND 7 AND ap.BalanceDue > 0`,
       `SELECT TOP 5 p.PartDescription,
-        ROUND(ActLaborCost - EstLaborCost,2) AS LaborVariance,
-        ROUND(ActMtlCost - EstMtlCost,2) AS MaterialVariance
+        ROUND(pr.ActLaborCost - pr.EstLaborCost,2) AS LaborVariance,
+        ROUND(pr.ActMtlCost - pr.EstMtlCost,2) AS MaterialVariance,
+        ROUND(pr.CostVariance,2) AS TotalVariance
         FROM fact.Production pr JOIN dim.Part p ON pr.PartKey = p.PartKey
-        WHERE pr.JobComplete = 1 AND ABS(ActLaborCost - EstLaborCost) > 500
-        ORDER BY ABS(ActLaborCost - EstLaborCost) DESC`,
+        WHERE pr.JobComplete = 1 AND ABS(pr.CostVariance) > 500
+        ORDER BY ABS(pr.CostVariance) DESC`,
       `SELECT TOP 5 v.VendorName,
         ROUND(AVG(CAST(DATEDIFF(day, po.OrderDate, po.DueDate) AS float)),1) AS AvgLeadDays
         FROM fact.PurchaseOrder po JOIN dim.Vendor v ON po.VendorKey = v.VendorKey
