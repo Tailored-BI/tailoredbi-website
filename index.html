@@ -367,7 +367,7 @@ footer p { font-size:12px; color:var(--muted); }
         </div>
         <div style="font-size:0.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Step 1</div>
         <h3 style="font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;">We connect to your Epicor</h3>
-        <p style="color:var(--muted2);font-size:0.9rem;line-height:1.6;">We install a lightweight agent on a server inside your network &mdash; like a printer driver. It makes outbound-only connections to Microsoft&rsquo;s cloud, so nothing can reach in from outside. No firewall changes, no open ports, no IT security review. Read-only &mdash; it can never write to or modify your Epicor data. We handle everything else.</p>
+        <p style="color:var(--muted2);font-size:0.9rem;line-height:1.6;">During setup, we connect briefly to deploy a small staging database on your existing SQL Server &mdash; a one-time process that takes a few hours. Then we install a lightweight gateway agent (like a printer driver) that makes outbound-only HTTPS connections to Microsoft&rsquo;s cloud. Nothing can reach in from outside. No open ports, no inbound firewall changes. Read-only &mdash; nothing can write to or modify your Epicor data. We handle everything else.</p>
       </div>
       <div style="background:var(--bg3);border:1px solid rgba(212,168,67,0.15);border-radius:12px;padding:1.75rem;">
         <div style="width:36px;height:36px;background:rgba(212,168,67,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
@@ -1083,7 +1083,7 @@ footer p { font-size:12px; color:var(--muted); }
 
           <div>
             <p style="color:var(--text);font-weight:600;font-size:0.95rem;margin-bottom:0.4rem;">Does my IT team need to be involved?</p>
-            <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Barely. We install a lightweight agent on a server inside your network &mdash; like adding a printer. It only makes outbound connections, so there are no firewall changes, no open ports, and no security review. Your Epicor server never talks directly to the internet. It&rsquo;s a 15-minute install and we walk your IT person through it.</p>
+            <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Briefly during setup &mdash; we connect once to deploy a small staging database and install a lightweight gateway agent on your server. After that, the agent runs on its own, making outbound-only HTTPS connections to Microsoft&rsquo;s cloud. No open ports, no inbound firewall changes, no ongoing IT involvement. Your Epicor server never talks directly to the internet. The whole setup typically takes a few hours and we walk your IT person through it.</p>
           </div>
 
           <div>
@@ -1098,7 +1098,7 @@ footer p { font-size:12px; color:var(--muted); }
 
           <div>
             <p style="color:var(--text);font-weight:600;font-size:0.95rem;margin-bottom:0.4rem;">Do you work with Epicor on-premises?</p>
-            <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Yes &mdash; that&rsquo;s our primary configuration. A lightweight agent sits inside your network and reads from Epicor with read-only access. All data flows outbound through encrypted channels to Microsoft&rsquo;s cloud infrastructure &mdash; the same infrastructure that runs Microsoft 365 and Azure. No VPN, no open ports, no IT security review. Cloud-hosted Epicor also works.</p>
+            <p style="color:var(--muted2);font-size:0.875rem;line-height:1.6;">Yes &mdash; that&rsquo;s our primary configuration. We deploy a small staging database on your existing SQL Server and install a lightweight gateway agent that sends data outbound through encrypted HTTPS channels to Microsoft&rsquo;s cloud &mdash; the same infrastructure that runs Microsoft 365 and Azure. Your Epicor server never touches the internet directly, and the agent has read-only access &mdash; it can never modify your Epicor data. If we need to make updates later, we reconnect briefly the same way. Cloud-hosted Epicor also works.</p>
           </div>
 
         </div>
@@ -1396,7 +1396,7 @@ footer p { font-size:12px; color:var(--muted); }
   <div style="max-width:900px;margin:0 auto;padding:0 2rem;">
     <p style="color:var(--gold);font-size:0.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">How your data moves</p>
     <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">One secure path. Your data stays yours.</h2>
-    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Every client runs the same proven architecture — a single read-only SQL connection from your Epicor server to our managed cloud infrastructure. No agents on your machines. No API keys. No complexity.</p>
+    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Every client runs the same proven architecture. During a one-time setup, we deploy a small staging database on your existing SQL Server and install a lightweight gateway agent. After that, your data flows outbound through encrypted channels to Microsoft&rsquo;s cloud &mdash; no open ports, no inbound firewall changes, and your Epicor server never touches the internet directly.</p>
 
     <div style="position:relative;padding:2rem 0;">
 
@@ -1406,17 +1406,17 @@ footer p { font-size:12px; color:var(--muted); }
           <div style="flex-shrink:0;width:48px;height:48px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:1rem;">1</div>
           <div style="flex:1;background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.5rem;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--text);">Your Epicor Kinetic server</h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--text);">One-time setup on your server</h3>
               <span style="font-size:0.75rem;color:var(--muted);background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:20px;">On your premises</span>
             </div>
-            <p style="color:var(--muted2);font-size:0.9rem;line-height:1.6;">Your Epicor data stays exactly where it is. We install a lightweight agent on a server inside your network &mdash; like adding a printer. It makes outbound-only connections through encrypted channels to Microsoft&rsquo;s cloud infrastructure. Nothing can reach in from outside. No firewall changes, no open ports, no IT security review needed. The agent has read-only access &mdash; it can never write to or modify your Epicor data.</p>
+            <p style="color:var(--muted2);font-size:0.9rem;line-height:1.6;">We connect briefly to your network to deploy a small staging database and stored procedures directly onto your existing SQL Server. Then we install a lightweight gateway agent &mdash; like a printer driver. The whole process typically takes a few hours, and your IT person is with us the entire time. After setup, the agent runs on its own &mdash; making outbound-only HTTPS connections to Microsoft&rsquo;s cloud. Nothing can reach in from outside. No open ports, no inbound firewall changes needed. Read-only access only &mdash; nothing can ever write to or modify your Epicor data.</p>
           </div>
         </div>
 
         <div style="display:flex;justify-content:center;margin-bottom:2rem;">
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             <div style="width:2px;height:20px;background:rgba(212,168,67,0.3);"></div>
-            <span style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Read-only · Encrypted · Incremental</span>
+            <span style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Outbound-only · Encrypted · Read-only</span>
             <div style="width:2px;height:20px;background:rgba(212,168,67,0.3);"></div>
           </div>
         </div>
@@ -1585,7 +1585,7 @@ footer p { font-size:12px; color:var(--muted); }
             </div>
             <div>
               <p style="color:var(--text);font-weight:600;font-size:0.9rem;margin-bottom:0.15rem;">You're live in 3–4 weeks</p>
-              <p style="color:var(--muted2);font-size:0.85rem;line-height:1.5;">Setup fee, NDA, a 15-minute agent install on your network &mdash; no firewall changes, no open ports &mdash; then we build while you run your business.</p>
+              <p style="color:var(--muted2);font-size:0.85rem;line-height:1.5;">Setup fee, NDA, a few hours of one-time setup on your server &mdash; no open ports, no inbound firewall changes &mdash; then we build while you run your business.</p>
             </div>
           </div>
         </div>
