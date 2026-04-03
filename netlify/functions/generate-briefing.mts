@@ -238,6 +238,15 @@ export default async (req: Request, context: Context) => {
           (sum: number, t: Record<string, unknown>) => sum + (Number(t.rowsLoaded) || 0), 0)
       : 0;
 
+    const lastRunStr = String(pipelineStatus.lastRunMT || "");
+    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const pipelineRanToday = lastRunStr.includes(todayStr.split(',')[0].trim()) ||
+      lastRunStr.startsWith(new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const pipelineMissed = !pipelineRanToday && lastRunStr.length > 0;
+    const dataAge = pipelineMissed
+      ? `WARNING: The pipeline did not run today. Last successful run was ${lastRunStr}. All insights below are based on data from that run — not today's activity.`
+      : `Pipeline ran successfully today at ${lastRunStr}. Data is current.`;
+
     let priorHistory: Record<string, unknown>[] = [];
     try {
       const histRes = await fetch(`${GITHUB_RAW}/${BRIEFING_HISTORY_PATH}`, {
@@ -301,7 +310,9 @@ Severity guide:
           role: "user",
           content: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
 
-Here is Heartland's warehouse data from this morning's pipeline run:
+DATA FRESHNESS: ${dataAge}
+
+Here is Heartland's warehouse data from the most recent pipeline run:
 ${dataContext}
 
 ${priorHistory.length > 0 ? `Here are the last ${priorHistory.length} day(s) of prior briefings for context:
@@ -322,6 +333,8 @@ Generate the daily briefing.`
     const briefing = JSON.parse(jsonMatch[0]);
     briefing.generatedAt = new Date().toISOString();
     briefing.dataDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    briefing.pipelineMissed = pipelineMissed;
+    briefing.lastRunMT = lastRunStr;
     briefing.dataHealth = {
       lastRefresh: pipelineStatus.lastRunMT || "Unknown",
       tablesSuccess: pipelineStatus.tablesSuccess ?? 0,
