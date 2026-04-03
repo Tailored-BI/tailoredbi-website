@@ -4,6 +4,7 @@ import { Connection, Request as TdsRequest } from "tedious";
 const GITHUB_RAW = "https://raw.githubusercontent.com/Tailored-BI/tailoredbi-clients/main";
 const GITHUB_API = "https://api.github.com";
 const BRIEFING_HISTORY_PATH = "clients/heartland/status/briefing-history.json";
+const PIPELINE_STATUS_PATH = "clients/heartland/status/pipeline-status.json";
 const MAX_HISTORY_DAYS = 7;
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
 const FABRIC_DB = "Heartland_Warehouse";
@@ -217,6 +218,26 @@ export default async (req: Request, context: Context) => {
       vendorLeadTimes: vendorLeadTime
     }, null, 2);
 
+    let pipelineStatus: Record<string, unknown> = {};
+    try {
+      const psRes = await fetch(`${GITHUB_RAW}/${PIPELINE_STATUS_PATH}`, {
+        headers: {
+          "Authorization": `token ${githubToken}`,
+          "Accept": "application/vnd.github.v3.raw"
+        }
+      });
+      if (psRes.ok) pipelineStatus = await psRes.json();
+    } catch { pipelineStatus = {}; }
+
+    const streakDays = String(pipelineStatus.streakDays || "");
+    const streakArr = streakDays ? streakDays.split(",") : [];
+    const streakOk = streakArr.filter((d: string) => d.trim() === "ok").length;
+    const streakTotal = streakArr.length;
+    const totalRows = Array.isArray(pipelineStatus.tables)
+      ? (pipelineStatus.tables as Record<string, unknown>[]).reduce(
+          (sum: number, t: Record<string, unknown>) => sum + (Number(t.rowsLoaded) || 0), 0)
+      : 0;
+
     let priorHistory: Record<string, unknown>[] = [];
     try {
       const histRes = await fetch(`${GITHUB_RAW}/${BRIEFING_HISTORY_PATH}`, {
@@ -301,6 +322,26 @@ Generate the daily briefing.`
     const briefing = JSON.parse(jsonMatch[0]);
     briefing.generatedAt = new Date().toISOString();
     briefing.dataDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    briefing.dataHealth = {
+      lastRefresh: pipelineStatus.lastRunMT || "Unknown",
+      tablesSuccess: pipelineStatus.tablesSuccess ?? 0,
+      tablesTotal: pipelineStatus.tablesTotal ?? 0,
+      tablesFailed: pipelineStatus.tablesFailed ?? 0,
+      duration: pipelineStatus.duration || "—",
+      recordsProcessed: totalRows,
+      streakOk,
+      streakTotal,
+      streakDays: streakArr,
+      overallStatus: pipelineStatus.overallStatus || "UNKNOWN",
+      tableStatus: Array.isArray(pipelineStatus.tables)
+        ? (pipelineStatus.tables as Record<string, unknown>[]).map(
+            (t: Record<string, unknown>) => ({
+              name: t.name,
+              status: t.status,
+              rowsLoaded: t.rowsLoaded
+            }))
+        : []
+    };
 
     const briefingJson = JSON.stringify(briefing, null, 2);
     await commitToGitHub(briefingJson, githubToken);
