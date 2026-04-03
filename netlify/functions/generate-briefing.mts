@@ -247,6 +247,53 @@ export default async (req: Request, context: Context) => {
       ? `WARNING: The pipeline did not run today. Last successful run was ${lastRunStr}. All insights below are based on data from that run — not today's activity.`
       : `Pipeline ran successfully today at ${lastRunStr}. Data is current.`;
 
+    if (pipelineMissed) {
+      const resendKey = Netlify.env.get("RESEND_API_KEY");
+      if (resendKey) {
+        try {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${resendKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: "Thread by Tailored.BI <advisor@advisor.tailored.bi>",
+              to: ["david@tailored.bi"],
+              subject: `Thread alert — Heartland pipeline did not run today`,
+              html: `<div style="font-family:'Segoe UI',sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+                <div style="background:#3d2b0e;padding:12px 16px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="color:#f5f0e8;font-size:13px;font-weight:600;">Heartland Ag Parts Co.</div>
+                  <div style="color:#c4963a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Pipeline Alert</div>
+                </div>
+                <div style="background:#fff;padding:16px;border:1px solid #e2dbd2;border-top:none;">
+                  <div style="padding:12px 14px;background:#fff8f0;border-left:3px solid #c4511a;border-radius:0 6px 6px 0;margin-bottom:12px;">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c4511a;margin-bottom:4px;">Pipeline did not run today</div>
+                    <div style="font-size:12px;color:#3d2b0e;line-height:1.6;">The Heartland ETL pipeline has not run today. Thread generated this morning's briefing using data last updated <strong>${lastRunStr}</strong>.</div>
+                  </div>
+                  <div style="font-size:11px;color:#6a5a4a;line-height:1.7;">
+                    <strong>What to check:</strong><br/>
+                    · Azure VM TBI-Gateway (20.9.85.153) — is it running?<br/>
+                    · On-premises data gateway — is it registered and online?<br/>
+                    · Fabric pipeline trigger — did the 8am schedule fire?<br/>
+                    · SQL Server on the gateway machine — is the service running?<br/>
+                    · Task Scheduler — did the 8:30am export script run?
+                  </div>
+                </div>
+                <div style="background:#f9f6f2;padding:8px 16px;border:1px solid #e2dbd2;border-top:none;border-radius:0 0 8px 8px;font-size:10px;color:#aaa;">
+                  Thread by Tailored.BI · Automated watchdog alert · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </div>
+              </div>`
+            })
+          });
+        } catch (alertErr) {
+          console.error("Watchdog alert failed:", alertErr);
+        }
+      } else {
+        console.warn("PIPELINE MISSED — no RESEND_API_KEY configured, watchdog alert not sent");
+      }
+    }
+
     let priorHistory: Record<string, unknown>[] = [];
     try {
       const histRes = await fetch(`${GITHUB_RAW}/${BRIEFING_HISTORY_PATH}`, {
