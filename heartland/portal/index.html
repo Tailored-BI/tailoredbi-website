@@ -519,6 +519,9 @@ function checkGate(){
 
 loadStatus();
 setTimeout(renderBriefing, 500);
+if (new URLSearchParams(window.location.search).get('t')) {
+  setTimeout(function() { statusData = null; loadStatus(); }, 800);
+}
 </script>
 </body>
 </html>
