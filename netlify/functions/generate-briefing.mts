@@ -239,9 +239,10 @@ export default async (req: Request, context: Context) => {
       : 0;
 
     const lastRunStr = String(pipelineStatus.lastRunMT || "");
-    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const pipelineRanToday = lastRunStr.includes(todayStr.split(',')[0].trim()) ||
-      lastRunStr.startsWith(new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const now = new Date();
+    const todayMDY = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const todayMD = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const pipelineRanToday = lastRunStr.includes(todayMDY) || lastRunStr.includes(todayMD);
     const pipelineMissed = !pipelineRanToday && lastRunStr.length > 0;
     const dataAge = pipelineMissed
       ? `WARNING: The pipeline did not run today. Last successful run was ${lastRunStr}. All insights below are based on data from that run — not today's activity.`
