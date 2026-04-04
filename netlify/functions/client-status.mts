@@ -26,21 +26,24 @@ export default async (req: Request, context: Context) => {
     : {};
 
   try {
-    const [pipelineRes, inventoryRes, briefingRes] = await Promise.all([
+    const [pipelineRes, inventoryRes, briefingRes, insightsRes] = await Promise.all([
       fetch(`${base}/pipeline-status.json`, { headers: ghHeaders }),
       fetch(`${base}/workspace-inventory.json`, { headers: ghHeaders }),
-      fetch(`${base}/daily-briefing.json`, { headers: ghHeaders })
+      fetch(`${base}/daily-briefing.json`, { headers: ghHeaders }),
+      fetch(`${base}/insights.json`, { headers: ghHeaders })
     ]);
 
     const pipeline = pipelineRes.ok ? await pipelineRes.json() : null;
     const inventory = inventoryRes.ok ? await inventoryRes.json() : null;
     const briefing = briefingRes.ok ? await briefingRes.json() : null;
+    const insights = insightsRes.ok ? await insightsRes.json() : [];
 
     return new Response(JSON.stringify({
       client: CLIENTS[clientId],
       pipeline,
       inventory,
       briefing,
+      insights,
       fetchedAt: new Date().toISOString()
     }), {
       status: 200,

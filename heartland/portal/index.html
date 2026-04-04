@@ -198,25 +198,12 @@ table.dt tr:hover td{background:#faf7f4;}
 
 <div class="page" id="tab-insights">
   <div class="card">
-    <div class="card-hdr">
+    <div class="card-hdr" style="display:flex;justify-content:space-between;align-items:center;">
       <div class="card-title">Thread Insights</div>
+      <div style="font-size:11px;color:#8a7a6a;">Your saved analyses from Ask Thread</div>
     </div>
-    <div class="card-body">
-      <div style="padding:40px 20px;text-align:center;">
-        <div style="margin-bottom:16px;">
-          <svg width="48" height="48" viewBox="0 0 28 28" fill="none" style="opacity:0.3;">
-            <rect x="9" y="5" width="10" height="18" rx="2" fill="#3d2b0e"/>
-            <rect x="6" y="3" width="16" height="5" rx="2.5" fill="#3d2b0e"/>
-            <rect x="6" y="20" width="16" height="5" rx="2.5" fill="#3d2b0e"/>
-            <rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/>
-            <path d="M18 14C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/>
-          </svg>
-        </div>
-        <div style="font-size:16px;font-weight:600;color:#3d2b0e;margin-bottom:8px;">Thread Insights — Coming soon</div>
-        <div style="font-size:14px;color:#8a7a6a;max-width:400px;margin:0 auto;line-height:1.6;">When Thread surfaces an insight in your Morning Thread or you find something useful in Ask Thread, save it here. Thread Insights builds your personal library of visual analyses over time.</div>
-        <div style="margin-top:20px;font-size:13px;color:#c4963a;">Ask Thread a question and look for the "Save as Thread Insight" option coming soon.</div>
-      </div>
+    <div class="card-body" id="insightsBody">
+      <div style="padding:32px;text-align:center;color:#8a7a6a;font-size:14px;">Loading insights...</div>
     </div>
   </div>
 </div>
@@ -252,7 +239,7 @@ function showTab(name, el) {
   el.classList.add('active');
   if (name === 'briefing') { statusData = null; loadStatus().then(function(){renderBriefing();}); }
   if (name === 'settings' && !statusData) loadStatus().then(function(){renderWorkspace();renderStatus();});
-  if (name === 'insights') {}
+  if (name === 'insights') { if (!statusData) { loadStatus().then(function() { renderInsights(); }); } else { renderInsights(); } }
 }
 
 function dots(s) {
@@ -610,6 +597,149 @@ function sendQuestion() {
   input.value = '';
 }
 
+function saveInsight(data, el) {
+  var orig = el.textContent;
+  el.textContent = 'Saving...';
+  el.style.cursor = 'default';
+  fetch('/api/save-insight', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      client: 'heartland',
+      title: data.explanation,
+      question: data.question,
+      sql: data.sql,
+      explanation: data.explanation,
+      chartType: data.chartType,
+      columns: data.columns,
+      rows: data.rows
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) {
+      el.textContent = '\u2713 Saved to Thread Insights';
+      el.style.color = '#2a7a2a';
+      if (statusData) statusData.insights = null;
+    } else {
+      el.textContent = orig;
+      el.style.cursor = 'pointer';
+    }
+  })
+  .catch(function() {
+    el.textContent = orig;
+    el.style.cursor = 'pointer';
+  });
+}
+
+function renderInsightChart(insight) {
+  if (!insight.rows || insight.rows.length === 0) return '<div style="color:#8a7a6a;font-size:13px;">No data</div>';
+  var cols = insight.columns || (insight.rows.length > 0 ? Object.keys(insight.rows[0]) : []);
+  if (insight.chartType === 'number' && insight.rows.length === 1) {
+    var val = Object.values(insight.rows[0])[0];
+    var fmt = typeof val === 'number' ? val.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) : String(val);
+    return '<div style="font-size:28px;font-weight:700;color:#3d2b0e;">'+fmt+'</div><div style="font-size:11px;color:#8a7a6a;">'+(cols[0]||'')+'</div>';
+  }
+  if (insight.chartType === 'bar' && insight.rows.length > 0) {
+    var labelCol = cols[0];
+    var valueCol = cols[1];
+    var maxVal = Math.max.apply(null, insight.rows.map(function(r) { return Number(r[valueCol]) || 0; }));
+    var bars = insight.rows.slice(0, 8).map(function(r) {
+      var pct = maxVal > 0 ? (Number(r[valueCol]) / maxVal * 100).toFixed(1) : 0;
+      var fmtV = typeof r[valueCol] === 'number' ? Number(r[valueCol]).toLocaleString() : String(r[valueCol]);
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">' +
+        '<div style="width:90px;font-size:11px;color:#6a5a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r[labelCol]+'</div>' +
+        '<div style="flex:1;background:#f0ebe4;border-radius:2px;height:14px;position:relative;">' +
+          '<div style="width:'+pct+'%;background:#c4511a;height:100%;border-radius:2px;"></div>' +
+        '</div>' +
+        '<div style="width:60px;text-align:right;font-size:11px;color:#3d2b0e;font-weight:600;">'+fmtV+'</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="margin-top:4px;">'+bars+'</div>';
+  }
+  var headers = cols.map(function(c) { return '<th style="text-align:left;padding:4px 8px;font-size:11px;color:#8a7a6a;font-weight:600;border-bottom:1px solid #e2dbd2;">'+c+'</th>'; }).join('');
+  var bodyRows = insight.rows.slice(0, 10).map(function(row) {
+    var cells = cols.map(function(c) {
+      var v = row[c];
+      var isAmt = typeof v === 'number' && (String(c).toLowerCase().indexOf('amt') !== -1 || String(c).toLowerCase().indexOf('balance') !== -1 || String(c).toLowerCase().indexOf('revenue') !== -1 || String(c).toLowerCase().indexOf('cost') !== -1);
+      var display = isAmt ? '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : v == null ? '\u2014' : String(v);
+      return '<td style="padding:4px 8px;font-size:12px;color:#3d2b0e;border-bottom:1px solid #f5f0e8;">'+display+'</td>';
+    }).join('');
+    return '<tr>'+cells+'</tr>';
+  }).join('');
+  return '<table style="width:100%;border-collapse:collapse;"><thead><tr>'+headers+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
+}
+
+function renderInsights() {
+  var body = document.getElementById('insightsBody');
+  if (!body) return;
+  var insights = statusData && statusData.insights ? statusData.insights : [];
+  if (!Array.isArray(insights) || insights.length === 0) {
+    body.innerHTML = '<div style="padding:40px 20px;text-align:center;">' +
+      '<svg width="40" height="40" viewBox="0 0 28 28" fill="none" style="opacity:0.25;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;">' +
+        '<rect x="9" y="5" width="10" height="18" rx="2" fill="#3d2b0e"/>' +
+        '<rect x="6" y="3" width="16" height="5" rx="2.5" fill="#3d2b0e"/>' +
+        '<rect x="6" y="20" width="16" height="5" rx="2.5" fill="#3d2b0e"/>' +
+        '<rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/>' +
+        '<path d="M18 14C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/>' +
+        '<circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/>' +
+      '</svg>' +
+      '<div style="font-size:15px;font-weight:600;color:#3d2b0e;margin-bottom:8px;">No Thread Insights saved yet</div>' +
+      '<div style="font-size:13px;color:#8a7a6a;max-width:380px;margin:0 auto;line-height:1.6;">Ask Thread a question and click "\u2605 Save as Thread Insight" to build your library of visual analyses.</div>' +
+    '</div>';
+    return;
+  }
+  body.innerHTML = insights.map(function(ins) {
+    return '<div style="border:1px solid #e2dbd2;border-radius:8px;padding:16px;margin-bottom:12px;background:#fff;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+        '<div>' +
+          '<div style="font-size:14px;font-weight:600;color:#3d2b0e;margin-bottom:2px;">'+(ins.title || ins.question)+'</div>' +
+          '<div style="font-size:11px;color:#aaa09a;">'+(ins.dataDate || '')+' \u00b7 Ask Thread</div>' +
+        '</div>' +
+        '<button onclick="refreshInsight(\''+ins.id+'\',\''+String(ins.question||'').replace(/'/g,"\\'")+'\')\" style="background:none;border:1px solid #e2dbd2;border-radius:4px;padding:3px 10px;font-size:11px;color:#8a7a6a;cursor:pointer;font-family:inherit;white-space:nowrap;">\u21BB Refresh</button>' +
+      '</div>' +
+      '<div style="margin-bottom:10px;">'+renderInsightChart(ins)+'</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-size:11px;color:#8a7a6a;font-style:italic;">'+(ins.explanation||'')+'</span>' +
+        '<span style="font-size:11px;color:#c4511a;cursor:pointer;" onclick="this.parentElement.nextElementSibling.style.display=this.parentElement.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">View SQL</span>' +
+      '</div>' +
+      '<div style="display:none;margin-top:8px;background:#f5f2ed;border-radius:4px;padding:8px;font-size:11px;color:#6a5a4a;font-family:monospace;white-space:pre-wrap;">'+(ins.sql||'')+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function refreshInsight(id, question) {
+  fetch('/api/ai-query', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({question: question})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.error) {
+      fetch('/api/save-insight', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          client: 'heartland',
+          title: data.explanation,
+          question: data.question,
+          sql: data.sql,
+          explanation: data.explanation,
+          chartType: data.chartType,
+          columns: data.columns,
+          rows: data.rows
+        })
+      })
+      .then(function() {
+        statusData = null;
+        loadStatus().then(function() { renderInsights(); });
+      });
+    }
+  })
+  .catch(function() {});
+}
+
 function togglePipelineDetail(el) {
   var detail = el.nextElementSibling;
   if (detail.style.display === 'none') {
@@ -662,10 +792,12 @@ async function askQuestion(question) {
     var data = await res.json();
     removeThinking();
     addMessage('assistant', renderResult(data));
-    var focusDiv = document.createElement('div');
-    focusDiv.style.cssText = 'padding:4px 0 12px 44px;';
-    focusDiv.innerHTML = '<span style="font-size:11px;color:#c4963a;cursor:pointer;" onclick="addToFocus(\'' + question.replace(/'/g,"\\'") + '\',this)">+ Add to Morning Thread focus</span>';
-    document.getElementById('chatMsgs').appendChild(focusDiv);
+    var actionBtns = document.createElement('div');
+    actionBtns.style.cssText = 'padding:4px 0 12px 44px;display:flex;gap:16px;';
+    window._lastAskData = data;
+    actionBtns.innerHTML = '<span style="font-size:11px;color:#c4963a;cursor:pointer;" onclick="addToFocus(\'' + question.replace(/'/g,"\\'") + '\',this)">+ Add to Morning Thread focus</span>' +
+      '<span style="font-size:11px;color:#6a5a4a;cursor:pointer;" onclick="saveInsight(window._lastAskData,this)">&#9733; Save as Thread Insight</span>';
+    document.getElementById('chatMsgs').appendChild(actionBtns);
   } catch(e) {
     removeThinking();
     addMessage('assistant', 'Sorry, I had trouble reaching the data service. Please try again in a moment.');
