@@ -158,8 +158,8 @@ table.dt tr:hover td{background:#faf7f4;}
 
 <div class="page active" id="tab-briefing">
   <div class="card" id="briefingCard">
-    <div class="card-hdr">
-      <div class="card-title">Morning Thread</div>
+    <div class="card-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;"><div class="card-title">Morning Thread</div><button onclick="statusData=null;loadStatus();" style="background:none;border:1px solid #e2dbd2;border-radius:4px;padding:3px 10px;font-size:11px;color:#8a7a6a;cursor:pointer;font-family:inherit;" title="Refresh Morning Thread">&#8635; Refresh</button></div>
       <div class="card-meta"><div style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="9" y="5" width="10" height="18" rx="2" fill="#6a4a2a"/><rect x="6" y="3" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="6" y="20" width="16" height="5" rx="2.5" fill="#4a3020"/><rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/><path d="M18 14 C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/><circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/></svg><span class="ai-pill">Thread</span></div><span id="briefingDate">Loading...</span></div>
     </div>
     <div class="card-body" id="briefingBody">
@@ -305,7 +305,8 @@ function renderBriefing() {
     dateEl.textContent = (p && p.lastRunMT) || '\u2014';
     bodyEl.innerHTML = '<div class="briefing-empty">' +
       '<div style="margin-bottom:8px;">No briefing generated yet for today.</div>' +
-      '<div style="font-size:11px;color:#aaa;">Thread weaves your Morning Thread automatically after each successful pipeline run at 8:30 AM MT.</div>' +
+      '<div style="font-size:12px;color:#aaa;margin-bottom:12px;">Thread weaves your Morning Thread automatically after each successful pipeline run at 8:30 AM MT.</div>' +
+      '<div style="font-size:12px;color:#c4963a;cursor:pointer;" onclick="statusData=null;loadStatus();">&#8635; Click to refresh — or try again after 8:30 AM MT</div>' +
     '</div>';
     return;
   }
@@ -524,11 +525,8 @@ function checkGate(){
   }
 })();
 
+statusData = null;
 loadStatus();
-setTimeout(renderBriefing, 500);
-if (new URLSearchParams(window.location.search).get('t')) {
-  setTimeout(function() { statusData = null; loadStatus(); }, 800);
-}
 </script>
 </body>
 </html>
