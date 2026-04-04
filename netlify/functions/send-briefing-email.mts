@@ -144,7 +144,8 @@ export default async (req: Request, context: Context) => {
         <td style="padding:14px 16px;background:${s.bg};">
           <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label} — ${ins.title}</p>
           <p style="margin:0${ins.action ? ' 0 8px' : ''};font-size:15px;color:#3d2b0e;line-height:1.65;">${ins.text}</p>
-          ${ins.action ? `<p style="margin:0;font-size:13px;color:#6a5a4a;font-style:italic;">${ins.action}</p>` : ''}
+          ${ins.action ? `<p style="margin:0 0 8px;font-size:13px;color:#6a5a4a;font-style:italic;">${ins.action}</p>` : ''}
+          <p style="margin:0;"><a href="https://tailored.bi/heartland/portal?t=${Date.now()}#insights" style="font-size:12px;color:#c4511a;text-decoration:none;font-weight:600;">Dig deeper in Thread Portal →</a></p>
         </td>
       </tr></table>
     </td></tr>`;
@@ -244,13 +245,13 @@ export default async (req: Request, context: Context) => {
       <tr><td style="background-color:#f9f6f2;padding:20px 24px;border:1px solid #e2dbd2;border-top:none;border-radius:0 0 8px 8px;text-align:center;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td align="center" style="padding:0 0 12px;">
-            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://tailored.bi/heartland/portal?t=${Date.now()}" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="15%" fillcolor="#c4511a"><center style="color:#fff;font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:700;">View full portal →</center></v:roundrect><![endif]-->
+            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://tailored.bi/heartland/portal?t=${Date.now()}" style="height:40px;v-text-anchor:middle;width:220px;" arcsize="15%" fillcolor="#c4511a"><center style="color:#fff;font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:700;">Open Thread Portal →</center></v:roundrect><![endif]-->
             <!--[if !mso]><!-->
-            <a href="https://tailored.bi/heartland/portal?t=${Date.now()}" style="display:inline-block;padding:10px 28px;background-color:#c4511a;color:#ffffff;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;mso-hide:all;">View full portal →</a>
+            <a href="https://tailored.bi/heartland/portal?t=${Date.now()}" style="display:inline-block;padding:10px 28px;background-color:#c4511a;color:#ffffff;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;mso-hide:all;">Open Thread Portal →</a>
             <!--<![endif]-->
           </td></tr>
           <tr><td align="center">
-            <p style="margin:0;font-size:11px;color:#aaa;">Thread by Tailored.BI · Managed BI for Epicor Kinetic · <a href="https://tailored.bi" style="color:#aaa;">tailored.bi</a></p>
+            <p style="margin:0;font-size:11px;color:#aaa;">Thread by <a href="https://tailored.bi" style="color:#c4963a;text-decoration:none;">Tailored.BI</a></p>
           </td></tr>
         </table>
       </td></tr>
