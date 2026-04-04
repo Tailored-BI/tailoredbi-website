@@ -330,10 +330,10 @@ export default async (req: Request, context: Context) => {
       if (invRes.ok) {
         const inv = await invRes.json();
         threadPreferences = inv.threadPreferences || {};
-    const insightCount = Number(threadPreferences.insightCount) || 5;
-    const memoryDays = Number(threadPreferences.memoryDays) || 7;
       }
     } catch { threadPreferences = {}; }
+    const insightCount = Number(threadPreferences.insightCount) || 5;
+    const memoryDays = Number(threadPreferences.memoryDays) || 7;
 
     try {
       const askRes = await fetch(`${GITHUB_RAW}/${ASK_HISTORY_PATH}`, {
