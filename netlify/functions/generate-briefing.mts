@@ -463,7 +463,9 @@ Generate the daily briefing.`
             (t: Record<string, unknown>) => ({
               name: t.name,
               status: t.status,
-              rowsLoaded: t.rowsLoaded
+              rowsLoaded: t.rowsLoaded,
+              lastSuccessful: t.lastSuccessful || null,
+              errorMessage: t.errorMessage || null
             }))
         : []
     };

@@ -358,16 +358,7 @@ function renderWorkspace() {
     '<div id="prefsSaveStatus" style="font-size:11px;margin-top:6px;text-align:right;"></div>' +
   '</div>';
 
-  var pipelineSection = '';
-  var statusEl = document.getElementById('statusContent');
-  if (statusEl && statusEl.innerHTML && statusEl.innerHTML.indexOf('Loading') === -1) {
-    pipelineSection = '<div style="margin-top:16px;">' +
-      '<div style="font-size:12px;font-weight:700;color:#8a7a6a;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Pipeline status</div>' +
-      statusEl.innerHTML +
-    '</div>';
-  }
-
-  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml + pipelineSection;
+  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml;
 }
 
 function savePreferences() {
@@ -520,6 +511,26 @@ function renderBriefing() {
           '<div style="color:#8a4a2a;font-size:12px;line-height:1.5;">'+(b.pipelineMissed ? 'Pipeline did not run today \u2014 Tailored.BI has been notified and is investigating.' : dh.tablesFailed+' table(s) failed to load \u2014 Tailored.BI has been notified and is investigating.')+'</div>' +
         '</div>' : '') +
       '</div>' +
+      (!allOk || b.pipelineMissed ?
+      '<div style="background:#f9f6f2;padding:8px 14px;border-top:1px solid #e2dbd2;">' +
+        '<span style="font-size:12px;color:#c4511a;cursor:pointer;font-weight:600;" onclick="togglePipelineDetail(this)">\u25B6 View pipeline details</span>' +
+        '<div class="pipeline-detail" style="display:none;margin-top:10px;">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+            '<thead><tr style="border-bottom:1px solid #e2dbd2;">' +
+              '<th style="text-align:left;padding:4px 8px;color:#8a7a6a;font-weight:600;">Table</th>' +
+              '<th style="text-align:center;padding:4px 8px;color:#8a7a6a;font-weight:600;">Status</th>' +
+              '<th style="text-align:right;padding:4px 8px;color:#8a7a6a;font-weight:600;">Rows</th>' +
+              '<th style="text-align:right;padding:4px 8px;color:#8a7a6a;font-weight:600;">Last success</th>' +
+            '</tr></thead><tbody>' +
+            (dh.tableStatus || []).map(function(t) {
+              return '<tr style="border-bottom:1px solid #f5f0e8;">' +
+                '<td style="padding:5px 8px;color:#3d2b0e;">'+t.name+'</td>' +
+                '<td style="padding:5px 8px;text-align:center;"><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(t.status==='SUCCESS'?'#eaf6ea':'#fff0f0')+';color:'+(t.status==='SUCCESS'?'#2a7a2a':'#c0201a')+';">'+t.status+'</span></td>' +
+                '<td style="padding:5px 8px;text-align:right;color:#6a5a4a;">'+(t.rowsLoaded!=null?Number(t.rowsLoaded).toLocaleString():'\u2014')+'</td>' +
+                '<td style="padding:5px 8px;text-align:right;color:#6a5a4a;">'+(t.lastSuccessful||'\u2014')+'</td>' +
+              '</tr>';
+            }).join('') +
+          '</tbody></table></div></div>' : '') +
       '<div style="background:#f9f6f2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2dbd2;">' +
         '<div style="color:#6a5a4a;font-size:11px;font-weight:600;">Heartland Ag Parts Co. \u00b7 Morning Thread</div>' +
         '<div style="color:#aaa09a;font-size:11px;">Managed by Tailored.BI</div>' +
@@ -597,6 +608,17 @@ function sendQuestion() {
   if (!q) return;
   askQuestion(q);
   input.value = '';
+}
+
+function togglePipelineDetail(el) {
+  var detail = el.nextElementSibling;
+  if (detail.style.display === 'none') {
+    detail.style.display = 'block';
+    el.textContent = '\u25BC Hide pipeline details';
+  } else {
+    detail.style.display = 'none';
+    el.textContent = '\u25B6 View pipeline details';
+  }
 }
 
 function addToFocus(question, el) {
