@@ -941,7 +941,7 @@ function toggleSQL(el) {
 }
 
 function deleteInsight(id, el) {
-  if (!confirm('Delete this Thread Insight?')) return;
+  el.textContent = '...';
   fetch('/api/save-insight', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
