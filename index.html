@@ -319,11 +319,10 @@ footer p { font-size:12px; color:var(--muted); }
   <div class="brand">Tailored<span>.BI</span></div>
   <ul class="nav-links">
     <li><a href="#thread">Thread</a></li>
-    <li><a href="#night-shift">Night Shift</a></li>
-    <li><a href="#capabilities">What You Can Answer</a></li>
-    <li><a href="#why">Why a Warehouse</a></li>
-    <li><a href="#examples">Reports</a></li>
+    <li><a href="#night-shift">How It Works</a></li>
+    <li><a href="#why">Why It Matters</a></li>
     <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#examples">Reports</a></li>
     <li><a href="#showcases">Showcases</a></li>
     <li><a href="#architecture">Security</a></li>
     <li><a href="#contact">Get Started</a></li>
@@ -693,118 +692,61 @@ footer p { font-size:12px; color:var(--muted); }
 
 <hr class="div"/>
 
-<!-- WHY A WAREHOUSE -->
-<section class="sec" id="why">
-<div class="sec-inner">
-  <p class="kicker">Why it matters</p>
-  <h2 class="sec-title">There's a better way than<br/>connecting Power BI directly<br/>to Epicor.</h2>
-  <p class="sec-lead">Most Epicor reporting starts the same way — Power BI pointed straight at the Epicor database or a BAQ, pulling data on demand. For a system representing a $500K&ndash;$2M+ investment, the out-of-box reporting experience is surprisingly painful. It works at first. Then it doesn't.</p>
+<section id="why" style="padding:5rem 0;background:var(--bg1);">
+  <div style="max-width:900px;margin:0 auto;padding:0 2rem;">
+    <p style="color:var(--gold);font-size:0.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Why it matters</p>
+    <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">Three tools. Three jobs. Each doing what it was built for.</h2>
+    <p style="color:var(--muted2);font-size:1.05rem;line-height:1.7;margin-bottom:3rem;max-width:680px;">Most Epicor manufacturers are asking one tool to do the job of three. Tailored.BI gives each layer of your business intelligence stack exactly the right role.</p>
 
-  <div class="why-grid">
-    <!-- LEFT: Direct connection problems -->
-    <div class="why-col why-bad">
-      <div class="why-col-head">
-        <div class="why-col-icon bad">✕</div>
+    <div style="display:flex;flex-direction:column;gap:1.25rem;margin-bottom:3rem;">
+
+      <div style="background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.75rem;display:grid;grid-template-columns:140px 1fr;gap:1.5rem;align-items:start;">
         <div>
-          <div class="why-col-label bad">Direct connection approach</div>
-          <div class="why-col-sub">Power BI → Epicor database or BAQ</div>
+          <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:6px;">Layer 1</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px;">Epicor</div>
+          <div style="font-size:0.8rem;color:var(--gold);font-weight:600;">Transactions</div>
         </div>
-      </div>
-      <div class="why-items">
-        <div class="why-item">
-          <div class="why-item-icon bad">—</div>
-          <div>
-            <h4>Slow reports, angry users</h4>
-            <p>Every refresh hits the live Epicor database. Complex visuals trigger complex queries. Reports time out. Users refresh repeatedly. The ERP slows down for everyone else.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon bad">—</div>
-          <div>
-            <h4>Epicor schema complexity</h4>
-            <p>The Epicor database has hundreds of tables with non-obvious relationships. DAX measures end up doing work that SQL should do — joins, case logic, cross-table calculations — making models fragile and hard to maintain.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon bad">—</div>
-          <div>
-            <h4>No history, no comparisons</h4>
-            <p>Epicor stores current state. Without a warehouse capturing snapshots, period-over-period analysis, budget vs. actual, and prior-year comparisons require complex workarounds — if they're possible at all.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon bad">—</div>
-          <div>
-            <h4>Breaks on Epicor upgrades</h4>
-            <p>Direct schema connections are brittle. When Epicor changes a table structure, columns move, or a BAQ is modified, every downstream report that touches it breaks — often silently.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon bad">—</div>
-          <div>
-            <h4>One report at a time</h4>
-            <p>Each report is its own island. No shared logic, no reusable measures, no consistent definitions. "Revenue" means something different in the Sales report than it does in the Finance report.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DIVIDER -->
-    <div class="why-div">
-      <div class="why-div-line"></div>
-      <div class="why-div-vs">vs</div>
-      <div class="why-div-line"></div>
-    </div>
-
-    <!-- RIGHT: Warehouse approach -->
-    <div class="why-col why-good">
-      <div class="why-col-head">
-        <div class="why-col-icon good">✓</div>
         <div>
-          <div class="why-col-label good">Tailored.BI Data Warehouse</div>
-          <div class="why-col-sub">Power BI → Fabric warehouse → Epicor</div>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">Epicor was built for operational work &mdash; entering orders, shipping parts, receiving inventory, managing jobs. It does this better than anything else. Keep using it for exactly that.</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">Your SSRS reports &mdash; customer invoices, vendor statements, packing slips, pick tickets &mdash; keep running exactly as they do today. Tailored.BI never touches your operational documents.</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;">What Epicor was not built for: telling you what your numbers mean, tracking trends across months, or surfacing the insight buried in six months of transaction history.</p>
         </div>
       </div>
-      <div class="why-items">
-        <div class="why-item">
-          <div class="why-item-icon good">+</div>
-          <div>
-            <h4>Fast reports, always</h4>
-            <p>Power BI reads from pre-shaped, indexed warehouse tables — not live Epicor. Incremental refresh means only changed rows move. Reports open in seconds. The ERP is untouched.</p>
-          </div>
+
+      <div style="background:var(--bg3);border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:1.75rem;display:grid;grid-template-columns:140px 1fr;gap:1.5rem;align-items:start;">
+        <div>
+          <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:6px;">Layer 2</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px;">Thread</div>
+          <div style="font-size:0.8rem;color:var(--gold);font-weight:600;">Intelligence</div>
         </div>
-        <div class="why-item">
-          <div class="why-item-icon good">+</div>
-          <div>
-            <h4>Clean, BI-ready schema</h4>
-            <p>A purpose-built star schema translates Epicor's complexity into simple, predictable tables. DAX measures are clean and fast. New reports can be built in hours, not days.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon good">+</div>
-          <div>
-            <h4>Full history, any comparison</h4>
-            <p>The warehouse captures period snapshots and preserves history. Budget vs. actual, prior-year comparisons, rolling 12-month trends, and retail 4-4-5 calendar analysis all work natively.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon good">+</div>
-          <div>
-            <h4>Isolated from Epicor changes</h4>
-            <p>The warehouse is the buffer. When Epicor is upgraded, only the data pipeline layer needs updating — not every report. Reports keep working while the plumbing is fixed behind the scenes.</p>
-          </div>
-        </div>
-        <div class="why-item">
-          <div class="why-item-icon good">+</div>
-          <div>
-            <h4>One version of the truth</h4>
-            <p>Every report shares the same dim tables, the same DAX measures, and the same definitions. Revenue is Revenue. Margin is Margin. Across Finance, Sales, Operations — everywhere.</p>
-          </div>
+        <div>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">Every night Thread pulls your Epicor transactions into a private Microsoft Fabric warehouse &mdash; clean, shaped, and ready for analysis. Then it reasons across your data and delivers your Morning Thread before you arrive.</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">Thread answers the questions Epicor was never designed to answer. Which customers are heading toward collections? Is this month tracking ahead or behind last year? Where are jobs running over budget? What parts are going to stock out before the season peaks?</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;">This is not generic AI connected to your data. Thread knows your Epicor schema, your manufacturing model, your seasonal patterns &mdash; and gets more useful the longer it knows your business.</p>
         </div>
       </div>
+
+      <div style="background:var(--bg3);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.75rem;display:grid;grid-template-columns:140px 1fr;gap:1.5rem;align-items:start;">
+        <div>
+          <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:6px;">Layer 3</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px;">Power BI</div>
+          <div style="font-size:0.8rem;color:var(--gold);font-weight:600;">Visual layer</div>
+        </div>
+        <div>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">Thread tells you what is happening. Power BI shows you the full picture. Every Tailored.BI subscription includes professionally designed reports &mdash; Executive Scorecard, Revenue and Sales, Margin and Profitability, AR and AP, Financial Trends &mdash; built on the same warehouse Thread uses.</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;margin-bottom:0.75rem;">These are the reports your CFO shares in board meetings and your management team reviews in weekly sessions. Always current. Always consistent. Available on any device.</p>
+          <p style="color:var(--muted2);font-size:0.9rem;line-height:1.7;">Connecting Power BI directly to Epicor works &mdash; briefly. It slows your ERP, breaks on upgrades, and requires rebuilding every calculation from raw tables. The warehouse fixes all of that. Thread and Power BI run against a clean analytical copy of your data, never touching production during business hours.</p>
+        </div>
+      </div>
+
     </div>
+
+    <div style="background:var(--bg3);border:1px solid rgba(212,168,67,0.15);border-radius:12px;padding:1.5rem 2rem;text-align:center;">
+      <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:0.5rem;">&ldquo;Epicor tells you what&rsquo;s happening. Thread tells you what it means.&rdquo;</p>
+      <p style="color:var(--muted2);font-size:0.875rem;">Your Epicor keeps doing what it was built for. Thread handles what it never was.</p>
+    </div>
+
   </div>
-</div>
 </section>
 
 
