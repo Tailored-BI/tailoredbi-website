@@ -292,7 +292,85 @@ function renderWorkspace() {
     var sc = statusMapLocal[i.status]||'ws-plan';
     return '<tr><td><span class="ws-type '+t.c+'">'+t.l+'</span></td><td><strong>'+i.name+'</strong></td><td style="font-size:10px;color:#6a5a4a;" class="hide-mob">'+i.detail+'</td><td><span class="'+sc+'">'+(statusTxt[i.status]||i.status)+'</span></td></tr>';
   }).join('');
-  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var prefs = (inv && inv.threadPreferences) || {};
+  var focusAreas = prefs.focusAreas || {
+    arAging: true, revenueVsPrior: true, inventory: true,
+    apPayments: true, productionCosts: true, vendorLeadTimes: true
+  };
+  var focusLabels = {
+    arAging: 'AR aging & collections',
+    revenueVsPrior: 'Revenue vs prior year',
+    inventory: 'Inventory & stock levels',
+    apPayments: 'AP & vendor payments',
+    productionCosts: 'Production costs & variances',
+    vendorLeadTimes: 'Vendor lead times & supply chain'
+  };
+
+  var focusChecks = '';
+  var focusKeys = ['arAging','revenueVsPrior','inventory','apPayments','productionCosts','vendorLeadTimes'];
+  focusKeys.forEach(function(key) {
+    var label = focusLabels[key];
+    var checked = focusAreas[key] !== false ? ' checked' : '';
+    focusChecks += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#f9f6f2;border-radius:6px;border:1px solid #e8e0d8;">' +
+      '<input type="checkbox" id="focus_'+key+'"'+checked+' style="width:14px;height:14px;accent-color:#c4511a;cursor:pointer;"/>' +
+      '<span style="font-size:13px;color:#3d2b0e;">'+label+'</span>' +
+    '</label>';
+  });
+
+  var prefsHtml = '<div style="background:#fff;border:1px solid #e2dbd2;border-radius:8px;padding:20px;margin-top:16px;">' +
+    '<div style="font-size:13px;font-weight:700;color:#3d2b0e;margin-bottom:4px;">Thread Preferences</div>' +
+    '<div style="font-size:12px;color:#8a7a6a;margin-bottom:16px;border-bottom:1px solid #f0ebe4;padding-bottom:12px;">Tell Thread what to focus on in your Morning Thread. Thread also learns from the questions you ask in Ask Thread.</div>' +
+    '<div style="font-size:12px;font-weight:600;color:#3d2b0e;margin-bottom:8px;">Focus areas</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">' + focusChecks + '</div>' +
+    '<div style="font-size:12px;font-weight:600;color:#3d2b0e;margin-bottom:6px;">Custom instructions for Thread</div>' +
+    '<div style="font-size:11px;color:#8a7a6a;margin-bottom:8px;">Tell Thread what matters most to your business right now \u2014 seasons, priorities, key customers, anything specific.</div>' +
+    '<textarea id="customInstructions" rows="4" style="width:100%;box-sizing:border-box;padding:10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;resize:vertical;line-height:1.5;" placeholder="Example: We are heading into spring planting season \u2014 parts availability is the #1 priority. Flag any customer with more than $50K overdue by name.">'+(prefs.customInstructions || '')+'</textarea>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">' +
+      '<div style="font-size:11px;color:#aaa09a;">'+(prefs.updatedAt ? 'Last saved: '+prefs.updatedAt : 'Not yet saved')+'</div>' +
+      '<button onclick="savePreferences()" style="background:#c4511a;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save preferences</button>' +
+    '</div>' +
+    '<div id="prefsSaveStatus" style="font-size:11px;margin-top:6px;text-align:right;"></div>' +
+  '</div>';
+
+  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml;
+}
+
+function savePreferences() {
+  var focusAreas = {};
+  ['arAging','revenueVsPrior','inventory','apPayments','productionCosts','vendorLeadTimes'].forEach(function(k) {
+    var el = document.getElementById('focus_' + k);
+    focusAreas[k] = el ? el.checked : true;
+  });
+  var customInstructions = (document.getElementById('customInstructions') || {}).value || '';
+  customInstructions = customInstructions.trim();
+  var statusEl = document.getElementById('prefsSaveStatus');
+  if (statusEl) statusEl.textContent = 'Saving...';
+
+  fetch('/api/save-preferences', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      client: 'heartland',
+      preferences: { focusAreas: focusAreas, customInstructions: customInstructions }
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (statusEl) {
+      statusEl.textContent = d.success ? '\u2713 Preferences saved \u2014 Thread will use these in tomorrow\'s Morning Thread' : 'Error saving preferences';
+      statusEl.style.color = d.success ? '#2a7a2a' : '#c0201a';
+    }
+    if (d.success && statusData && statusData.inventory) {
+      statusData.inventory.threadPreferences = {
+        focusAreas: focusAreas,
+        customInstructions: customInstructions,
+        updatedAt: new Date().toISOString().split('T')[0]
+      };
+    }
+  })
+  .catch(function() {
+    if (statusEl) { statusEl.textContent = 'Error saving \u2014 try again'; statusEl.style.color = '#c0201a'; }
+  });
 }
 
 function renderBriefing() {
@@ -486,12 +564,37 @@ function sendQuestion() {
   input.value = '';
 }
 
+function addToFocus(question, el) {
+  el.textContent = 'Adding to focus...';
+  el.style.cursor = 'default';
+  fetch('/api/log-ask-question', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({client:'heartland', question: question, addToFocus: true})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() {
+    el.textContent = '\u2713 Added to Morning Thread focus';
+    el.style.color = '#2a7a2a';
+  })
+  .catch(function() {
+    el.textContent = 'Could not save \u2014 try again';
+    el.style.color = '#c0201a';
+  });
+}
+
 async function askQuestion(question) {
   document.getElementById('chatInput').value = '';
   document.getElementById('suggestionsRow').style.display = 'none';
   addMessage('user', question);
   addThinking();
   document.getElementById('chatBtn').disabled = true;
+
+  fetch('/api/log-ask-question', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({client:'heartland', question: question})
+  }).catch(function() {});
 
   try {
     var res = await fetch('/api/ai-query', {
@@ -502,6 +605,10 @@ async function askQuestion(question) {
     var data = await res.json();
     removeThinking();
     addMessage('assistant', renderResult(data));
+    var focusDiv = document.createElement('div');
+    focusDiv.style.cssText = 'padding:4px 0 12px 44px;';
+    focusDiv.innerHTML = '<span style="font-size:11px;color:#c4963a;cursor:pointer;" onclick="addToFocus(\'' + question.replace(/'/g,"\\'") + '\',this)">+ Add to Morning Thread focus</span>';
+    document.getElementById('chatMsgs').appendChild(focusDiv);
   } catch(e) {
     removeThinking();
     addMessage('assistant', 'Sorry, I had trouble reaching the data service. Please try again in a moment.');

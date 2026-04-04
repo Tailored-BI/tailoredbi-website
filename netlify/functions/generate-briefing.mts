@@ -5,6 +5,8 @@ const GITHUB_RAW = "https://raw.githubusercontent.com/Tailored-BI/tailoredbi-cli
 const GITHUB_API = "https://api.github.com";
 const BRIEFING_HISTORY_PATH = "clients/heartland/status/briefing-history.json";
 const PIPELINE_STATUS_PATH = "clients/heartland/status/pipeline-status.json";
+const ASK_HISTORY_PATH = "clients/heartland/status/ask-history.json";
+const WORKSPACE_INVENTORY_PATH = "clients/heartland/status/workspace-inventory.json";
 const MAX_HISTORY_DAYS = 7;
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
 const FABRIC_DB = "Heartland_Warehouse";
@@ -318,6 +320,31 @@ export default async (req: Request, context: Context) => {
       }
     }
 
+    let threadPreferences: Record<string, unknown> = {};
+    let askHistory: Record<string, unknown>[] = [];
+    try {
+      const invRes = await fetch(`${GITHUB_RAW}/${WORKSPACE_INVENTORY_PATH}`, {
+        headers: { "Authorization": `token ${githubToken}`, "Accept": "application/vnd.github.v3.raw" }
+      });
+      if (invRes.ok) {
+        const inv = await invRes.json();
+        threadPreferences = inv.threadPreferences || {};
+      }
+    } catch { threadPreferences = {}; }
+
+    try {
+      const askRes = await fetch(`${GITHUB_RAW}/${ASK_HISTORY_PATH}`, {
+        headers: { "Authorization": `token ${githubToken}`, "Accept": "application/vnd.github.v3.raw" }
+      });
+      if (askRes.ok) {
+        const allAsks = await askRes.json();
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        askHistory = allAsks.filter((a: Record<string, unknown>) =>
+          String(a.askedAt || '') > sevenDaysAgo
+        ).slice(0, 20);
+      }
+    } catch { askHistory = []; }
+
     let priorHistory: Record<string, unknown>[] = [];
     try {
       const histRes = await fetch(`${GITHUB_RAW}/${BRIEFING_HISTORY_PATH}`, {
@@ -346,11 +373,23 @@ export default async (req: Request, context: Context) => {
 
 You receive fresh warehouse data every morning after their Epicor pipeline runs. You also receive the last 7 days of prior briefings so you can reason across time — spotting trends, tracking whether flagged issues improved or worsened, and avoiding repeating the same insight every day unless it is genuinely escalating.
 
-Your job is to identify 3-5 specific, actionable insights the owner or CFO should know about today.
+${threadPreferences.customInstructions ? `IMPORTANT — CLIENT INSTRUCTIONS:
+The client has given you these specific instructions. Read them carefully and let them guide what you surface, what you skip, and how you frame your insights:
+"${threadPreferences.customInstructions}"
 
-You are named Thread because you follow the thread through complex data — connecting the numbers that matter into a clear picture. Use prior briefings to:
-- Note if a flagged issue is getting worse ("the Midwest Equipment Co. balance flagged yesterday has now grown to X")
-- Note if something improved ("the overdue AR flagged Monday has been partially resolved — down from X to Y")
+` : ''}${threadPreferences.focusAreas ? `CLIENT FOCUS AREAS (weight these higher):
+${Object.entries(threadPreferences.focusAreas as Record<string, boolean>).filter(([,v]) => v).map(([k]) => '- ' + k).join('\n')}
+
+` : ''}${askHistory.length > 0 ? `QUESTIONS THE CLIENT ASKED THREAD THIS WEEK (signals about what they care about):
+${askHistory.map((a: Record<string, unknown>) => '- "' + a.question + '"' + (a.addedToFocus ? ' [added to focus]' : '')).join('\n')}
+
+Use these questions as signals about what the client is thinking about. If they have been asking about a topic repeatedly, proactively surface insights about it even if Thread would not normally flag it.
+
+` : ''}Your job is to identify 3-5 specific, actionable insights the owner or CFO should know about today.
+
+Use prior briefings to:
+- Note if a flagged issue is getting worse
+- Note if something improved
 - Avoid repeating the same low-priority insight multiple days in a row unless it is escalating
 - Identify trends that are only visible across multiple days
 
