@@ -1076,6 +1076,16 @@ function digDeeper(query, el) {
         if (insightsTab) insightsTab.click();
         el.textContent = '\u2713 Saved to Thread Insights';
         el.style.color = '#2a7a2a';
+        setTimeout(function() {
+          var cards = document.querySelectorAll('#insightsBody > div > div');
+          if (cards.length > 0) {
+            var newest = cards[0];
+            newest.style.transition = 'box-shadow 0.3s ease';
+            newest.style.boxShadow = '0 0 0 3px #c4963a';
+            newest.scrollIntoView({behavior:'smooth', block:'start'});
+            setTimeout(function() { newest.style.boxShadow = 'none'; }, 3000);
+          }
+        }, 400);
       });
     });
   })
@@ -1202,7 +1212,19 @@ function checkGate(){
         })
         .then(function() {
           statusData = null;
-          loadStatus().then(function() { renderInsights(); });
+          loadStatus().then(function() {
+            renderInsights();
+            setTimeout(function() {
+              var cards = document.querySelectorAll('#insightsBody > div > div');
+              if (cards.length > 0) {
+                var newest = cards[0];
+                newest.style.transition = 'box-shadow 0.3s ease';
+                newest.style.boxShadow = '0 0 0 3px #c4963a';
+                newest.scrollIntoView({behavior:'smooth', block:'start'});
+                setTimeout(function() { newest.style.boxShadow = 'none'; }, 3000);
+              }
+            }, 400);
+          });
         });
       })
       .catch(function() { renderInsights(); });
