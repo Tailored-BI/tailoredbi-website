@@ -1167,6 +1167,50 @@ function checkGate(){
   renderBriefing();
   renderStatus();
   renderWorkspace();
+
+  var params = new URLSearchParams(window.location.search);
+  var tabParam = params.get('tab');
+  var queryParam = params.get('query');
+
+  if (tabParam === 'insights' && queryParam) {
+    var insTab = document.querySelectorAll('.nav-tab')[2];
+    if (insTab) insTab.click();
+    setTimeout(function() {
+      var body = document.getElementById('insightsBody');
+      if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:#8a7a6a;font-size:14px;">Running analysis: "' + decodeURIComponent(queryParam) + '"...</div>';
+      fetch('/api/ai-query', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({question: decodeURIComponent(queryParam)})
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) { renderInsights(); return; }
+        return fetch('/api/save-insight', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            client: 'heartland',
+            title: data.title || data.explanation,
+            question: data.question,
+            sql: data.sql,
+            explanation: data.explanation,
+            chartType: data.chartType,
+            columns: data.columns,
+            rows: data.rows
+          })
+        })
+        .then(function() {
+          statusData = null;
+          loadStatus().then(function() { renderInsights(); });
+        });
+      })
+      .catch(function() { renderInsights(); });
+    }, 500);
+  } else if (tabParam === 'insights') {
+    var insTab2 = document.querySelectorAll('.nav-tab')[2];
+    if (insTab2) insTab2.click();
+  }
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>

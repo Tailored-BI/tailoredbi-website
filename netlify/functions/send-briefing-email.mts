@@ -134,7 +134,7 @@ export default async (req: Request, context: Context) => {
     </td></tr>` : '';
 
   const insightsHtml = (briefing.insights || []).map((ins: {
-    severity: string; title: string; text: string; action?: string
+    severity: string; title: string; text: string; action?: string; suggestedQuery?: string
   }) => {
     const s = severityStyle[ins.severity] || severityStyle.info;
     return `
@@ -145,7 +145,7 @@ export default async (req: Request, context: Context) => {
           <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label} — ${ins.title}</p>
           <p style="margin:0${ins.action ? ' 0 8px' : ''};font-size:15px;color:#3d2b0e;line-height:1.65;">${ins.text}</p>
           ${ins.action ? `<p style="margin:0 0 8px;font-size:13px;color:#6a5a4a;font-style:italic;">${ins.action}</p>` : ''}
-          <p style="margin:0;"><a href="https://tailored.bi/heartland/portal?t=${Date.now()}#insights" style="font-size:12px;color:#c4511a;text-decoration:none;font-weight:600;">Dig deeper in Thread Portal →</a></p>
+          ${ins.suggestedQuery ? `<p style="margin:0;"><a href="https://tailored.bi/heartland/portal?tab=insights&query=${encodeURIComponent(ins.suggestedQuery)}&t=${Date.now()}" style="font-size:12px;color:#c4511a;text-decoration:none;font-weight:600;">Dig deeper in Thread Insights →</a></p>` : ''}
         </td>
       </tr></table>
     </td></tr>`;
