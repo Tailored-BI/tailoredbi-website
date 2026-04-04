@@ -805,7 +805,25 @@ function renderInsightChart(insight, chartId) {
     return '<div style="margin-top:4px;">'+bars+alert+'</div>';
   }
 
-  if (insight.chartType === 'bar' || (insight.rows.length > 1 && insight.rows.length <= 12)) {
+  if (insight.chartType === 'table' || insight.rows.length > 15) {
+    var isDaysColT = function(c) { return c.toLowerCase().indexOf('day') !== -1 || c.toLowerCase().indexOf('age') !== -1 || c.toLowerCase().indexOf('past') !== -1; };
+    var tHdrs = cols.map(function(c) { return '<th style="text-align:left;padding:5px 8px;font-size:11px;color:#8a7a6a;font-weight:600;border-bottom:1px solid #e2dbd2;white-space:nowrap;">'+c+'</th>'; }).join('');
+    var tBodyR = insight.rows.slice(0,12).map(function(row) {
+      var cells = cols.map(function(c) {
+        var v = row[c];
+        var fmt4 = formatInsightValue(v, c);
+        var isAmt2 = typeof v === 'number' && (c.toLowerCase().indexOf('balance') !== -1 || c.toLowerCase().indexOf('revenue') !== -1 || c.toLowerCase().indexOf('amt') !== -1 || c.toLowerCase().indexOf('due') !== -1);
+        var isAlert2 = isDaysColT(c) && typeof v === 'number' && v > 60;
+        var style2 = isAlert2 ? 'color:#A32D2D;font-weight:600;' : isAmt2 ? 'color:#3d2b0e;font-weight:500;' : 'color:#6a5a4a;';
+        return '<td style="padding:5px 8px;font-size:12px;border-bottom:1px solid #f5f0e8;'+style2+'">'+fmt4+'</td>';
+      }).join('');
+      return '<tr>'+cells+'</tr>';
+    }).join('');
+    var moreR = insight.rows.length > 12 ? '<tr><td colspan="'+cols.length+'" style="padding:6px 8px;font-size:11px;color:#8a7a6a;font-style:italic;">Showing 12 of '+insight.rows.length+' rows \u00b7 Refresh to re-query</td></tr>' : '';
+    return '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr>'+tHdrs+'</tr></thead><tbody>'+tBodyR+moreR+'</tbody></table></div>';
+  }
+
+  if (insight.chartType === 'bar' || insight.rows.length > 1) {
     var lCol = cols[0];
     var vCol = cols[1] || cols[0];
     var isTimeSeries = (insight.question||'').toLowerCase().indexOf('month') !== -1 || (insight.question||'').toLowerCase().indexOf('trend') !== -1;
@@ -942,6 +960,7 @@ function toggleSQL(el) {
 
 function deleteInsight(id, el) {
   el.textContent = '...';
+  el.disabled = true;
   fetch('/api/save-insight', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
