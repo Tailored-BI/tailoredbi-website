@@ -708,7 +708,7 @@ function saveInsight(data, el) {
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       client: 'heartland',
-      title: data.explanation,
+      title: data.title || data.explanation,
       question: data.question,
       sql: data.sql,
       explanation: data.explanation,
@@ -832,6 +832,26 @@ function renderInsightChart(insight, chartId) {
       var labels = insight.rows.map(function(r) { return String(r[lCol]); });
       var values = insight.rows.map(function(r) { return Number(r[vCol]) || 0; });
       var vColRef = vCol;
+      var total = values.reduce(function(s,v) { return s+v; }, 0);
+      var peak = Math.max.apply(null, values);
+      var peakLabel = labels[values.indexOf(peak)];
+      var ytdValues = values.slice(-3);
+      var ytd = ytdValues.reduce(function(s,v) { return s+v; }, 0);
+      var summaryStrip = '<div style="display:flex;gap:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f0ebe4;">' +
+        '<div style="flex:1;text-align:center;">' +
+          '<div style="font-size:10px;color:#aaa09a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">12-month total</div>' +
+          '<div style="font-size:16px;font-weight:600;color:#3d2b0e;">'+formatInsightValue(total, vCol)+'</div>' +
+        '</div>' +
+        '<div style="flex:1;text-align:center;border-left:1px solid #f0ebe4;">' +
+          '<div style="font-size:10px;color:#aaa09a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Peak month</div>' +
+          '<div style="font-size:16px;font-weight:600;color:#3d2b0e;">'+formatInsightValue(peak, vCol)+'</div>' +
+          '<div style="font-size:10px;color:#aaa09a;">'+peakLabel+'</div>' +
+        '</div>' +
+        '<div style="flex:1;text-align:center;border-left:1px solid #f0ebe4;">' +
+          '<div style="font-size:10px;color:#aaa09a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Last 3 months</div>' +
+          '<div style="font-size:16px;font-weight:600;color:#3d2b0e;">'+formatInsightValue(ytd, vCol)+'</div>' +
+        '</div>' +
+      '</div>';
       setTimeout(function() {
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
@@ -861,14 +881,14 @@ function renderInsightChart(insight, chartId) {
           }
         });
       }, 100);
-      return '<div style="position:relative;height:160px;"><canvas id="'+canvasId+'"></canvas></div>';
+      return summaryStrip + '<div style="position:relative;height:160px;"><canvas id="'+canvasId+'"></canvas></div>';
     }
     var mxVal = Math.max.apply(null, insight.rows.map(function(r) { return Number(r[vCol]) || 0; }));
     var hBars = insight.rows.slice(0,10).map(function(r) {
       var pct2 = mxVal > 0 ? Math.round(Number(r[vCol])/mxVal*100) : 0;
       var fV = formatInsightValue(r[vCol], vCol);
       return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-        '<div style="width:120px;font-size:11px;color:#6a5a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">'+r[lCol]+'</div>' +
+        '<div style="width:150px;font-size:11px;color:#6a5a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;" title="'+r[lCol]+'">'+r[lCol]+'</div>' +
         '<div style="flex:1;background:#f0ebe4;border-radius:3px;height:14px;">' +
           '<div style="width:'+pct2+'%;background:#c4511a;height:100%;border-radius:3px;"></div>' +
         '</div>' +
@@ -909,7 +929,12 @@ function renderInsights() {
         '<circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/>' +
       '</svg>' +
       '<div style="font-size:15px;font-weight:600;color:#3d2b0e;margin-bottom:8px;">No Thread Insights saved yet</div>' +
-      '<div style="font-size:13px;color:#8a7a6a;max-width:380px;margin:0 auto;line-height:1.6;">Ask Thread a question and click "\u2605 Save as Thread Insight" to build your library of visual analyses.</div>' +
+      '<div style="font-size:13px;color:#8a7a6a;max-width:380px;margin:0 auto;line-height:1.6;margin-bottom:20px;">Ask Thread a question and click "\u2605 Save as Thread Insight" to build your library of visual analyses.</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;max-width:420px;margin:0 auto;">' +
+        ['What is my AR balance by aging bucket?','Who are my top 10 customers by revenue this year?','Show me revenue by month for the last 12 months','Which customers are over 60 days past due?'].map(function(q) {
+          return '<div onclick="document.querySelector(\'.nav-tab:nth-child(2)\').click();setTimeout(function(){document.getElementById(\'chatInput\').value=\''+q+'\';sendQuestion();},300);" style="padding:10px 14px;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-size:13px;color:#3d2b0e;cursor:pointer;text-align:left;">\u2192 '+q+'</div>';
+        }).join('') +
+      '</div>' +
     '</div>';
     return;
   }
@@ -919,7 +944,8 @@ function renderInsights() {
     var isWide = ins.chartType === 'table' ||
       ((ins.question||'').toLowerCase().indexOf('month') !== -1) ||
       ((ins.question||'').toLowerCase().indexOf('trend') !== -1) ||
-      (ins.rows && ins.rows.length > 6);
+      isAgingInsight(ins) ||
+      (ins.rows && ins.rows.length > 8);
     var colSpan = isWide ? 'grid-column:1/-1;' : '';
     html += '<div style="background:#fff;border:1px solid #e2dbd2;border-radius:10px;overflow:hidden;'+colSpan+'">' +
       '<div style="padding:12px 16px 10px;border-bottom:1px solid #f0ebe4;display:flex;justify-content:space-between;align-items:flex-start;">' +
@@ -938,8 +964,8 @@ function renderInsights() {
       '<div style="padding:14px 16px;" id="chartarea_'+idx+'">' +
         renderInsightChart(ins, cId) +
       '</div>' +
-      '<div style="padding:8px 16px 10px;border-top:1px solid #f5f0e8;display:flex;justify-content:space-between;align-items:center;">' +
-        '<span style="font-size:11px;color:#8a7a6a;font-style:italic;flex:1;padding-right:8px;">'+(ins.explanation||'')+'</span>' +
+      '<div style="padding:8px 16px 10px;border-top:1px solid #f5f0e8;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+        '<span style="font-size:11px;color:#aaa09a;flex:1;">'+(ins.question||'')+'</span>' +
         '<span style="font-size:11px;color:#c4511a;cursor:pointer;white-space:nowrap;" onclick="toggleSQL(this)">View SQL</span>' +
       '</div>' +
       '<div class="sql-block" style="display:none;margin:0 16px 12px;background:#f5f2ed;border-radius:4px;padding:8px;font-size:11px;color:#6a5a4a;font-family:monospace;white-space:pre-wrap;overflow-x:auto;">'+(ins.sql||'')+'</div>' +
@@ -985,7 +1011,7 @@ function refreshInsight(id, question) {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           client: 'heartland',
-          title: data.explanation,
+          title: data.title || data.explanation,
           question: data.question,
           sql: data.sql,
           explanation: data.explanation,

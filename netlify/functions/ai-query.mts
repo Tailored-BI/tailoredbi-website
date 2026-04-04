@@ -266,6 +266,7 @@ When you receive a question:
 2. Return ONLY a JSON object with this exact structure — no markdown, no extra text:
 {
   "sql": "SELECT ...",
+  "title": "5 words max — human headline e.g. Revenue by Month, Top Customers by Revenue, AR Aging Summary",
   "explanation": "One sentence describing what this query returns",
   "chartType": "table" or "number" or "bar"
 }
@@ -290,7 +291,7 @@ chartType rules:
     const claudeData = await claudeRes.json();
     const rawText = claudeData.content?.[0]?.text || "";
 
-    let parsed: { sql: string; explanation: string; chartType: string };
+    let parsed: { sql: string; title?: string; explanation: string; chartType: string };
     try {
       const start = rawText.indexOf("{");
       const end = rawText.lastIndexOf("}");
@@ -328,6 +329,7 @@ chartType rules:
 
     return new Response(JSON.stringify({
       question,
+      title: parsed.title || parsed.explanation,
       sql: parsed.sql,
       explanation: parsed.explanation,
       chartType: parsed.chartType,
