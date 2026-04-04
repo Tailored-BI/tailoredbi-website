@@ -37,7 +37,7 @@ body{background:#f5f2ed;color:#3d2b0e;}
 .page.active{display:flex;flex-direction:column;gap:14px;}
 .card{background:#fff;border:1px solid #e2dbd2;border-radius:10px;overflow:hidden;}
 .card-hdr{background:#f9f6f2;padding:9px 16px;border-bottom:1px solid #e2dbd2;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
-.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8a7a6a;}
+.card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8a7a6a;}
 .card-meta{font-size:10px;color:#aaa;display:flex;align-items:center;gap:6px;}
 .ai-pill{background:#f0e8ff;color:#4a1080;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;}
 .card-body{padding:16px;}
@@ -322,6 +322,7 @@ function renderBriefing() {
   dateEl.textContent = b.pipelineMissed
     ? (b.lastRunMT || b.dataDate) + ' \u2014 stale'
     : (b.dataDate || (p && p.lastRunMT) || '\u2014');
+  dateEl.style.fontSize = '13px';
 
   var severityMap = {
     alert: { cls:'ii-red', lcls:'il-red', label:'Action needed',
@@ -350,7 +351,13 @@ function renderBriefing() {
 
   if (b.dataHealth) {
     var dh = b.dataHealth;
-    var allOk = dh.tablesFailed === 0;
+    var allOk = dh.tablesFailed === 0 && !b.pipelineMissed;
+    var statusText = b.pipelineMissed
+      ? 'Pipeline not run today'
+      : (allOk ? 'All systems healthy' : dh.tablesFailed + ' table(s) failed');
+    var statusColor = b.pipelineMissed
+      ? '#c4511a'
+      : (allOk ? '#2a7a2a' : '#8a1010');
     var streakBars = (dh.streakDays || []).map(function(d) {
       return '<div style="width:8px;height:16px;border-radius:2px;background:'+(d.trim()==='ok'?'#3a8a3a':'#e8c0c0')+';"></div>';
     }).join('');
@@ -365,23 +372,23 @@ function renderBriefing() {
     bodyEl.innerHTML +=
     '<div style="margin-top:16px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e2dbd2;">' +
       '<div style="background:#f5f0e8;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2dbd2;">' +
-        '<div style="color:#8a7a6a;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Data health &amp; pipeline status</div>' +
+        '<div style="color:#8a7a6a;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Data health &amp; pipeline status</div>' +
         '<div style="display:flex;align-items:center;gap:4px;">' +
-          '<div style="width:5px;height:5px;border-radius:50%;background:'+(allOk?'#3a8a3a':'#d04040')+';"></div>' +
-          '<div style="color:'+(allOk?'#2a7a2a':'#c03030')+';font-size:9px;font-weight:600;">'+(allOk?'All systems healthy':dh.tablesFailed+' table(s) failed')+'</div>' +
+          '<div style="width:5px;height:5px;border-radius:50%;background:'+statusColor+';"></div>' +
+          '<div style="color:'+statusColor+';font-size:11px;font-weight:600;">'+statusText+'</div>' +
         '</div>' +
       '</div>' +
       '<div style="padding:10px 14px;display:flex;flex-direction:column;gap:10px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Last refresh</div><div style="color:#3d2b0e;font-size:11px;font-weight:600;">'+dh.lastRefresh+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Last refresh</div><div style="color:#3d2b0e;font-size:13px;font-weight:600;">'+dh.lastRefresh+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Tables loaded</div><div style="color:#2a7a2a;font-size:11px;font-weight:600;">'+dh.tablesSuccess+' / '+dh.tablesTotal+' \u2713</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Tables loaded</div><div style="color:#2a7a2a;font-size:13px;font-weight:600;">'+dh.tablesSuccess+' / '+dh.tablesTotal+' \u2713</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Records</div><div style="color:#c4511a;font-size:11px;font-weight:600;">'+recordsFormatted+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Records</div><div style="color:#c4511a;font-size:13px;font-weight:600;">'+recordsFormatted+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Duration</div><div style="color:#3d2b0e;font-size:11px;font-weight:600;">'+dh.duration+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Duration</div><div style="color:#3d2b0e;font-size:13px;font-weight:600;">'+dh.duration+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">30-day streak</div><div style="color:#2a7a2a;font-size:11px;font-weight:600;">'+dh.streakOk+' / '+dh.streakTotal+' \u2713</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">30-day streak</div><div style="color:#2a7a2a;font-size:13px;font-weight:600;">'+dh.streakOk+' / '+dh.streakTotal+' \u2713</div></div>' +
         '</div>' +
         (tableDots ? '<div><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Table status</div><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;">'+tableDots+'</div></div>' : '') +
         (streakBars ? '<div><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Run history</div><div style="display:flex;gap:2px;align-items:flex-end;">'+streakBars+'</div></div>' : '') +
