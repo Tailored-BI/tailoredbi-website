@@ -959,15 +959,16 @@ function toggleSQL(el) {
 }
 
 function deleteInsight(id, el) {
-  el.textContent = '...';
-  el.disabled = true;
+  var card = el.closest('[style*="border-radius:10px"]');
+  if (card) card.style.display = 'none';
+  if (statusData && statusData.insights) {
+    statusData.insights = statusData.insights.filter(function(i) { return i.id !== id; });
+  }
   fetch('/api/save-insight', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ client: 'heartland', deleteId: id })
-  })
-  .then(function() { statusData = null; loadStatus().then(function() { renderInsights(); }); })
-  .catch(function() {});
+  }).catch(function() {});
 }
 
 function refreshInsight(id, question) {
