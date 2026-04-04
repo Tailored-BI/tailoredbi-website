@@ -246,7 +246,8 @@ export default async (req: Request, context: Context) => {
     const todayMD = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const pipelineRanToday = lastRunStr.includes(todayMDY) ||
       lastRunStr.includes(todayMD);
-    const pipelineMissed = !pipelineRanToday && lastRunStr.length > 0;
+    const statusIsSuccess = String(pipelineStatus.overallStatus || '') === 'SUCCESS';
+    const pipelineMissed = !pipelineRanToday && !statusIsSuccess && lastRunStr.length > 0;
     const dataAge = pipelineMissed
       ? `WARNING: The pipeline did not run today. Last successful run was ${lastRunStr}. All insights below are based on data from that run — not today's activity.`
       : `Pipeline ran successfully today at ${lastRunStr}. Data is current.`;
@@ -445,9 +446,7 @@ Generate the daily briefing.`
     const briefing = JSON.parse(jsonMatch[0]);
     briefing.generatedAt = new Date().toISOString();
     briefing.dataDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const statusOverride = String(pipelineStatus.overallStatus || '') === 'SUCCESS' &&
-      lastRunStr.length > 0;
-    briefing.pipelineMissed = statusOverride ? false : pipelineMissed;
+    briefing.pipelineMissed = pipelineMissed;
     briefing.lastRunMT = lastRunStr;
     briefing.dataHealth = {
       lastRefresh: pipelineStatus.lastRunMT || "Unknown",
