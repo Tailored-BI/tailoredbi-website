@@ -24,10 +24,39 @@ export default async (req: Request, context: Context) => {
     chartType?: string;
     columns?: string[];
     rows?: Record<string, unknown>[];
+    deleteId?: string;
   } = {};
   try { body = await req.json(); } catch { body = {}; }
 
   const clientId = body.client || "heartland";
+
+  if (body.deleteId) {
+    const path2 = `clients/${clientId}/status/insights.json`;
+    const headers2 = {
+      "Authorization": `token ${githubToken}`,
+      "Accept": "application/vnd.github.v3+json",
+      "Content-Type": "application/json"
+    };
+    const getRes2 = await fetch(`${GITHUB_API}/repos/Tailored-BI/tailoredbi-clients/contents/${path2}`, { headers: headers2 });
+    if (getRes2.ok) {
+      const file2 = await getRes2.json();
+      let insights2: Record<string, unknown>[] = JSON.parse(Buffer.from(file2.content, "base64").toString("utf8"));
+      insights2 = insights2.filter((i: Record<string, unknown>) => i.id !== body.deleteId);
+      await fetch(`${GITHUB_API}/repos/Tailored-BI/tailoredbi-clients/contents/${path2}`, {
+        method: "PUT",
+        headers: headers2,
+        body: JSON.stringify({
+          message: `insights: delete insight ${body.deleteId}`,
+          content: Buffer.from(JSON.stringify(insights2, null, 2)).toString("base64"),
+          sha: file2.sha
+        })
+      });
+    }
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200, headers: { "Content-Type": "application/json" }
+    });
+  }
+
   if (!body.question) {
     return new Response(JSON.stringify({ error: "No question provided" }), {
       status: 400, headers: { "Content-Type": "application/json" }

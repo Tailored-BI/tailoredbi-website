@@ -734,42 +734,146 @@ function saveInsight(data, el) {
   });
 }
 
-function renderInsightChart(insight) {
-  if (!insight.rows || insight.rows.length === 0) return '<div style="color:#8a7a6a;font-size:13px;">No data</div>';
-  var cols = insight.columns || (insight.rows.length > 0 ? Object.keys(insight.rows[0]) : []);
+function formatInsightValue(v, colName) {
+  if (v == null) return '\u2014';
+  var col = String(colName).toLowerCase();
+  var isCurrency = col.indexOf('revenue') !== -1 || col.indexOf('balance') !== -1 || col.indexOf('amt') !== -1 || col.indexOf('amount') !== -1 || col.indexOf('cost') !== -1 || col.indexOf('price') !== -1 || col.indexOf('due') !== -1 || col.indexOf('overdue') !== -1 || col.indexOf('total') !== -1;
+  if (typeof v === 'number') {
+    if (isCurrency) {
+      if (Math.abs(v) >= 1000000) return '$' + (v/1000000).toFixed(1) + 'M';
+      if (Math.abs(v) >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
+      return '$' + v.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+    }
+    return v.toLocaleString();
+  }
+  return String(v);
+}
+
+function isAgingInsight(insight) {
+  var q = (insight.question || '').toLowerCase();
+  var colStr = (insight.columns || []).join(' ').toLowerCase();
+  return (q.indexOf('aging') !== -1 || q.indexOf('bucket') !== -1 || colStr.indexOf('agingbucket') !== -1 || colStr.indexOf('bucket') !== -1);
+}
+
+var chartInstances = {};
+
+function renderInsightChart(insight, chartId) {
+  if (!insight.rows || insight.rows.length === 0) {
+    return '<div style="color:#8a7a6a;font-size:13px;padding:16px 0;">No data available</div>';
+  }
+  var cols = insight.columns || Object.keys(insight.rows[0] || {});
+
   if (insight.chartType === 'number' && insight.rows.length === 1) {
     var val = Object.values(insight.rows[0])[0];
-    var fmt = typeof val === 'number' ? val.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) : String(val);
-    return '<div style="font-size:28px;font-weight:700;color:#3d2b0e;">'+fmt+'</div><div style="font-size:11px;color:#8a7a6a;">'+(cols[0]||'')+'</div>';
+    var fmt = formatInsightValue(val, cols[0]);
+    return '<div style="padding:8px 0;">' +
+      '<div style="font-size:32px;font-weight:600;color:#3d2b0e;line-height:1;">'+fmt+'</div>' +
+      '<div style="font-size:12px;color:#8a7a6a;margin-top:4px;">'+(cols[0]||'')+'</div>' +
+    '</div>';
   }
-  if (insight.chartType === 'bar' && insight.rows.length > 0) {
+
+  if (isAgingInsight(insight)) {
+    var agingOrder = ['Current','1-30','31-60','61-90','90+'];
+    var agingColors = {'Current':'#3B6D11','1-30':'#BA7517','31-60':'#D85A30','61-90':'#E24B4A','90+':'#A32D2D'};
     var labelCol = cols[0];
-    var valueCol = cols[1];
-    var maxVal = Math.max.apply(null, insight.rows.map(function(r) { return Number(r[valueCol]) || 0; }));
-    var bars = insight.rows.slice(0, 8).map(function(r) {
-      var pct = maxVal > 0 ? (Number(r[valueCol]) / maxVal * 100).toFixed(1) : 0;
-      var fmtV = typeof r[valueCol] === 'number' ? Number(r[valueCol]).toLocaleString() : String(r[valueCol]);
-      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">' +
-        '<div style="width:90px;font-size:11px;color:#6a5a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r[labelCol]+'</div>' +
-        '<div style="flex:1;background:#f0ebe4;border-radius:2px;height:14px;position:relative;">' +
-          '<div style="width:'+pct+'%;background:#c4511a;height:100%;border-radius:2px;"></div>' +
+    var valueCol = cols[1] || cols[0];
+    var rows = [].concat(insight.rows).sort(function(a,b) {
+      return agingOrder.indexOf(String(a[labelCol])) - agingOrder.indexOf(String(b[labelCol]));
+    });
+    var maxVal = Math.max.apply(null, rows.map(function(r) { return Number(r[valueCol]) || 0; }));
+    var total = rows.reduce(function(s,r) { return s + (Number(r[valueCol]) || 0); }, 0);
+    var bars = rows.map(function(r) {
+      var label = String(r[labelCol]);
+      var val2 = Number(r[valueCol]) || 0;
+      var pct = maxVal > 0 ? Math.round(val2/maxVal*100) : 0;
+      var color = agingColors[label] || '#888780';
+      var fmt2 = formatInsightValue(val2, valueCol);
+      var sharePct = total > 0 ? Math.round(val2/total*100) : 0;
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+        '<div style="width:52px;font-size:12px;font-weight:600;color:'+color+';">'+label+'</div>' +
+        '<div style="flex:1;background:#f0ebe4;border-radius:3px;height:16px;">' +
+          '<div style="width:'+pct+'%;background:'+color+';height:100%;border-radius:3px;"></div>' +
         '</div>' +
-        '<div style="width:60px;text-align:right;font-size:11px;color:#3d2b0e;font-weight:600;">'+fmtV+'</div>' +
+        '<div style="width:64px;text-align:right;font-size:12px;font-weight:600;color:'+color+';">'+fmt2+'</div>' +
+        '<div style="width:36px;text-align:right;font-size:11px;color:#aaa09a;">'+sharePct+'%</div>' +
       '</div>';
     }).join('');
-    return '<div style="margin-top:4px;">'+bars+'</div>';
+    var overdueRow = rows.filter(function(r) { return String(r[labelCol]) === '90+'; })[0];
+    var overdueAmt = overdueRow ? Number(overdueRow[valueCol]) : 0;
+    var overdueShare = total > 0 ? Math.round(overdueAmt/total*100) : 0;
+    var alert = overdueShare > 50 ? '<div style="margin-top:10px;padding:8px 12px;background:#fff0f0;border-left:3px solid #A32D2D;font-size:12px;color:#A32D2D;">90+ bucket is '+overdueShare+'% of total open AR \u2014 immediate attention required</div>' : '';
+    return '<div style="margin-top:4px;">'+bars+alert+'</div>';
   }
-  var headers = cols.map(function(c) { return '<th style="text-align:left;padding:4px 8px;font-size:11px;color:#8a7a6a;font-weight:600;border-bottom:1px solid #e2dbd2;">'+c+'</th>'; }).join('');
-  var bodyRows = insight.rows.slice(0, 10).map(function(row) {
+
+  if (insight.chartType === 'bar' || (insight.rows.length > 1 && insight.rows.length <= 12)) {
+    var lCol = cols[0];
+    var vCol = cols[1] || cols[0];
+    var isTimeSeries = (insight.question||'').toLowerCase().indexOf('month') !== -1 || (insight.question||'').toLowerCase().indexOf('trend') !== -1;
+    if (isTimeSeries && insight.rows.length > 2 && typeof Chart !== 'undefined') {
+      var canvasId = chartId || ('chart_' + Math.random().toString(36).substr(2,8));
+      var labels = insight.rows.map(function(r) { return String(r[lCol]); });
+      var values = insight.rows.map(function(r) { return Number(r[vCol]) || 0; });
+      var vColRef = vCol;
+      setTimeout(function() {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); }
+        chartInstances[canvasId] = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: '#c4511a',
+              borderRadius: 3,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: function(ctx) { return ' ' + formatInsightValue(ctx.raw, vColRef); } } }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#8a7a6a', maxRotation: 45, autoSkip: false } },
+              y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, color: '#8a7a6a', callback: function(v) { return formatInsightValue(v, vColRef); } } }
+            }
+          }
+        });
+      }, 100);
+      return '<div style="position:relative;height:160px;"><canvas id="'+canvasId+'"></canvas></div>';
+    }
+    var mxVal = Math.max.apply(null, insight.rows.map(function(r) { return Number(r[vCol]) || 0; }));
+    var hBars = insight.rows.slice(0,10).map(function(r) {
+      var pct2 = mxVal > 0 ? Math.round(Number(r[vCol])/mxVal*100) : 0;
+      var fV = formatInsightValue(r[vCol], vCol);
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+        '<div style="width:120px;font-size:11px;color:#6a5a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">'+r[lCol]+'</div>' +
+        '<div style="flex:1;background:#f0ebe4;border-radius:3px;height:14px;">' +
+          '<div style="width:'+pct2+'%;background:#c4511a;height:100%;border-radius:3px;"></div>' +
+        '</div>' +
+        '<div style="width:70px;text-align:right;font-size:11px;font-weight:600;color:#3d2b0e;flex-shrink:0;">'+fV+'</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="margin-top:4px;">'+hBars+'</div>';
+  }
+
+  var isDaysCol = function(c) { return c.toLowerCase().indexOf('day') !== -1 || c.toLowerCase().indexOf('age') !== -1 || c.toLowerCase().indexOf('past') !== -1; };
+  var tHeaders = cols.map(function(c) { return '<th style="text-align:left;padding:5px 8px;font-size:11px;color:#8a7a6a;font-weight:600;border-bottom:1px solid #e2dbd2;white-space:nowrap;">'+c+'</th>'; }).join('');
+  var tRows = insight.rows.slice(0,10).map(function(row) {
     var cells = cols.map(function(c) {
       var v = row[c];
-      var isAmt = typeof v === 'number' && (String(c).toLowerCase().indexOf('amt') !== -1 || String(c).toLowerCase().indexOf('balance') !== -1 || String(c).toLowerCase().indexOf('revenue') !== -1 || String(c).toLowerCase().indexOf('cost') !== -1);
-      var display = isAmt ? '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : v == null ? '\u2014' : String(v);
-      return '<td style="padding:4px 8px;font-size:12px;color:#3d2b0e;border-bottom:1px solid #f5f0e8;">'+display+'</td>';
+      var fmt3 = formatInsightValue(v, c);
+      var isAmt = typeof v === 'number' && (c.toLowerCase().indexOf('balance') !== -1 || c.toLowerCase().indexOf('revenue') !== -1 || c.toLowerCase().indexOf('amt') !== -1 || c.toLowerCase().indexOf('due') !== -1);
+      var isAlert = isDaysCol(c) && typeof v === 'number' && v > 60;
+      var style = isAlert ? 'color:#A32D2D;font-weight:600;' : isAmt ? 'color:#3d2b0e;font-weight:500;' : 'color:#6a5a4a;';
+      return '<td style="padding:5px 8px;font-size:12px;border-bottom:1px solid #f5f0e8;'+style+'">'+fmt3+'</td>';
     }).join('');
     return '<tr>'+cells+'</tr>';
   }).join('');
-  return '<table style="width:100%;border-collapse:collapse;"><thead><tr>'+headers+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
+  return '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr>'+tHeaders+'</tr></thead><tbody>'+tRows+'</tbody></table></div>';
 }
 
 function renderInsights() {
@@ -791,23 +895,60 @@ function renderInsights() {
     '</div>';
     return;
   }
-  body.innerHTML = insights.map(function(ins) {
-    return '<div style="border:1px solid #e2dbd2;border-radius:8px;padding:16px;margin-bottom:12px;background:#fff;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
-        '<div>' +
-          '<div style="font-size:14px;font-weight:600;color:#3d2b0e;margin-bottom:2px;">'+(ins.title || ins.question)+'</div>' +
-          '<div style="font-size:11px;color:#aaa09a;">'+(ins.dataDate || '')+' \u00b7 Ask Thread</div>' +
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
+  insights.forEach(function(ins, idx) {
+    var cId = 'inschart_' + idx;
+    var isWide = ins.chartType === 'table' ||
+      ((ins.question||'').toLowerCase().indexOf('month') !== -1) ||
+      ((ins.question||'').toLowerCase().indexOf('trend') !== -1) ||
+      (ins.rows && ins.rows.length > 6);
+    var colSpan = isWide ? 'grid-column:1/-1;' : '';
+    html += '<div style="background:#fff;border:1px solid #e2dbd2;border-radius:10px;overflow:hidden;'+colSpan+'">' +
+      '<div style="padding:12px 16px 10px;border-bottom:1px solid #f0ebe4;display:flex;justify-content:space-between;align-items:flex-start;">' +
+        '<div style="flex:1;padding-right:8px;">' +
+          '<div style="font-size:13px;font-weight:600;color:#3d2b0e;margin-bottom:2px;line-height:1.3;">'+(ins.title || ins.question)+'</div>' +
+          '<div style="font-size:11px;color:#aaa09a;display:flex;align-items:center;gap:8px;">' +
+            '<span>'+(ins.dataDate || '')+'</span>' +
+            '<span style="background:#f5f0e8;color:#8a7a6a;padding:1px 7px;border-radius:8px;font-size:10px;">Ask Thread</span>' +
+          '</div>' +
         '</div>' +
-        '<button onclick="refreshInsight(\''+ins.id+'\',\''+String(ins.question||'').replace(/'/g,"\\'")+'\')\" style="background:none;border:1px solid #e2dbd2;border-radius:4px;padding:3px 10px;font-size:11px;color:#8a7a6a;cursor:pointer;font-family:inherit;white-space:nowrap;">\u21BB Refresh</button>' +
+        '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+          '<button onclick="refreshInsight(\''+ins.id+'\',\''+String(ins.question||'').replace(/'/g,"\\'")+'\')\" style="background:none;border:1px solid #e2dbd2;border-radius:4px;padding:3px 8px;font-size:11px;color:#8a7a6a;cursor:pointer;font-family:inherit;" title="Refresh with latest data">\u21BB</button>' +
+          '<button onclick="deleteInsight(\''+ins.id+'\',this)" style="background:none;border:1px solid #f0ddd8;border-radius:4px;padding:3px 8px;font-size:11px;color:#c0201a;cursor:pointer;font-family:inherit;" title="Delete insight">\u00d7</button>' +
+        '</div>' +
       '</div>' +
-      '<div style="margin-bottom:10px;">'+renderInsightChart(ins)+'</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<span style="font-size:11px;color:#8a7a6a;font-style:italic;">'+(ins.explanation||'')+'</span>' +
-        '<span style="font-size:11px;color:#c4511a;cursor:pointer;" onclick="this.parentElement.nextElementSibling.style.display=this.parentElement.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">View SQL</span>' +
+      '<div style="padding:14px 16px;" id="chartarea_'+idx+'">' +
+        renderInsightChart(ins, cId) +
       '</div>' +
-      '<div style="display:none;margin-top:8px;background:#f5f2ed;border-radius:4px;padding:8px;font-size:11px;color:#6a5a4a;font-family:monospace;white-space:pre-wrap;">'+(ins.sql||'')+'</div>' +
+      '<div style="padding:8px 16px 10px;border-top:1px solid #f5f0e8;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-size:11px;color:#8a7a6a;font-style:italic;flex:1;padding-right:8px;">'+(ins.explanation||'')+'</span>' +
+        '<span style="font-size:11px;color:#c4511a;cursor:pointer;white-space:nowrap;" onclick="toggleSQL(this)">View SQL</span>' +
+      '</div>' +
+      '<div class="sql-block" style="display:none;margin:0 16px 12px;background:#f5f2ed;border-radius:4px;padding:8px;font-size:11px;color:#6a5a4a;font-family:monospace;white-space:pre-wrap;overflow-x:auto;">'+(ins.sql||'')+'</div>' +
     '</div>';
-  }).join('');
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function toggleSQL(el) {
+  var card = el.closest('[style*="border-radius:10px"]');
+  var block = card ? card.querySelector('.sql-block') : null;
+  if (block) {
+    block.style.display = block.style.display === 'none' ? 'block' : 'none';
+    el.textContent = block.style.display === 'none' ? 'View SQL' : 'Hide SQL';
+  }
+}
+
+function deleteInsight(id, el) {
+  if (!confirm('Delete this Thread Insight?')) return;
+  fetch('/api/save-insight', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ client: 'heartland', deleteId: id })
+  })
+  .then(function() { statusData = null; loadStatus().then(function() { renderInsights(); }); })
+  .catch(function() {});
 }
 
 function refreshInsight(id, question) {
@@ -940,5 +1081,6 @@ function checkGate(){
   renderWorkspace();
 })();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </body>
 </html>
