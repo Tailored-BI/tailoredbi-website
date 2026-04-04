@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Heartland Ag Parts — Thread &middot; Tailored.BI</title>
+<title>Heartland Ag Parts — Thread Portal &middot; Tailored.BI</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
 body{background:#f5f2ed;color:#3d2b0e;}
@@ -134,13 +134,13 @@ table.dt tr:hover td{background:#faf7f4;}
   <a href="https://tailored.bi" class="topbar-brand">Tailored.BI</a>
   <div class="topbar-links">
     <a href="/heartland" class="topbar-link">&larr; Heartland Showcase</a>
-    <a href="/heartland/status" class="topbar-link">Morning Thread</a>
+    <a href="/heartland/status" class="topbar-link">Pipeline Status</a>
   </div>
 </div>
 
 <div class="header">
   <div class="header-left">
-    <h1>Heartland Ag Parts Co. &mdash; Client Portal</h1>
+    <h1>Heartland Ag Parts Co. &mdash; Thread Portal</h1>
     <p>Make to Stock &middot; Ag Manufacturing &middot; Lohrville, Iowa &middot; Fictitious demo company</p>
   </div>
   <div class="header-badge" id="dataBadge">
@@ -152,8 +152,8 @@ table.dt tr:hover td{background:#faf7f4;}
 <div class="nav">
   <div class="nav-tab active" onclick="showTab('briefing',this)">Morning Thread</div>
   <div class="nav-tab" onclick="showTab('ask',this)">Ask Thread</div>
-  <div class="nav-tab" onclick="showTab('status',this)">Pipeline status</div>
-  <div class="nav-tab" onclick="showTab('workspace',this)">Workspace</div>
+  <div class="nav-tab" onclick="showTab('insights',this)">Thread Insights</div>
+  <div class="nav-tab" onclick="showTab('settings',this)">Settings</div>
 </div>
 
 <div class="page active" id="tab-briefing">
@@ -196,11 +196,36 @@ table.dt tr:hover td{background:#faf7f4;}
   </div>
 </div>
 
+<div class="page" id="tab-insights">
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">Thread Insights</div>
+    </div>
+    <div class="card-body">
+      <div style="padding:40px 20px;text-align:center;">
+        <div style="margin-bottom:16px;">
+          <svg width="48" height="48" viewBox="0 0 28 28" fill="none" style="opacity:0.3;">
+            <rect x="9" y="5" width="10" height="18" rx="2" fill="#3d2b0e"/>
+            <rect x="6" y="3" width="16" height="5" rx="2.5" fill="#3d2b0e"/>
+            <rect x="6" y="20" width="16" height="5" rx="2.5" fill="#3d2b0e"/>
+            <rect x="10" y="7" width="8" height="14" rx="1" fill="#c4963a"/>
+            <path d="M18 14C21 13 23 13 24.5 13.5" stroke="#c4963a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="24.5" cy="13.5" r="2" fill="#c4963a"/>
+          </svg>
+        </div>
+        <div style="font-size:16px;font-weight:600;color:#3d2b0e;margin-bottom:8px;">Thread Insights — Coming soon</div>
+        <div style="font-size:14px;color:#8a7a6a;max-width:400px;margin:0 auto;line-height:1.6;">When Thread surfaces an insight in your Morning Thread or you find something useful in Ask Thread, save it here. Thread Insights builds your personal library of visual analyses over time.</div>
+        <div style="margin-top:20px;font-size:13px;color:#c4963a;">Ask Thread a question and look for the "Save as Thread Insight" option coming soon.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="tab-status">
   <div id="statusContent" class="loading">Loading pipeline status...</div>
 </div>
 
-<div class="page" id="tab-workspace">
+<div class="page" id="tab-settings">
   <div id="workspaceContent" class="loading">Loading workspace inventory...</div>
 </div>
 
@@ -225,8 +250,9 @@ function showTab(name, el) {
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('tab-' + name).classList.add('active');
   el.classList.add('active');
-  if (name === 'briefing') { statusData = null; loadStatus(); }
-  if ((name === 'status' || name === 'workspace') && !statusData) loadStatus();
+  if (name === 'briefing') { statusData = null; loadStatus().then(function(){renderBriefing();}); }
+  if (name === 'settings' && !statusData) loadStatus().then(function(){renderWorkspace();renderStatus();});
+  if (name === 'insights') {}
 }
 
 function dots(s) {
@@ -332,7 +358,16 @@ function renderWorkspace() {
     '<div id="prefsSaveStatus" style="font-size:11px;margin-top:6px;text-align:right;"></div>' +
   '</div>';
 
-  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml;
+  var pipelineSection = '';
+  var statusEl = document.getElementById('statusContent');
+  if (statusEl && statusEl.innerHTML && statusEl.innerHTML.indexOf('Loading') === -1) {
+    pipelineSection = '<div style="margin-top:16px;">' +
+      '<div style="font-size:12px;font-weight:700;color:#8a7a6a;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Pipeline status</div>' +
+      statusEl.innerHTML +
+    '</div>';
+  }
+
+  document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml + pipelineSection;
 }
 
 function savePreferences() {
