@@ -21,7 +21,7 @@ body{background:#f5f2ed;color:#3d2b0e;}
 .topbar{background:#0b1120;height:36px;display:flex;align-items:center;padding:0 20px;justify-content:space-between;}
 .topbar-brand{color:#D4A843;font-size:13px;font-weight:700;text-decoration:none;}
 .topbar-links{display:flex;gap:20px;}
-.topbar-link{color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;}
+.topbar-link{color:rgba(255,255,255,0.75);font-size:13px;text-decoration:none;}
 .topbar-link:hover{color:#D4A843;}
 .header{background:#3d2b0e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 .header-left h1{color:#f5f0e8;font-size:22px;font-weight:700;margin-bottom:4px;}
@@ -39,7 +39,7 @@ body{background:#f5f2ed;color:#3d2b0e;}
 .card-hdr{background:#f9f6f2;padding:9px 16px;border-bottom:1px solid #e2dbd2;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
 .card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8a7a6a;}
 .card-meta{font-size:10px;color:#aaa;display:flex;align-items:center;gap:6px;}
-.ai-pill{background:#f0e8ff;color:#4a1080;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;}
+.ai-pill{background:#f0e8ff;color:#5a2d8a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.04em;}
 .card-body{padding:16px;}
 .insight{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f0ebe4;}
 .insight:last-child{border-bottom:none;}
@@ -134,7 +134,7 @@ table.dt tr:hover td{background:#faf7f4;}
   <a href="https://tailored.bi" class="topbar-brand">Tailored.BI</a>
   <div class="topbar-links">
     <a href="/heartland" class="topbar-link">&larr; Heartland Showcase</a>
-    <a href="/heartland/status" class="topbar-link">Pipeline Status</a>
+    <a href="/heartland/status" class="topbar-link">Morning Thread</a>
   </div>
 </div>
 
@@ -381,15 +381,15 @@ function renderBriefing() {
       '</div>' +
       '<div style="padding:10px 14px;display:flex;flex-direction:column;gap:10px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Last refresh</div><div style="color:#3d2b0e;font-size:13px;font-weight:600;">'+dh.lastRefresh+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Last refresh</div><div style="color:#3d2b0e;font-size:14px;font-weight:600;">'+dh.lastRefresh+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Tables loaded</div><div style="color:#2a7a2a;font-size:13px;font-weight:600;">'+dh.tablesSuccess+' / '+dh.tablesTotal+' \u2713</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Tables loaded</div><div style="color:#2a7a2a;font-size:14px;font-weight:600;">'+dh.tablesSuccess+' / '+dh.tablesTotal+' \u2713</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Records</div><div style="color:#c4511a;font-size:13px;font-weight:600;">'+recordsFormatted+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Records</div><div style="color:#c4511a;font-size:14px;font-weight:600;">'+recordsFormatted+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Duration</div><div style="color:#3d2b0e;font-size:13px;font-weight:600;">'+dh.duration+'</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Duration</div><div style="color:#3d2b0e;font-size:14px;font-weight:600;">'+dh.duration+'</div></div>' +
           '<div style="width:1px;height:24px;background:#e2dbd2;"></div>' +
-          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">30-day streak</div><div style="color:#2a7a2a;font-size:13px;font-weight:600;">'+dh.streakOk+' / '+dh.streakTotal+' \u2713</div></div>' +
+          '<div style="text-align:center;"><div style="color:#8a7a6a;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">30-day streak</div><div style="color:#2a7a2a;font-size:14px;font-weight:600;">'+dh.streakOk+' / '+dh.streakTotal+' \u2713</div></div>' +
         '</div>' +
         (tableDots ? '<div><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Table status</div><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;">'+tableDots+'</div></div>' : '') +
         (streakBars ? '<div><div style="color:#8a7a6a;font-size:8px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Run history</div><div style="display:flex;gap:2px;align-items:flex-end;">'+streakBars+'</div></div>' : '') +
@@ -398,9 +398,9 @@ function renderBriefing() {
           '<div style="color:#8a6a4a;font-size:9px;line-height:1.5;">If any table fails to load, Tailored.BI receives an immediate alert. Issues are typically resolved before your team arrives.</div>' +
         '</div>' +
       '</div>' +
-      '<div style="background:#f9f6f2;padding:6px 14px;display:flex;justify-content:space-between;border-top:1px solid #e2dbd2;">' +
-        '<div style="color:#aaa09a;font-size:8px;">Heartland Ag Parts Co. \u00b7 Microsoft Fabric \u00b7 Epicor Kinetic</div>' +
-        '<div style="color:#aaa09a;font-size:8px;">Managed by Tailored.BI</div>' +
+      '<div style="background:#f9f6f2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2dbd2;">' +
+        '<div style="color:#6a5a4a;font-size:11px;font-weight:600;">Heartland Ag Parts Co. \u00b7 Morning Thread</div>' +
+        '<div style="color:#aaa09a;font-size:11px;">Managed by Tailored.BI</div>' +
       '</div>' +
     '</div>';
   }
