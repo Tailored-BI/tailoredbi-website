@@ -329,6 +329,8 @@ export default async (req: Request, context: Context) => {
       if (invRes.ok) {
         const inv = await invRes.json();
         threadPreferences = inv.threadPreferences || {};
+    const insightCount = Number(threadPreferences.insightCount) || 5;
+    const memoryDays = Number(threadPreferences.memoryDays) || 7;
       }
     } catch { threadPreferences = {}; }
 
@@ -338,9 +340,9 @@ export default async (req: Request, context: Context) => {
       });
       if (askRes.ok) {
         const allAsks = await askRes.json();
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const memoryDaysAgo = new Date(Date.now() - memoryDays * 24 * 60 * 60 * 1000).toISOString();
         askHistory = allAsks.filter((a: Record<string, unknown>) =>
-          String(a.askedAt || '') > sevenDaysAgo
+          String(a.askedAt || '') > memoryDaysAgo
         ).slice(0, 20);
       }
     } catch { askHistory = []; }
@@ -355,7 +357,7 @@ export default async (req: Request, context: Context) => {
       });
       if (histRes.ok) {
         priorHistory = await histRes.json();
-        if (priorHistory.length > MAX_HISTORY_DAYS) priorHistory = priorHistory.slice(0, MAX_HISTORY_DAYS);
+        if (priorHistory.length > memoryDays) priorHistory = priorHistory.slice(0, memoryDays);
       }
     } catch { priorHistory = []; }
 
@@ -385,7 +387,7 @@ ${askHistory.map((a: Record<string, unknown>) => '- "' + a.question + '"' + (a.a
 
 Use these questions as signals about what the client is thinking about. If they have been asking about a topic repeatedly, proactively surface insights about it even if Thread would not normally flag it.
 
-` : ''}Your job is to identify 3-5 specific, actionable insights the owner or CFO should know about today.
+` : ''}Your job is to identify exactly ${insightCount} specific, actionable insights the owner or CFO should know about today. No more, no fewer.
 
 Use prior briefings to:
 - Note if a flagged issue is getting worse

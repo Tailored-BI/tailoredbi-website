@@ -92,20 +92,23 @@ export default async (req: Request, context: Context) => {
   const briefing = await briefingRes.json();
   const inventory = inventoryRes.ok ? await inventoryRes.json() : null;
 
-  const config = inventory?.notifications?.briefingEmail;
-  if (!config?.enabled) {
-    return new Response(JSON.stringify({ skipped: "Email notifications disabled" }), {
+  const prefs = inventory?.threadPreferences || {};
+  const config = inventory?.notifications?.briefingEmail || {};
+
+  const deliveryDays: number[] = prefs.deliveryDays?.length > 0
+    ? prefs.deliveryDays
+    : (config.weekdayOnly !== false ? [1,2,3,4,5] : [1,2,3,4,5]);
+
+  const todayDay = new Date().getDay() === 0 ? 7 : new Date().getDay();
+  if (!deliveryDays.includes(todayDay)) {
+    return new Response(JSON.stringify({ skipped: `Not a delivery day (day ${todayDay})` }), {
       status: 200, headers: { "Content-Type": "application/json" }
     });
   }
 
-  if (config.weekdayOnly && !isWeekday) {
-    return new Response(JSON.stringify({ skipped: "Weekend — briefing email skipped" }), {
-      status: 200, headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  const recipients: string[] = config.recipients || [];
+  const recipients: string[] = prefs.recipients?.length > 0
+    ? prefs.recipients
+    : (config.recipients || []);
   if (recipients.length === 0) {
     return new Response(JSON.stringify({ skipped: "No recipients configured" }), {
       status: 200, headers: { "Content-Type": "application/json" }

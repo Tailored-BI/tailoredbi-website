@@ -338,7 +338,60 @@ function renderWorkspace() {
     '<div style="font-size:12px;font-weight:600;color:#3d2b0e;margin-bottom:6px;">Custom instructions for Thread</div>' +
     '<div style="font-size:11px;color:#8a7a6a;margin-bottom:8px;">Tell Thread what matters most to your business right now \u2014 seasons, priorities, key customers, anything specific.</div>' +
     '<textarea id="customInstructions" rows="4" style="width:100%;box-sizing:border-box;padding:10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;resize:vertical;line-height:1.5;" placeholder="Example: We are heading into spring planting season \u2014 parts availability is the #1 priority. Flag any customer with more than $50K overdue by name.">'+(prefs.customInstructions || '')+'</textarea>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">' +
+    '<div style="border-top:1px solid #f0ebe4;margin-top:16px;padding-top:16px;">' +
+      '<div style="font-size:12px;font-weight:600;color:#3d2b0e;margin-bottom:12px;">Morning Thread delivery</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">' +
+        '<div>' +
+          '<div style="font-size:12px;color:#6a5a4a;margin-bottom:6px;">Insights per briefing</div>' +
+          '<select id="insightCount" style="width:100%;padding:8px 10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;">' +
+            '<option value="3"'+((prefs.insightCount||5)==3?' selected':'')+'>3 \u2014 focused</option>' +
+            '<option value="4"'+((prefs.insightCount||5)==4?' selected':'')+'>4</option>' +
+            '<option value="5"'+((prefs.insightCount||5)==5?' selected':'')+'>5 \u2014 recommended</option>' +
+            '<option value="6"'+((prefs.insightCount||5)==6?' selected':'')+'>6</option>' +
+            '<option value="7"'+((prefs.insightCount||5)==7?' selected':'')+'>7</option>' +
+            '<option value="8"'+((prefs.insightCount||5)==8?' selected':'')+'>8 \u2014 comprehensive</option>' +
+          '</select>' +
+        '</div>' +
+        '<div>' +
+          '<div style="font-size:12px;color:#6a5a4a;margin-bottom:6px;">Memory depth</div>' +
+          '<select id="memoryDays" style="width:100%;padding:8px 10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;">' +
+            '<option value="7"'+((prefs.memoryDays||7)==7?' selected':'')+'>7 days \u2014 one week</option>' +
+            '<option value="14"'+((prefs.memoryDays||7)==14?' selected':'')+'>14 days \u2014 two weeks</option>' +
+            '<option value="30"'+((prefs.memoryDays||7)==30?' selected':'')+'>30 days \u2014 one month</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:12px;color:#6a5a4a;margin-bottom:8px;">Deliver Morning Thread on</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+        (function() {
+          var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+          var dd = prefs.deliveryDays || [1,2,3,4,5];
+          return days.map(function(day, i) {
+            var num = i + 1;
+            var checked = dd.indexOf(num) !== -1;
+            return '<label style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:'+(checked?'#3d2b0e':'#f9f6f2')+';color:'+(checked?'#f5f0e8':'#6a5a4a')+';border:1px solid '+(checked?'#3d2b0e':'#e2dbd2')+';border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">' +
+              '<input type="checkbox" id="day_'+num+'"'+(checked?' checked':'')+' style="display:none;" onchange="updateDayLabel(this)"/>' +
+              day +
+            '</label>';
+          }).join('');
+        })() +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:12px;color:#6a5a4a;margin-bottom:6px;">Morning Thread recipients</div>' +
+        '<div id="recipientsList">' +
+        (prefs.recipients || ['david@tailored.bi']).map(function(r, i) {
+          return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;" id="rec_'+i+'">' +
+            '<input type="email" value="'+r+'" id="recipient_'+i+'" style="flex:1;padding:7px 10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;"/>' +
+            '<span style="color:#c0201a;cursor:pointer;font-size:16px;padding:0 4px;" onclick="removeRecipient('+i+')">\u00d7</span>' +
+          '</div>';
+        }).join('') +
+        '</div>' +
+        '<span style="font-size:12px;color:#c4963a;cursor:pointer;" onclick="addRecipient()">+ Add recipient</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #f0ebe4;">' +
       '<div style="font-size:11px;color:#aaa09a;">'+(prefs.updatedAt ? 'Last saved: '+prefs.updatedAt : 'Not yet saved')+'</div>' +
       '<button onclick="savePreferences()" style="background:#c4511a;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save preferences</button>' +
     '</div>' +
@@ -346,6 +399,35 @@ function renderWorkspace() {
   '</div>';
 
   document.getElementById('workspaceContent').innerHTML = '<div class="card"><div class="card-hdr"><div class="card-title">Workspace inventory</div><div class="card-meta">'+inv.subscription+' subscription \u00b7 '+inv.items.length+' deliverables \u00b7 Last updated '+inv.lastUpdated+'</div></div><table class="dt"><thead><tr><th style="width:110px;">Type</th><th>Name</th><th class="hide-mob">Detail</th><th style="width:110px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>' + prefsHtml;
+}
+
+function updateDayLabel(checkbox) {
+  var label = checkbox.closest('label');
+  if (checkbox.checked) {
+    label.style.background = '#3d2b0e';
+    label.style.color = '#f5f0e8';
+    label.style.borderColor = '#3d2b0e';
+  } else {
+    label.style.background = '#f9f6f2';
+    label.style.color = '#6a5a4a';
+    label.style.borderColor = '#e2dbd2';
+  }
+}
+
+function addRecipient() {
+  var list = document.getElementById('recipientsList');
+  var count = list.querySelectorAll('[id^="rec_"]').length;
+  var div = document.createElement('div');
+  div.id = 'rec_' + count;
+  div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;';
+  div.innerHTML = '<input type="email" id="recipient_'+count+'" placeholder="email@company.com" style="flex:1;padding:7px 10px;font-size:13px;color:#3d2b0e;background:#f9f6f2;border:1px solid #e2dbd2;border-radius:6px;font-family:inherit;"/>' +
+    '<span style="color:#c0201a;cursor:pointer;font-size:16px;padding:0 4px;" onclick="removeRecipient('+count+')">\u00d7</span>';
+  list.appendChild(div);
+}
+
+function removeRecipient(i) {
+  var el = document.getElementById('rec_' + i);
+  if (el) el.remove();
 }
 
 function savePreferences() {
@@ -356,6 +438,22 @@ function savePreferences() {
   });
   var customInstructions = (document.getElementById('customInstructions') || {}).value || '';
   customInstructions = customInstructions.trim();
+  var insightCount = parseInt((document.getElementById('insightCount') || {}).value || '5');
+  var memoryDays = parseInt((document.getElementById('memoryDays') || {}).value || '7');
+  var deliveryDays = [];
+  [1,2,3,4,5,6,7].forEach(function(d) {
+    var cb = document.getElementById('day_' + d);
+    if (cb && cb.checked) deliveryDays.push(d);
+  });
+  var recipients = [];
+  var ri = 0;
+  while (true) {
+    var recEl = document.getElementById('recipient_' + ri);
+    if (!recEl) break;
+    var val = recEl.value.trim();
+    if (val) recipients.push(val);
+    ri++;
+  }
   var statusEl = document.getElementById('prefsSaveStatus');
   if (statusEl) statusEl.textContent = 'Saving...';
 
@@ -364,7 +462,7 @@ function savePreferences() {
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       client: 'heartland',
-      preferences: { focusAreas: focusAreas, customInstructions: customInstructions }
+      preferences: { focusAreas: focusAreas, customInstructions: customInstructions, insightCount: insightCount, memoryDays: memoryDays, deliveryDays: deliveryDays, recipients: recipients }
     })
   })
   .then(function(r) { return r.json(); })
@@ -377,6 +475,10 @@ function savePreferences() {
       statusData.inventory.threadPreferences = {
         focusAreas: focusAreas,
         customInstructions: customInstructions,
+        insightCount: insightCount,
+        memoryDays: memoryDays,
+        deliveryDays: deliveryDays,
+        recipients: recipients,
         updatedAt: new Date().toISOString().split('T')[0]
       };
     }
