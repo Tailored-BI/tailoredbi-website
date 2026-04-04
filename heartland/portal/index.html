@@ -25,7 +25,7 @@ body{background:#f5f2ed;color:#3d2b0e;}
 .topbar-link:hover{color:#D4A843;}
 .header{background:#3d2b0e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 .header-left h1{color:#f5f0e8;font-size:22px;font-weight:700;margin-bottom:4px;}
-.header-left p{color:#8a7040;font-size:13px;}
+.header-left p{color:#c4a060;font-size:14px;}
 .header-badge{background:rgba(196,150,58,0.15);border:1px solid rgba(196,150,58,0.3);border-radius:16px;padding:5px 12px;display:flex;align-items:center;gap:6px;}
 .hb-dot{width:7px;height:7px;border-radius:50%;background:#c4963a;}
 .hb-text{color:#c4963a;font-size:12px;font-weight:700;}
@@ -525,12 +525,13 @@ function checkGate(){
   }
 })();
 
-statusData = null;
-loadStatus().then(() => {
+(async () => {
+  statusData = null;
+  await loadStatus();
   renderBriefing();
   renderStatus();
   renderWorkspace();
-});
+})();
 </script>
 </body>
 </html>
