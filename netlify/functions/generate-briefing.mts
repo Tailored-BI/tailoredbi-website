@@ -475,6 +475,28 @@ Generate the daily briefing.`
     await commitToGitHub(briefingJson, githubToken);
     const updatedHistory = await getAndUpdateHistory(briefing, githubToken);
 
+    // ── Save briefing to Thread PWA database ────────────────────────────────
+    try {
+      const threadPayload = {
+        client: clientId,
+        dataDate: briefing.dataDate || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        pipelineMissed: briefing.pipelineMissed || false,
+        lastRunMT: briefing.lastRunMT || "",
+        insights: briefing.insights || [],
+        dataHealth: briefing.dataHealth || {},
+      };
+      const threadRes = await fetch("https://tailoredbi-thread.netlify.app/api/save-briefing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(threadPayload),
+      });
+      const threadResult = await threadRes.json();
+      console.log("Thread briefing saved:", threadResult.success ? "SUCCESS" : "FAILED");
+    } catch (err) {
+      console.error("Thread save-briefing failed (non-critical):", err);
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     return new Response(JSON.stringify({ success: true, insightCount: briefing.insights.length, historyDays: updatedHistory.length }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
