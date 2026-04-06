@@ -310,6 +310,37 @@ footer p { font-size:12px; color:var(--muted); }
 .hero h1     {animation:up .5s .08s ease both;}
 .hero-sub    {animation:up .5s .16s ease both;}
 .hero-btns   {animation:up .5s .24s ease both;}
+
+  /* ── PHONE HERO MOCKUP ── */
+  .hero-layout { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; }
+  .hero-phone-wrap { flex-shrink: 0; }
+  .hero-phone { background: #0f1a2e; border-radius: 28px; border: 2px solid rgba(255,255,255,0.12); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); width: 190px; }
+  .hp-notch { height: 6px; background: #1a3a6b; display: flex; justify-content: center; align-items: center; }
+  .hp-notch-bar { width: 36px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .hp-header { background: #1a3a6b; padding: 9px 11px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid rgba(196,150,58,0.3); }
+  .hp-logo { width: 20px; height: 20px; background: #c4963a; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #1a3a6b; flex-shrink: 0; }
+  .hp-title { font-size: 11px; font-weight: 600; color: #fff; line-height: 1; }
+  .hp-sub { font-size: 8px; color: #c4963a; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 1px; }
+  .hp-live { display: flex; align-items: center; gap: 3px; margin-left: auto; }
+  .hp-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+  .hp-live-txt { font-size: 8px; color: #94a3b8; }
+  .hp-body { background: #f4f6f9; padding: 7px; }
+  .hp-banner { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 5px 7px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .hp-banner-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+  .hp-banner-txt { font-size: 8px; font-weight: 600; color: #166534; }
+  .hp-banner-sub { font-size: 7px; color: #86efac; }
+  .hp-sec { font-size: 7px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+  .hp-card { background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 6px; padding: 6px 7px; margin-bottom: 5px; }
+  .hp-card-row { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 2px; }
+  .hp-card-icon { width: 18px; height: 18px; background: rgba(196,150,58,0.12); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+  .hp-card-title { font-size: 8px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+  .hp-card-cat { font-size: 7px; color: #c4963a; font-weight: 500; }
+  .hp-card-body { font-size: 7px; color: #475569; line-height: 1.4; }
+  .hp-card-link { font-size: 7px; color: #c4963a; font-weight: 500; margin-top: 2px; }
+  .hp-tabs { background: #fff; border-top: 1px solid rgba(0,0,0,0.07); display: flex; }
+  .hp-tab { flex: 1; text-align: center; padding: 5px 0; font-size: 7px; color: #94a3b8; }
+  .hp-tab.act { color: #1a3a6b; border-top: 1.5px solid #c4963a; }
+  @media (max-width: 700px) { .hero-layout { grid-template-columns: 1fr; } .hero-phone-wrap { display: none; } }
 </style>
 </head>
 <body>
@@ -335,14 +366,64 @@ footer p { font-size:12px; color:var(--muted); }
 <!-- HERO -->
 <div style="max-width:1180px;margin:0 auto;">
 <div class="hero">
-  <div class="hero-eyebrow">Epicor Kinetic · Microsoft Fabric · Thread</div>
-  <h1>Know your business<br/><span class="acc">before breakfast.</span></h1>
-  <p class="hero-sub" style="font-size:1.15rem;margin-bottom:0.75rem;">A managed AI advisor woven into your Epicor data &mdash; watching your business every night, delivering what matters every morning.</p>
-  <p class="hero-sub">Thread runs nightly on your private Microsoft Fabric warehouse &mdash; pulling every transaction from Epicor, reasoning across your business data, and delivering a Morning Thread before you arrive at work. Your business intelligence, in the palm of your hand &mdash; delivered every morning before you arrive.</p>
-  <p style="font-size:15px;color:var(--gold);font-weight:500;letter-spacing:-.2px;margin-top:-8px;margin-bottom:32px;font-style:italic;">&ldquo;You subscribed to Epicor. Now subscribe to the intelligence.&rdquo;</p>
-  <div class="hero-btns">
-    <a href="#thread" class="btn btn-gold">Meet Thread &rarr;</a>
-    <a href="#contact" class="btn btn-ghost">Start a conversation</a>
+  <div class="hero-layout">
+    <div>
+      <div class="hero-eyebrow">Epicor Kinetic &middot; Microsoft Fabric &middot; Thread</div>
+      <h1>Know your business<br/><span class="acc">before breakfast.</span></h1>
+      <p class="hero-sub" style="font-size:1.15rem;margin-bottom:0.75rem;">A managed AI advisor woven into your Epicor data &mdash; watching your business every night, delivering what matters every morning.</p>
+      <p class="hero-sub">Thread runs nightly on your private Microsoft Fabric warehouse &mdash; pulling every transaction from Epicor, reasoning across your business data, and delivering a Morning Thread before you arrive at work. Your business intelligence, in the palm of your hand &mdash; delivered every morning before you arrive.</p>
+      <p style="font-size:15px;color:var(--gold);font-weight:500;letter-spacing:-.2px;margin-top:-8px;margin-bottom:32px;font-style:italic;">&ldquo;You subscribed to Epicor. Now subscribe to the intelligence.&rdquo;</p>
+      <div class="hero-btns">
+        <a href="#thread" class="btn btn-gold">Meet Thread &rarr;</a>
+        <a href="#contact" class="btn btn-ghost">Start a conversation</a>
+      </div>
+    </div>
+    <div class="hero-phone-wrap">
+      <div class="hero-phone">
+        <div class="hp-notch"><div class="hp-notch-bar"></div></div>
+        <div class="hp-header">
+          <div class="hp-logo">T</div>
+          <div><div class="hp-title">Thread</div><div class="hp-sub">Morning Briefing</div></div>
+          <div class="hp-live"><div class="hp-dot"></div><div class="hp-live-txt">Live</div></div>
+        </div>
+        <div class="hp-body">
+          <div class="hp-banner">
+            <div class="hp-banner-dot"></div>
+            <div><div class="hp-banner-txt">Pipeline healthy &middot; Data current</div><div class="hp-banner-sub">Last refresh 8:24 AM</div></div>
+          </div>
+          <div class="hp-sec">Today&rsquo;s insights</div>
+          <div class="hp-card">
+            <div class="hp-card-row">
+              <div class="hp-card-icon">&#9888;</div>
+              <div><div class="hp-card-cat">Action needed</div><div class="hp-card-title">AR aging over 90 days climbed 12%</div></div>
+            </div>
+            <div class="hp-card-body">Three accounts now exceed $25K overdue. Collections outreach recommended today.</div>
+            <div class="hp-card-link">Dig deeper in Thread &rarr;</div>
+          </div>
+          <div class="hp-card">
+            <div class="hp-card-row">
+              <div class="hp-card-icon">&#10003;</div>
+              <div><div class="hp-card-cat">Good news</div><div class="hp-card-title">Revenue up 8% vs. last April</div></div>
+            </div>
+            <div class="hp-card-body">MTD revenue tracking ahead of prior year, driven by parts sales in the South region.</div>
+            <div class="hp-card-link">Dig deeper in Thread &rarr;</div>
+          </div>
+          <div class="hp-card">
+            <div class="hp-card-row">
+              <div class="hp-card-icon">&#9679;</div>
+              <div><div class="hp-card-cat">Watch closely</div><div class="hp-card-title">Vendor lead times stretching</div></div>
+            </div>
+            <div class="hp-card-body">Two key suppliers averaging 18+ day lead times, up from 12 days last quarter.</div>
+          </div>
+        </div>
+        <div class="hp-tabs">
+          <div class="hp-tab act">Briefing</div>
+          <div class="hp-tab">Ask</div>
+          <div class="hp-tab">Reports</div>
+          <div class="hp-tab">Insights</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 </div>
