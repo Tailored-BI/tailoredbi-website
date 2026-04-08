@@ -485,7 +485,7 @@ Generate the daily briefing.`
         insights: briefing.insights || [],
         dataHealth: briefing.dataHealth || {},
       };
-      const threadRes = await fetch("https://tailoredbi-thread.netlify.app/api/save-briefing", {
+      const threadRes = await fetch("https://threadbi.netlify.app/api/save-briefing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(threadPayload),

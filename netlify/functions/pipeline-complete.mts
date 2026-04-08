@@ -1,6 +1,6 @@
 import type { Config } from "@netlify/functions";
 
-const THREAD_URL = "https://tailoredbi-thread.netlify.app";
+const THREAD_URL = "https://threadbi.netlify.app";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
