@@ -343,7 +343,7 @@ footer p { font-size:12px; color:var(--muted); }
   @media (max-width: 700px) { .hero-layout { grid-template-columns: 1fr; } .hero-phone-wrap { display: none; } }
 
   /* ── THREAD APP SHOWCASE ── */
-  .hero-phone-wrap { display: flex; justify-content: center; }
+  .hero-phone-wrap { display: flex; flex-direction: column; align-items: center; }
   .thread-app-showcase {
     background: linear-gradient(160deg, #0d1829, #132040);
     border: 1px solid rgba(196,150,58,0.45);
@@ -450,13 +450,13 @@ footer p { font-size:12px; color:var(--muted); }
       </div>
     </div>
     <div class="hero-phone-wrap">
-      <div class="thread-logo-anim" style="display:flex; flex-direction:column; align-items:center; gap:0; margin-bottom:28px; text-align:center;">
+      <div class="thread-logo-anim" style="display:block; text-align:center; margin-bottom:24px; width:100%;">
         <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:400; letter-spacing:-0.02em; color:#ffffff; line-height:1; display:inline-flex; align-items:baseline;">
           Thread
           <canvas id="knot-hero" width="36" height="78" style="display:inline-block; vertical-align:baseline; margin:0 -7px;"></canvas>
           <span style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#b87d2a; letter-spacing:-0.02em;">bi</span>
         </div>
-        <canvas id="stitch-hero" width="155" height="14" style="display:block; margin-top:-2px;"></canvas>
+        <canvas id="stitch-hero" width="155" height="14" style="display:block; margin:-2px auto 0;"></canvas>
       </div>
       <a href="https://thread.bi" class="thread-app-showcase" style="display:block;text-decoration:none;" onmouseover="this.style.borderColor='rgba(196,150,58,0.9)'" onmouseout="this.style.borderColor='rgba(196,150,58,0.45)'">
         <div class="thread-app-showcase-screen">
