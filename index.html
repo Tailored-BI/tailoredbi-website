@@ -450,6 +450,14 @@ footer p { font-size:12px; color:var(--muted); }
       </div>
     </div>
     <div class="hero-phone-wrap">
+      <div class="thread-logo-anim" style="display:inline-flex; flex-direction:column; align-items:center; gap:0; margin-bottom:16px; width:100%;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:400; letter-spacing:-0.02em; color:#ffffff; line-height:1; display:inline-flex; align-items:baseline;">
+          Thread
+          <canvas id="knot-hero" width="36" height="78" style="display:inline-block; vertical-align:baseline; margin:0 -7px;"></canvas>
+          <span style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#b87d2a; letter-spacing:-0.02em;">bi</span>
+        </div>
+        <canvas id="stitch-hero" width="190" height="14" style="display:block; margin-top:-2px;"></canvas>
+      </div>
       <a href="https://thread.bi" class="thread-app-showcase" style="display:block;text-decoration:none;" onmouseover="this.style.borderColor='rgba(196,150,58,0.9)'" onmouseout="this.style.borderColor='rgba(196,150,58,0.45)'">
         <div class="thread-app-showcase-header" style="display:flex;align-items:center;justify-content:center;gap:10px;">
           <div style="display:flex;align-items:center;gap:8px;">
@@ -529,12 +537,12 @@ footer p { font-size:12px; color:var(--muted); }
     <p style="color:var(--gold);font-size:0.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:0.75rem;">Thread.bi at work</p>
 
     <div class="thread-logo-anim" style="display:inline-flex; flex-direction:column; align-items:flex-start; gap:0; margin-bottom:24px;">
-      <div style="font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:400; letter-spacing:-0.02em; color:#161e30; line-height:1; display:inline-flex; align-items:baseline;">
+      <div style="font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:400; letter-spacing:-0.02em; color:#ffffff; line-height:1; display:inline-flex; align-items:baseline;">
         Thread
-        <canvas id="knot-hero" width="36" height="78" style="display:inline-block; vertical-align:baseline; margin:0 -7px;"></canvas>
+        <canvas id="knot-work" width="36" height="78" style="display:inline-block; vertical-align:baseline; margin:0 -7px;"></canvas>
         <span style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#b87d2a; letter-spacing:-0.02em;">bi</span>
       </div>
-      <canvas id="stitch-hero" width="230" height="14" style="display:block; margin-top:-2px;"></canvas>
+      <canvas id="stitch-work" width="230" height="14" style="display:block; margin-top:-2px;"></canvas>
     </div>
 
     <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.75rem;color:var(--text);">Your managed AI advisor, woven into your data warehouse.</h2>
@@ -1900,84 +1908,93 @@ footer p { font-size:12px; color:var(--muted); }
 </footer>
 
 <script>
+/* ── Thread.bi stitch+knot animation (shared drawing functions, two instances) ── */
 (function() {
-  const kC = document.getElementById('knot-hero');
-  const sC = document.getElementById('stitch-hero');
-  if (!kC || !sC) return;
-  const kX = kC.getContext('2d');
-  const sX = sC.getContext('2d');
   const G = '#b87d2a';
-  const SW = 230, SY = 5, SL = 22, GL = 8, SP = 1.8;
+  const SY = 5, SL = 22, GL = 8, SP = 1.8;
   const KCX = 18, KCY = 72;
-  let phase = 'idle', sp = 0, kp = 0;
-
-  function start() { phase = 'stitch'; sp = 0; tick(); }
-
-  function tick() {
-    if (phase === 'stitch') {
-      sp += SP; drawS(sp);
-      if (sp < SW) requestAnimationFrame(tick);
-      else { drawSFull(); setTimeout(() => { phase = 'knot'; kp = 0; tick(); }, 120); }
-    } else if (phase === 'knot') {
-      kp += 0.022; drawK(kp);
-      if (kp < 1) requestAnimationFrame(tick);
-      else drawK(1);
-    }
-  }
-
-  function drawS(p) {
-    sX.clearRect(0,0,SW,14);
-    const cl = SL+GL; const done = Math.floor(p/cl);
-    for (let i=0;i<done;i++) { const x1=i*cl,x2=Math.min(x1+SL,SW); if(x1>=SW)break; ln(sX,x1,SY,x2,SY,G,1.4); [x1,x2].forEach(x=>ci(sX,x,SY,1.5,G,0.6)); }
-    const cp=p-done*cl, cx=done*cl;
-    if(cx<SW) {
-      if(cp<=SL) { const e=Math.min(cx+cp,SW); ln(sX,cx,SY,e,SY,G,1.4); ci(sX,cx,SY,1.5,G,0.6); nd(sX,e,SY,G,1,14); }
-      else { const x2=Math.min(cx+SL,SW); ln(sX,cx,SY,x2,SY,G,1.4); [cx,x2].forEach(x=>ci(sX,x,SY,1.5,G,0.6));
-        const sp2=(cp-SL)/GL, bx=x2+(cp-SL), by=SY+Math.sin(sp2*Math.PI)*6;
-        sX.beginPath();sX.moveTo(x2,SY);sX.lineTo(Math.min(bx,SW),by);sX.strokeStyle=G;sX.lineWidth=0.8;sX.globalAlpha=0.15;sX.setLineDash([2,3]);sX.stroke();sX.setLineDash([]);sX.globalAlpha=1;
-        if(bx<SW){sX.globalAlpha=0.5;nd(sX,bx,by,G,1,14);sX.globalAlpha=1;}
-      }
-    }
-  }
-
-  function drawSFull() {
-    sX.clearRect(0,0,SW,14); let x=0; const cl=SL+GL;
-    while(x<SW){const x2=Math.min(x+SL,SW);if(x+SL>SW)break;ln(sX,x,SY,x2,SY,G,1.4);[x,x2].forEach(p=>ci(sX,p,SY,1.5,G,0.6));x+=cl;}
-  }
-
-  function drawK(p) {
-    kX.clearRect(0,0,36,78);
-    const cx=KCX, cy=KCY;
-    if(p<0.25){const np=p/0.25;kX.globalAlpha=np;nd(kX,-8+np*(cx+6),cy,G,1,12);kX.globalAlpha=1;return;}
-    if(p>=0.25){
-      const op=Math.min((p-0.25)/0.45,1);
-      const lp=[[cx-4,cy],[cx-5,cy-3],[cx-2,cy-6],[cx+1,cy-6],[cx+4,cy-4],[cx+5,cy-1],[cx+3,cy+2],[cx+1,cy+4],[cx-2,cy+4],[cx-4,cy+2],[cx-4,cy]];
-      const tp=Math.max(2,Math.floor(op*(lp.length-1)));
-      kX.beginPath();kX.moveTo(lp[0][0],lp[0][1]);
-      for(let i=1;i<=tp&&i<lp.length;i++)kX.lineTo(lp[i][0],lp[i][1]);
-      kX.strokeStyle=G;kX.lineWidth=1.5;kX.lineCap='round';kX.lineJoin='round';kX.stroke();
-    }
-    if(p>=0.55){
-      const ip=Math.min((p-0.55)/0.35,1);
-      const il=[[cx-1,cy+1],[cx-2,cy-1],[cx-1,cy-3],[cx+1,cy-3],[cx+3,cy-1],[cx+2,cy+2],[cx,cy+3],[cx-1,cy+1]];
-      const itp=Math.max(2,Math.floor(ip*(il.length-1)));
-      kX.beginPath();kX.moveTo(il[0][0],il[0][1]);
-      for(let i=1;i<=itp&&i<il.length;i++)kX.lineTo(il[i][0],il[i][1]);
-      kX.strokeStyle=G;kX.lineWidth=1.2;kX.lineCap='round';kX.lineJoin='round';kX.stroke();
-    }
-    if(p>=0.85){const dp=(p-0.85)/0.15;kX.beginPath();kX.arc(cx,cy,2*dp,0,Math.PI*2);kX.fillStyle=G;kX.fill();}
-    if(p>=0.8){const tp2=(p-0.8)/0.2;kX.globalAlpha=tp2*0.35;kX.beginPath();kX.moveTo(cx-4,cy-3);kX.quadraticCurveTo(cx-7,cy-7,cx-5,cy-10);kX.strokeStyle=G;kX.lineWidth=1;kX.lineCap='round';kX.stroke();kX.beginPath();kX.moveTo(cx+3,cy+3);kX.quadraticCurveTo(cx+6,cy+6,cx+4,cy+10);kX.stroke();kX.globalAlpha=1;}
-    if(p<0.6){const nf=1-p/0.6;kX.globalAlpha=nf*0.35;nd(kX,cx-3,cy,G,1,11);kX.globalAlpha=1;}
-  }
 
   function ln(c,x1,y1,x2,y2,col,w){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.stroke();}
   function ci(c,x,y,r,col,a){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=col;c.globalAlpha=a||1;c.fill();c.globalAlpha=1;}
   function nd(c,x,y,col,a,l){l=l||14;const ang=-0.42,ex=x+Math.cos(ang)*l,ey=y+Math.sin(ang)*l;c.globalAlpha=a||1;c.beginPath();c.moveTo(x,y);c.lineTo(ex,ey);c.strokeStyle=col;c.lineWidth=2;c.lineCap='round';c.stroke();c.beginPath();c.arc(ex,ey,1.2,0,Math.PI*2);c.fillStyle=col;c.fill();const e2x=x+Math.cos(ang)*l*0.25,e2y=y+Math.sin(ang)*l*0.25;c.save();c.translate(e2x,e2y);c.rotate(ang);c.beginPath();c.ellipse(0,0,2.2,1,0,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=1;c.stroke();c.restore();c.globalAlpha=1;}
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting && phase === 'idle') start(); });
-  }, { threshold: 0.5 });
-  observer.observe(kC);
+  function initAnim(knotId, stitchId, sw) {
+    const kC = document.getElementById(knotId);
+    const sC = document.getElementById(stitchId);
+    if (!kC || !sC) return;
+    const kX = kC.getContext('2d');
+    const sX = sC.getContext('2d');
+    let phase = 'idle', sp = 0, kp = 0;
+
+    function start() { phase = 'stitch'; sp = 0; tick(); }
+
+    function tick() {
+      if (phase === 'stitch') {
+        sp += SP; drawS(sp);
+        if (sp < sw) requestAnimationFrame(tick);
+        else { drawSFull(); setTimeout(() => { phase = 'knot'; kp = 0; tick(); }, 120); }
+      } else if (phase === 'knot') {
+        kp += 0.022; drawK(kp);
+        if (kp < 1) requestAnimationFrame(tick);
+        else drawK(1);
+      }
+    }
+
+    function drawS(p) {
+      sX.clearRect(0,0,sw,14);
+      const cl=SL+GL; const done=Math.floor(p/cl);
+      for(let i=0;i<done;i++){const x1=i*cl,x2=Math.min(x1+SL,sw);if(x1>=sw)break;ln(sX,x1,SY,x2,SY,G,1.4);[x1,x2].forEach(x=>ci(sX,x,SY,1.5,G,0.6));}
+      const cp=p-done*cl,cx=done*cl;
+      if(cx<sw){
+        if(cp<=SL){const e=Math.min(cx+cp,sw);ln(sX,cx,SY,e,SY,G,1.4);ci(sX,cx,SY,1.5,G,0.6);nd(sX,e,SY,G,1,14);}
+        else{const x2=Math.min(cx+SL,sw);ln(sX,cx,SY,x2,SY,G,1.4);[cx,x2].forEach(x=>ci(sX,x,SY,1.5,G,0.6));
+          const sp2=(cp-SL)/GL,bx=x2+(cp-SL),by=SY+Math.sin(sp2*Math.PI)*6;
+          sX.beginPath();sX.moveTo(x2,SY);sX.lineTo(Math.min(bx,sw),by);sX.strokeStyle=G;sX.lineWidth=0.8;sX.globalAlpha=0.15;sX.setLineDash([2,3]);sX.stroke();sX.setLineDash([]);sX.globalAlpha=1;
+          if(bx<sw){sX.globalAlpha=0.5;nd(sX,bx,by,G,1,14);sX.globalAlpha=1;}
+        }
+      }
+    }
+
+    function drawSFull() {
+      sX.clearRect(0,0,sw,14);let x=0;const cl=SL+GL;
+      while(x<sw){const x2=Math.min(x+SL,sw);if(x+SL>sw)break;ln(sX,x,SY,x2,SY,G,1.4);[x,x2].forEach(p=>ci(sX,p,SY,1.5,G,0.6));x+=cl;}
+    }
+
+    function drawK(p) {
+      kX.clearRect(0,0,36,78);
+      const cx=KCX,cy=KCY;
+      if(p<0.25){const np=p/0.25;kX.globalAlpha=np;nd(kX,-8+np*(cx+6),cy,G,1,12);kX.globalAlpha=1;return;}
+      if(p>=0.25){
+        const op=Math.min((p-0.25)/0.45,1);
+        const lp=[[cx-4,cy],[cx-5,cy-3],[cx-2,cy-6],[cx+1,cy-6],[cx+4,cy-4],[cx+5,cy-1],[cx+3,cy+2],[cx+1,cy+4],[cx-2,cy+4],[cx-4,cy+2],[cx-4,cy]];
+        const tp=Math.max(2,Math.floor(op*(lp.length-1)));
+        kX.beginPath();kX.moveTo(lp[0][0],lp[0][1]);
+        for(let i=1;i<=tp&&i<lp.length;i++)kX.lineTo(lp[i][0],lp[i][1]);
+        kX.strokeStyle=G;kX.lineWidth=1.5;kX.lineCap='round';kX.lineJoin='round';kX.stroke();
+      }
+      if(p>=0.55){
+        const ip=Math.min((p-0.55)/0.35,1);
+        const il=[[cx-1,cy+1],[cx-2,cy-1],[cx-1,cy-3],[cx+1,cy-3],[cx+3,cy-1],[cx+2,cy+2],[cx,cy+3],[cx-1,cy+1]];
+        const itp=Math.max(2,Math.floor(ip*(il.length-1)));
+        kX.beginPath();kX.moveTo(il[0][0],il[0][1]);
+        for(let i=1;i<=itp&&i<il.length;i++)kX.lineTo(il[i][0],il[i][1]);
+        kX.strokeStyle=G;kX.lineWidth=1.2;kX.lineCap='round';kX.lineJoin='round';kX.stroke();
+      }
+      if(p>=0.85){const dp=(p-0.85)/0.15;kX.beginPath();kX.arc(cx,cy,2*dp,0,Math.PI*2);kX.fillStyle=G;kX.fill();}
+      if(p>=0.8){const tp2=(p-0.8)/0.2;kX.globalAlpha=tp2*0.35;kX.beginPath();kX.moveTo(cx-4,cy-3);kX.quadraticCurveTo(cx-7,cy-7,cx-5,cy-10);kX.strokeStyle=G;kX.lineWidth=1;kX.lineCap='round';kX.stroke();kX.beginPath();kX.moveTo(cx+3,cy+3);kX.quadraticCurveTo(cx+6,cy+6,cx+4,cy+10);kX.stroke();kX.globalAlpha=1;}
+      if(p<0.6){const nf=1-p/0.6;kX.globalAlpha=nf*0.35;nd(kX,cx-3,cy,G,1,11);kX.globalAlpha=1;}
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting && phase === 'idle') start(); });
+    }, { threshold: 0.5 });
+    observer.observe(kC);
+  }
+
+  // Hero instance (above phone mockup)
+  initAnim('knot-hero', 'stitch-hero', 190);
+  // "Thread.bi at work" section instance
+  initAnim('knot-work', 'stitch-work', 230);
 })();
 </script>
 
