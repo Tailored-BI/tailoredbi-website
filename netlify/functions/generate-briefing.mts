@@ -9,7 +9,7 @@ const ASK_HISTORY_PATH = "clients/heartland/status/ask-history.json";
 const WORKSPACE_INVENTORY_PATH = "clients/heartland/status/workspace-inventory.json";
 const MAX_HISTORY_DAYS = 7;
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
-const FABRIC_DB = "Heartland_Warehouse";
+const FABRIC_DB = "Thread_Warehouse";
 
 async function getFabricToken(tenantId: string, clientId: string, clientSecret: string): Promise<string> {
   const res = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {

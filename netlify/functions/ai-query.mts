@@ -2,7 +2,7 @@ import type { Context, Config } from "@netlify/functions";
 import { Connection, Request as TdsRequest, TYPES } from "tedious";
 
 const FABRIC_HOST = "ps46d6p7gwou5nlxnjxw3r4i2a-vicdsupe53wetowpzk2jtzqoy4.datawarehouse.fabric.microsoft.com";
-const FABRIC_DB = "Heartland_Warehouse";
+const FABRIC_DB = "Thread_Warehouse";
 
 const SCHEMA_CONTEXT = `
 You are a business intelligence assistant for Heartland Ag Parts Co., a make-to-stock agricultural parts manufacturer in Lohrville, Iowa. You have read-only access to their Microsoft Fabric data warehouse.
