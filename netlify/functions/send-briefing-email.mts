@@ -32,7 +32,7 @@ async function sendGraphEmail(token: string, to: string[], subject: string, html
         body: { contentType: "HTML", content: html },
         from: {
           emailAddress: {
-            name: "Thread by Tailored.BI",
+            name: "Thread.bi",
             address: FROM_ADDRESS
           }
         },
@@ -133,19 +133,43 @@ export default async (req: Request, context: Context) => {
       </tr></table>
     </td></tr>` : '';
 
+  const catBadge: Record<string, { bg: string; color: string }> = {
+    revenue:     { bg: '#e8f0e0', color: '#3B6D11' },
+    sales:       { bg: '#e8f0e0', color: '#3B6D11' },
+    collections: { bg: '#fde8e8', color: '#A32D2D' },
+    ar:          { bg: '#fde8e8', color: '#A32D2D' },
+    production:  { bg: '#e6f1fb', color: '#185FA5' },
+    operations:  { bg: '#e6f1fb', color: '#185FA5' },
+    purchasing:  { bg: '#eeedfe', color: '#534AB7' },
+    inventory:   { bg: '#fdf3e3', color: '#854F0B' },
+  };
+  function getCatFromTitle(title: string): string {
+    const t = title.toLowerCase();
+    if (/revenue|margin|sales/i.test(t)) return 'revenue';
+    if (/collect|overdue|aging|ar\b|receivable/i.test(t)) return 'collections';
+    if (/job|production|operat/i.test(t)) return 'production';
+    if (/vendor|purchas|lead.time|ap\b/i.test(t)) return 'purchasing';
+    if (/inventor|stock|part/i.test(t)) return 'inventory';
+    return '';
+  }
+
   const insightsHtml = (briefing.insights || []).map((ins: {
-    severity: string; title: string; text: string; action?: string; suggestedQuery?: string
+    severity: string; title: string; text: string; action?: string; suggestedQuery?: string; category?: string; focusArea?: string
   }) => {
     const s = severityStyle[ins.severity] || severityStyle.info;
+    const cat = (ins.category || ins.focusArea || getCatFromTitle(ins.title)).toLowerCase();
+    const cb = catBadge[cat] || { bg: '#fdf3e3', color: '#854F0B' };
+    const catLabel = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : '';
+    const catHtml = catLabel ? `<span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:${cb.bg};color:${cb.color};padding:2px 7px;border-radius:8px;margin-left:8px;">${catLabel}</span>` : '';
     return `
     <tr><td style="padding:0 0 14px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
         <td width="4" style="background:${s.border};"></td>
         <td style="padding:14px 16px;background:${s.bg};">
-          <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label} — ${ins.title}</p>
+          <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label} — ${ins.title}${catHtml}</p>
           <p style="margin:0${ins.action ? ' 0 8px' : ''};font-size:15px;color:#3d2b0e;line-height:1.65;">${ins.text}</p>
           ${ins.action ? `<p style="margin:0 0 8px;font-size:13px;color:#6a5a4a;font-style:italic;">${ins.action}</p>` : ''}
-          ${ins.suggestedQuery ? `<p style="margin:0;"><a href="https://thread.bi/?tab=ask&query=${encodeURIComponent(ins.suggestedQuery)}&t=${Date.now()}" style="font-size:12px;color:#c4511a;text-decoration:none;font-weight:600;">Dig deeper in Thread →</a></p>` : ''}
+          ${ins.suggestedQuery ? `<p style="margin:0;"><a href="https://thread.bi/?tab=ask&query=${encodeURIComponent(ins.suggestedQuery)}&t=${Date.now()}" style="font-size:12px;color:#BA7517;text-decoration:none;font-weight:600;">Dig deeper in Thread →</a></p>` : ''}
         </td>
       </tr></table>
     </td></tr>`;
@@ -208,14 +232,14 @@ export default async (req: Request, context: Context) => {
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
       <!-- HEADER -->
-      <tr><td style="background-color:#3d2b0e;padding:16px 24px;border-radius:8px 8px 0 0;">
+      <tr><td style="background-color:#0f1e35;padding:16px 24px;border-radius:8px 8px 0 0;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
           <td>
-            <p style="margin:0;font-size:17px;font-weight:700;color:#f5f0e8;">${clientName}</p>
-            <p style="margin:3px 0 0;font-size:13px;color:#8a7040;">Thread by Tailored.BI · ${dataDate}</p>
+            <p style="margin:0;font-size:17px;font-weight:700;color:#f0ead8;">Thread<span style="font-style:italic;color:#c9a84c;">.bi</span></p>
+            <p style="margin:3px 0 0;font-size:13px;color:#6a7a90;">${clientName} · ${dataDate}</p>
           </td>
           <td align="right" valign="top">
-            <p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c4963a;">Morning Thread</p>
+            <p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c9a84c;">Morning Thread</p>
           </td>
         </tr></table>
       </td></tr>
@@ -245,13 +269,13 @@ export default async (req: Request, context: Context) => {
       <tr><td style="background-color:#f9f6f2;padding:20px 24px;border:1px solid #e2dbd2;border-top:none;border-radius:0 0 8px 8px;text-align:center;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td align="center" style="padding:0 0 12px;">
-            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://thread.bi/?t=${Date.now()}" style="height:40px;v-text-anchor:middle;width:220px;" arcsize="15%" fillcolor="#c4511a"><center style="color:#fff;font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:700;">Open Thread →</center></v:roundrect><![endif]-->
+            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://thread.bi/?t=${Date.now()}" style="height:40px;v-text-anchor:middle;width:220px;" arcsize="15%" fillcolor="#c9a84c"><center style="color:#fff;font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:700;">Open Thread →</center></v:roundrect><![endif]-->
             <!--[if !mso]><!-->
-            <a href="https://thread.bi/?t=${Date.now()}" style="display:inline-block;padding:10px 28px;background-color:#c4511a;color:#ffffff;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;mso-hide:all;">Open Thread →</a>
+            <a href="https://thread.bi/?t=${Date.now()}" style="display:inline-block;padding:10px 28px;background-color:#c9a84c;color:#ffffff;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;mso-hide:all;">Open Thread →</a>
             <!--<![endif]-->
           </td></tr>
           <tr><td align="center">
-            <p style="margin:0;font-size:11px;color:#aaa;">Thread by <a href="https://tailored.bi" style="color:#c4963a;text-decoration:none;">Tailored.BI</a></p>
+            <p style="margin:0;font-size:11px;color:#aaa;"><a href="https://thread.bi" style="color:#c9a84c;text-decoration:none;">thread.bi</a> · A product of <a href="https://tailored.bi" style="color:#c9a84c;text-decoration:none;">Tailored.BI</a></p>
           </td></tr>
         </table>
       </td></tr>
