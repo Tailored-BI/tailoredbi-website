@@ -17,6 +17,9 @@ export default async (req: Request) => {
   console.log(`pipeline-complete: client=${client} status=${status}`);
 
   // ── Step 1: Update Thread pipeline status ──────────────────────────────────
+  // TODO Phase 2: send staleCount, perTableStats[] (name, rowCount, duration, stale, nct),
+  // runHistory[] (date, status, tablesLoaded, duration), warehouseRowCounts[] (table, rows, capturedAt)
+  // These fields are needed by the Pipeline dashboard tab for full per-table detail.
   try {
     const r = await fetch(`${THREAD_URL}/api/update-pipeline`, {
       method: "POST",
