@@ -86,8 +86,35 @@ export default async (req: Request) => {
     console.error("Briefing generation failed:", err);
   }
 
-  // ── Step 4: NO EMAIL HERE — email sent by scheduled function at 7am MT ─────
-  steps.push("email: deferred to scheduled send-morning-thread function");
+  // ── Step 4: Send Morning Thread email immediately ──────────────────────────
+  try {
+    const origin = new URL(req.url).origin;
+    const emailRes = await fetch(`${origin}/api/send-briefing-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client }),
+    });
+    const emailData = await emailRes.json();
+    steps.push(`send-email: ${emailRes.status} (${emailData.success ? 'sent' : emailData.error || 'failed'})`);
+    console.log("Email sent:", emailRes.status, emailData.success ? "SUCCESS" : emailData.error);
+
+    // Mark email as sent in Thread DB so backup cron doesn't double-send
+    if (emailData.success) {
+      try {
+        await fetch(`${THREAD_URL}/api/save-briefing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client, markEmailSent: true }),
+        });
+        steps.push("mark-email-sent: done");
+      } catch (markErr) {
+        steps.push(`mark-email-sent: failed - ${markErr}`);
+      }
+    }
+  } catch (err) {
+    steps.push(`send-email: failed - ${err}`);
+    console.error("Email send failed (backup cron will retry):", err);
+  }
 
   return new Response(JSON.stringify({ success: true, steps }), {
     status: 200, headers: { "Content-Type": "application/json" }
