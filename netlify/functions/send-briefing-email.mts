@@ -160,13 +160,15 @@ export default async (req: Request, context: Context) => {
     const cat = (ins.category || ins.focusArea || getCatFromTitle(ins.title)).toLowerCase();
     const cb = catBadge[cat] || { bg: '#fdf3e3', color: '#854F0B' };
     const catLabel = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : '';
-    const catHtml = catLabel ? `<span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:${cb.bg};color:${cb.color};padding:2px 7px;border-radius:8px;margin-left:8px;">${catLabel}</span>` : '';
+    const catHtml = catLabel ? `<span style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:${cb.bg};color:${cb.color};padding:2px 7px;border-radius:8px;">${catLabel}</span>` : '';
     return `
     <tr><td style="padding:0 0 14px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
         <td width="4" style="background:${s.border};"></td>
         <td style="padding:14px 16px;background:${s.bg};">
-          <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label} — ${ins.title}${catHtml}</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${s.color};">${s.label}</p>
+          <p style="margin:0 0 6px;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.35;">${ins.title}</p>
+          ${catHtml ? `<p style="margin:0 0 10px;">${catHtml}</p>` : ''}
           <p style="margin:0${ins.action ? ' 0 8px' : ''};font-size:15px;color:#3d2b0e;line-height:1.65;">${ins.text}</p>
           ${ins.action ? `<p style="margin:0 0 8px;font-size:13px;color:#6a5a4a;font-style:italic;">${ins.action}</p>` : ''}
           ${ins.suggestedQuery ? `<p style="margin:0;"><a href="https://thread.bi/?tab=ask&query=${encodeURIComponent(ins.suggestedQuery)}&t=${Date.now()}" style="font-size:12px;color:#BA7517;text-decoration:none;font-weight:600;">Dig deeper in Thread →</a></p>` : ''}
