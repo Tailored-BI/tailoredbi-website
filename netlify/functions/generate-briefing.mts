@@ -298,9 +298,9 @@ export default async (req: Request, context: Context) => {
                           <strong>What to check:</strong><br/>
                           &bull; Azure VM TBI-Gateway (20.9.85.153) — is it running?<br/>
                           &bull; On-premises data gateway — is it registered and online in Fabric?<br/>
-                          &bull; Fabric pipeline trigger — did the 8am schedule fire?<br/>
+                          &bull; Fabric pipeline trigger — did the 1am schedule fire?<br/>
                           &bull; SQL Server on the gateway machine — is the service running?<br/>
-                          &bull; Task Scheduler — did the 8:30am export script run?
+                          &bull; Task Scheduler — did the 1:30am export script run?
                         </div>
                       </div>
                       <div style="background:#f9f6f2;padding:8px 16px;border:1px solid #e2dbd2;border-top:none;border-radius:0 0 8px 8px;font-size:10px;color:#aaa;">

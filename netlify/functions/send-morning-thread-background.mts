@@ -2,7 +2,7 @@ import type { Config } from "@netlify/functions";
 
 const THREAD_URL = "https://thread.bi";
 
-// Backup email sender — runs at 9:15 AM MT (15:15 UTC)
+// Backup email sender — runs at 6:00 AM MT (12:00 UTC)
 // Only sends if pipeline-complete didn't already send today's email
 export default async (req: Request) => {
   const clients = ["heartland"];
@@ -77,5 +77,5 @@ export default async (req: Request) => {
 };
 
 export const config: Config = {
-  schedule: "15 15 * * *",
+  schedule: "0 12 * * *",
 };
