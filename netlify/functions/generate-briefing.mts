@@ -220,21 +220,42 @@ export default async (req: Request, context: Context) => {
       vendorLeadTimes: vendorLeadTime
     }, null, 2);
 
+    // Fetch pipeline status from Thread.bi (Neon + Thread_Framework fallback)
+    // instead of stale GitHub JSON
     let pipelineStatus: Record<string, unknown> = {};
     try {
-      const psRes = await fetch(`${GITHUB_RAW}/${PIPELINE_STATUS_PATH}`, {
-        headers: {
-          "Authorization": `token ${githubToken}`,
-          "Accept": "application/vnd.github.v3.raw"
-        }
-      });
-      if (psRes.ok) pipelineStatus = await psRes.json();
-    } catch { pipelineStatus = {}; }
+      const psRes = await fetch(`https://thread.bi/api/thread-status?client=${clientId}`);
+      if (psRes.ok) {
+        const threadData = await psRes.json();
+        const pip = threadData.pipeline || {};
+        pipelineStatus = {
+          overallStatus: pip.overallStatus || "UNKNOWN",
+          lastRunMT: pip.lastRunMT || "",
+          tablesSuccess: pip.tablesLoaded || 0,
+          tablesTotal: pip.totalTables || 16,
+          tablesFailed: pip.tablesFailed || 0,
+          duration: pip.duration || "",
+          streakDays: Array.isArray(pip.streakDays) ? pip.streakDays.join(",") : String(pip.streakDays || ""),
+          streakOk: pip.streakOk || 0,
+          streakTotal: pip.streakTotal || 0,
+          tables: pip.tableStatus || [],
+        };
+      }
+    } catch (e) {
+      console.log("thread-status fetch failed, trying GitHub fallback:", String(e).substring(0, 100));
+      try {
+        const psRes2 = await fetch(`${GITHUB_RAW}/${PIPELINE_STATUS_PATH}`, {
+          headers: { "Authorization": `token ${githubToken}`, "Accept": "application/vnd.github.v3.raw" }
+        });
+        if (psRes2.ok) pipelineStatus = await psRes2.json();
+      } catch { pipelineStatus = {}; }
+    }
 
     const streakDays = String(pipelineStatus.streakDays || "");
     const streakArr = streakDays ? streakDays.split(",") : [];
-    const streakOk = streakArr.filter((d: string) => d.trim() === "ok").length;
-    const streakTotal = streakArr.length;
+    // Use pre-calculated values from thread-status if available, else count from array
+    const streakOk = Number(pipelineStatus.streakOk) || streakArr.filter((d: string) => d.trim() === "S" || d.trim() === "ok").length;
+    const streakTotal = Number(pipelineStatus.streakTotal) || streakArr.length;
     const totalRows = Array.isArray(pipelineStatus.tables)
       ? (pipelineStatus.tables as Record<string, unknown>[]).reduce(
           (sum: number, t: Record<string, unknown>) => sum + (Number(t.rowsLoaded) || 0), 0)
