@@ -143,6 +143,11 @@ export default async (req: Request, context: Context) => {
     return new Response(JSON.stringify({ error: "Not configured" }), { status: 500 });
   }
 
+  // Parse POST body — pipeline-status-update sends pipelineStatus directly
+  let reqBody: Record<string, unknown> = {};
+  try { reqBody = await req.json(); } catch { reqBody = {}; }
+  const incomingStatus = reqBody.pipelineStatus as Record<string, unknown> | undefined;
+
   try {
     const queries = [
       `SELECT COUNT(*) AS InvoiceCount, ROUND(SUM(BalanceDue),2) AS TotalOverdue
@@ -220,35 +225,56 @@ export default async (req: Request, context: Context) => {
       vendorLeadTimes: vendorLeadTime
     }, null, 2);
 
-    // Fetch pipeline status from Thread.bi (Neon + Thread_Framework fallback)
-    // instead of stale GitHub JSON
+    // Pipeline status: prefer data passed directly from pipeline-status-update,
+    // fall back to thread-status fetch, then GitHub JSON
     let pipelineStatus: Record<string, unknown> = {};
-    try {
-      const psRes = await fetch(`https://thread.bi/api/thread-status?client=${clientId}`);
-      if (psRes.ok) {
-        const threadData = await psRes.json();
-        const pip = threadData.pipeline || {};
-        pipelineStatus = {
-          overallStatus: pip.overallStatus || "UNKNOWN",
-          lastRunMT: pip.lastRunMT || "",
-          tablesSuccess: pip.tablesLoaded || 0,
-          tablesTotal: pip.totalTables || 16,
-          tablesFailed: pip.tablesFailed || 0,
-          duration: pip.duration || "",
-          streakDays: Array.isArray(pip.streakDays) ? pip.streakDays.join(",") : String(pip.streakDays || ""),
-          streakOk: pip.streakOk || 0,
-          streakTotal: pip.streakTotal || 0,
-          tables: pip.tableStatus || [],
-        };
-      }
-    } catch (e) {
-      console.log("thread-status fetch failed, trying GitHub fallback:", String(e).substring(0, 100));
+    if (incomingStatus && incomingStatus.lastRunMT) {
+      // Use pipeline data passed directly in POST body — no fetch needed
+      console.log("generate-briefing: using pipeline status from POST body");
+      pipelineStatus = {
+        overallStatus: String(incomingStatus.overallStatus || "UNKNOWN"),
+        lastRunMT: String(incomingStatus.lastRunMT || ""),
+        tablesSuccess: Number(incomingStatus.tablesSuccess || 0),
+        tablesTotal: Number(incomingStatus.tablesTotal || 16),
+        tablesFailed: Number(incomingStatus.tablesFailed || 0),
+        duration: String(incomingStatus.duration || ""),
+        streakDays: String(incomingStatus.streakDays || ""),
+        streakOk: Number(incomingStatus.streakOk || 0),
+        streakTotal: Number(incomingStatus.streakTotal || 0),
+        tables: Array.isArray(incomingStatus.tables) ? incomingStatus.tables : [],
+      };
+    } else {
+      // Fallback: fetch from thread-status API, then GitHub JSON
+      console.log("generate-briefing: no POST pipeline data, fetching from thread-status");
       try {
-        const psRes2 = await fetch(`${GITHUB_RAW}/${PIPELINE_STATUS_PATH}`, {
-          headers: { "Authorization": `token ${githubToken}`, "Accept": "application/vnd.github.v3.raw" }
-        });
-        if (psRes2.ok) pipelineStatus = await psRes2.json();
-      } catch { pipelineStatus = {}; }
+        const psRes = await fetch(`https://thread.bi/api/thread-status?client=heartland`);
+        if (psRes.ok) {
+          const threadData = await psRes.json();
+          const pip = threadData.pipeline || {};
+          pipelineStatus = {
+            overallStatus: pip.overallStatus || "UNKNOWN",
+            lastRunMT: pip.lastRunMT || "",
+            tablesSuccess: pip.tablesLoaded || 0,
+            tablesTotal: pip.totalTables || 16,
+            tablesFailed: pip.tablesFailed || 0,
+            duration: pip.duration || "",
+            streakDays: Array.isArray(pip.streakDays) ? pip.streakDays.join(",") : String(pip.streakDays || ""),
+            streakOk: pip.streakOk || 0,
+            streakTotal: pip.streakTotal || 0,
+            tables: pip.tableStatus || [],
+          };
+        } else {
+          throw new Error(`thread-status returned ${psRes.status}`);
+        }
+      } catch (e) {
+        console.log("thread-status fetch failed, trying GitHub fallback:", String(e).substring(0, 100));
+        try {
+          const psRes2 = await fetch(`${GITHUB_RAW}/${PIPELINE_STATUS_PATH}`, {
+            headers: { "Authorization": `token ${githubToken}`, "Accept": "application/vnd.github.v3.raw" }
+          });
+          if (psRes2.ok) pipelineStatus = await psRes2.json();
+        } catch { pipelineStatus = {}; }
+      }
     }
 
     const streakDays = String(pipelineStatus.streakDays || "");
