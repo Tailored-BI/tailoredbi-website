@@ -69,20 +69,44 @@ export default async (req: Request, context: Context) => {
   const clientId = body.client || "heartland";
   const bodyRecipients = Array.isArray(body.recipients) ? body.recipients.filter(e => e && e.includes("@")) : [];
 
-  // ── Query 1: Briefing content from Neon ────────────────────────────────────
+  // ── Query 1: Briefing content from thread.bi (primary) or local Neon (fallback)
   let briefing: Record<string, unknown> | null = null;
   try {
-    const rows = await queryDb(
-      `SELECT b.*, c.name AS client_name
-       FROM briefings b
-       JOIN clients c ON b.client_id = c.client_id
-       WHERE b.client_id = $1
-       ORDER BY b.generated_at DESC LIMIT 1`,
-      [clientId]
-    );
-    briefing = rows[0] || null;
+    // Primary: fetch from thread.bi API (briefings live in thread.bi's Neon)
+    const threadRes = await fetch(`https://thread.bi/api/thread-status?client=${clientId}&_=${Date.now()}`);
+    if (threadRes.ok) {
+      const threadData = await threadRes.json();
+      if (threadData.briefing && threadData.briefing.insights?.length > 0) {
+        briefing = {
+          insights: JSON.stringify(threadData.briefing.insights),
+          data_date: threadData.briefing.dataDate,
+          data_health: JSON.stringify(threadData.briefing.dataHealth || {}),
+          last_run_mt: threadData.briefing.lastRunMT,
+          pipeline_missed: threadData.briefing.pipelineMissed,
+          generated_at: threadData.briefing.generatedAt,
+          client_name: threadData.inventory?.client || "Heartland Ag Parts Co.",
+        };
+        console.log("send-briefing-email: loaded briefing from thread.bi API");
+      }
+    }
   } catch (err) {
-    console.error("send-briefing-email: briefing query failed:", String(err).substring(0, 200));
+    console.log("send-briefing-email: thread.bi fetch failed, trying local Neon:", String(err).substring(0, 100));
+  }
+  // Fallback: local Neon
+  if (!briefing) {
+    try {
+      const rows = await queryDb(
+        `SELECT b.*, c.name AS client_name
+         FROM briefings b
+         JOIN clients c ON b.client_id = c.client_id
+         WHERE b.client_id = $1
+         ORDER BY b.generated_at DESC LIMIT 1`,
+        [clientId]
+      );
+      briefing = rows[0] || null;
+    } catch (err) {
+      console.error("send-briefing-email: local briefing query failed:", String(err).substring(0, 200));
+    }
   }
 
   if (!briefing) {
@@ -92,16 +116,31 @@ export default async (req: Request, context: Context) => {
     });
   }
 
-  // ── Query 2: Pipeline status from Neon ─────────────────────────────────────
+  // ── Query 2: Pipeline status (already fetched from thread.bi above, or local Neon)
   let pip: Record<string, unknown> = {};
   try {
-    const rows = await queryDb(
-      `SELECT * FROM pipeline_status WHERE client_id = $1`,
-      [clientId]
-    );
-    pip = rows[0] || {};
-  } catch (err) {
-    console.error("send-briefing-email: pipeline_status query failed:", String(err).substring(0, 200));
+    // Try thread.bi API first
+    const threadPipRes = await fetch(`https://thread.bi/api/thread-status?client=${clientId}&_=${Date.now()}`);
+    if (threadPipRes.ok) {
+      const td = await threadPipRes.json();
+      const p = td.pipeline || {};
+      pip = {
+        overall_status: p.overallStatus, last_run_mt: p.lastRunMT,
+        tables_loaded: p.tablesLoaded, total_tables: p.totalTables,
+        tables_failed: p.tablesFailed, total_rows: p.totalRows,
+        duration: p.duration, streak_days: (p.streakDays || []).join(","),
+        streak_ok: p.streakOk, streak_total: p.streakTotal,
+        table_status: JSON.stringify(p.tableStatus || []),
+      };
+    }
+  } catch { /* fall through */ }
+  if (!pip.overall_status) {
+    try {
+      const rows = await queryDb(`SELECT * FROM pipeline_status WHERE client_id = $1`, [clientId]);
+      pip = rows[0] || {};
+    } catch (err) {
+      console.error("send-briefing-email: pipeline_status query failed:", String(err).substring(0, 200));
+    }
   }
 
   // ── Query 3: Preferences from Neon ─────────────────────────────────────────
@@ -172,6 +211,31 @@ export default async (req: Request, context: Context) => {
         streakTotal: Number(pip.streak_total || 0),
         overallStatus: String(pip.overall_status || "UNKNOWN"),
       };
+
+  // ── Greeting: personalize with first name if single recipient ───────────────
+  let greetingName = "";
+  if (recipients.length === 1) {
+    try {
+      // Try thread.bi users table for first name
+      const nameRes = await fetch(`https://thread.bi/api/thread-status?client=${clientId}&_=${Date.now()}`);
+      // Alternatively, query local users table
+    } catch { /* ignore */ }
+    if (!greetingName) {
+      try {
+        const nameRows = await queryDb(
+          `SELECT first_name, name FROM users WHERE email = $1 LIMIT 1`,
+          [recipients[0]]
+        );
+        if (nameRows[0]) {
+          greetingName = String(nameRows[0].first_name || String(nameRows[0].name || "").split(" ")[0] || "");
+        }
+      } catch { /* ignore */ }
+    }
+  }
+  const now = new Date();
+  const mtHour = parseInt(now.toLocaleString("en-US", { timeZone: "America/Denver", hour: "numeric", hour12: false }));
+  const timeGreeting = mtHour < 12 ? "Good morning" : mtHour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = greetingName ? `${timeGreeting}, ${greetingName}.` : `${timeGreeting}.`;
 
   // ── Build HTML ─────────────────────────────────────────────────────────────
   const severityStyle: Record<string, { bg: string; border: string; color: string; label: string }> = {
@@ -307,7 +371,7 @@ export default async (req: Request, context: Context) => {
 
           <!-- Intro -->
           <tr><td style="padding:0 0 16px;border-bottom:1px solid #f0ebe4;">
-            <p style="margin:0;font-size:15px;color:#6a5a4a;line-height:1.65;">Good morning. Thread reviewed your data overnight. Here is what needs your attention today.</p>
+            <p style="margin:0;font-size:15px;color:#6a5a4a;line-height:1.65;">${greeting} Thread reviewed your data overnight. Here is what needs your attention today.</p>
           </td></tr>
           <tr><td style="padding:16px 0 0;"></td></tr>
 
