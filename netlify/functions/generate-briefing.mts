@@ -147,6 +147,9 @@ export default async (req: Request, context: Context) => {
   let reqBody: Record<string, unknown> = {};
   try { reqBody = await req.json(); } catch { reqBody = {}; }
   const incomingStatus = reqBody.pipelineStatus as Record<string, unknown> | undefined;
+  const incomingAlertRecipients = Array.isArray(reqBody.alertRecipients)
+    ? (reqBody.alertRecipients as string[]).filter(e => e && String(e).includes("@"))
+    : [];
 
   try {
     const queries = [
@@ -356,7 +359,7 @@ export default async (req: Request, context: Context) => {
                     </div>`
                   },
                   from: { emailAddress: { name: "Thread by Tailored.BI", address: "david@tailored.bi" } },
-                  toRecipients: [{ emailAddress: { address: "david@tailored.bi" } }]
+                  toRecipients: (incomingAlertRecipients.length > 0 ? incomingAlertRecipients : ["david@tailored.bi"]).map(addr => ({ emailAddress: { address: addr } }))
                 },
                 saveToSentItems: true
               })
