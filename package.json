@@ -2,7 +2,7 @@
   "name": "tailoredbi-website",
   "private": true,
   "dependencies": {
-    "@netlify/neon": "^0.1.2",
+    "@neondatabase/serverless": "^1.0.2",
     "tedious": "^19.0.0"
   }
 }
