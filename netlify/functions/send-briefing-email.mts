@@ -132,8 +132,7 @@ export default async (req: Request, context: Context) => {
     try {
       const userRows = await queryDb(
         `SELECT email FROM users
-         WHERE client_id = $1 AND is_active = true
-         AND (receive_briefing = true OR (receive_briefing IS NULL AND role IN ('employee', 'admin')))`,
+         WHERE client_id = $1 AND is_active = true AND role IN ('employee', 'admin')`,
         [clientId]
       );
       recipients = userRows.map(r => String(r.email)).filter(e => e.includes("@"));
