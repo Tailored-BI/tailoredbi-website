@@ -134,18 +134,19 @@ async function getAndUpdateHistory(newBriefing: Record<string, unknown>, githubT
 
 export default async (req: Request, context: Context) => {
   const anthropicKey = Netlify.env.get("ANTHROPIC_API_KEY");
-  const clientId = Netlify.env.get("FABRIC_CLIENT_ID");
+  const fabricClientId = Netlify.env.get("FABRIC_CLIENT_ID");
   const clientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
   const tenantId = Netlify.env.get("FABRIC_TENANT_ID");
   const githubToken = Netlify.env.get("GITHUB_TOKEN");
 
-  if (!anthropicKey || !clientId || !clientSecret || !tenantId || !githubToken) {
+  if (!anthropicKey || !fabricClientId || !clientSecret || !tenantId || !githubToken) {
     return new Response(JSON.stringify({ error: "Not configured" }), { status: 500 });
   }
 
   // Parse POST body — pipeline-status-update sends pipelineStatus directly
   let reqBody: Record<string, unknown> = {};
   try { reqBody = await req.json(); } catch { reqBody = {}; }
+  const threadClientId = String(reqBody.client || "heartland");
   const incomingStatus = reqBody.pipelineStatus as Record<string, unknown> | undefined;
   const incomingAlertRecipients = Array.isArray(reqBody.alertRecipients)
     ? (reqBody.alertRecipients as string[]).filter(e => e && String(e).includes("@"))
@@ -189,7 +190,7 @@ export default async (req: Request, context: Context) => {
     // Single connection, sequential queries — avoids Fabric connection throttling
     let results: Record<string, unknown>[][];
     try {
-      const token = await getFabricToken(tenantId, clientId, clientSecret);
+      const token = await getFabricToken(tenantId, fabricClientId, clientSecret);
       results = await runAllQueries(queries, {
         type: "azure-active-directory-access-token" as const,
         options: { token }
@@ -198,7 +199,7 @@ export default async (req: Request, context: Context) => {
       try {
         results = await runAllQueries(queries, {
           type: "azure-active-directory-service-principal-secret" as const,
-          options: { clientId, clientSecret, tenantId }
+          options: { clientId: fabricClientId, clientSecret, tenantId }
         });
       } catch (spnErr) {
         function errDetail(e: unknown): string {
@@ -537,7 +538,7 @@ Generate the daily briefing.`
     // ── Save briefing to Thread PWA database ────────────────────────────────
     try {
       const threadPayload = {
-        client: clientId,
+        client: threadClientId,
         dataDate: briefing.dataDate || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
         pipelineMissed: briefing.pipelineMissed || false,
         lastRunMT: briefing.lastRunMT || "",
