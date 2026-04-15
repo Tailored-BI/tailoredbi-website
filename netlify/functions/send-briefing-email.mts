@@ -65,9 +65,10 @@ export default async (req: Request, context: Context) => {
     });
   }
 
-  let body: { client?: string } = {};
+  let body: { client?: string; recipients?: string[] } = {};
   try { body = await req.json(); } catch { body = {}; }
   const clientId2 = body.client || "heartland";
+  const bodyRecipients = Array.isArray(body.recipients) ? body.recipients.filter(e => e && e.includes("@")) : [];
 
   const day = new Date().getDay();
   const isWeekday = day >= 1 && day <= 5;
@@ -106,9 +107,9 @@ export default async (req: Request, context: Context) => {
     });
   }
 
-  const recipients: string[] = prefs.recipients?.length > 0
-    ? prefs.recipients
-    : (config.recipients || []);
+  const recipients: string[] = bodyRecipients.length > 0
+    ? bodyRecipients
+    : (prefs.recipients?.length > 0 ? prefs.recipients : (config.recipients || []));
   if (recipients.length === 0) {
     return new Response(JSON.stringify({ skipped: "No recipients configured" }), {
       status: 200, headers: { "Content-Type": "application/json" }
