@@ -1,6 +1,6 @@
 import type { Context, Config } from "@netlify/functions";
+import { queryDb, execDb } from "./db.mts";
 
-const GITHUB_RAW = "https://raw.githubusercontent.com/Tailored-BI/tailoredbi-clients/main";
 const GRAPH_ENDPOINT = "https://graph.microsoft.com/v1.0";
 const FROM_ADDRESS = "david@tailored.bi";
 
@@ -54,12 +54,11 @@ export default async (req: Request, context: Context) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  const clientId = Netlify.env.get("FABRIC_CLIENT_ID");
-  const clientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
+  const fabricClientId = Netlify.env.get("FABRIC_CLIENT_ID");
+  const fabricClientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
   const tenantId = Netlify.env.get("FABRIC_TENANT_ID");
-  const githubToken = Netlify.env.get("GITHUB_TOKEN");
 
-  if (!clientId || !clientSecret || !tenantId || !githubToken) {
+  if (!fabricClientId || !fabricClientSecret || !tenantId) {
     return new Response(JSON.stringify({ error: "Not configured" }), {
       status: 500, headers: { "Content-Type": "application/json" }
     });
@@ -67,39 +66,59 @@ export default async (req: Request, context: Context) => {
 
   let body: { client?: string; recipients?: string[] } = {};
   try { body = await req.json(); } catch { body = {}; }
-  const clientId2 = body.client || "heartland";
+  const clientId = body.client || "heartland";
   const bodyRecipients = Array.isArray(body.recipients) ? body.recipients.filter(e => e && e.includes("@")) : [];
 
-  const day = new Date().getDay();
-  const isWeekday = day >= 1 && day <= 5;
+  // ── Query 1: Briefing content from Neon ────────────────────────────────────
+  let briefing: Record<string, unknown> | null = null;
+  try {
+    const rows = await queryDb(
+      `SELECT b.*, c.name AS client_name
+       FROM briefings b
+       JOIN clients c ON b.client_id = c.client_id
+       WHERE b.client_id = $1
+       ORDER BY b.generated_at DESC LIMIT 1`,
+      [clientId]
+    );
+    briefing = rows[0] || null;
+  } catch (err) {
+    console.error("send-briefing-email: briefing query failed:", String(err).substring(0, 200));
+  }
 
-  const headers = {
-    "Authorization": `token ${githubToken}`,
-    "Accept": "application/vnd.github.v3.raw"
-  };
-  const base = `${GITHUB_RAW}/clients/${clientId2}/status`;
-
-  const [briefingRes, inventoryRes] = await Promise.all([
-    fetch(`${base}/daily-briefing.json`, { headers }),
-    fetch(`${base}/workspace-inventory.json`, { headers })
-  ]);
-
-  if (!briefingRes.ok) {
-    return new Response(JSON.stringify({ error: "No briefing available" }), {
-      status: 404, headers: { "Content-Type": "application/json" }
+  if (!briefing) {
+    console.log(`send-briefing-email: no briefing found for ${clientId} — skipping send`);
+    return new Response(JSON.stringify({ skipped: `No briefing found for ${clientId}` }), {
+      status: 200, headers: { "Content-Type": "application/json" }
     });
   }
 
-  const briefing = await briefingRes.json();
-  const inventory = inventoryRes.ok ? await inventoryRes.json() : null;
+  // ── Query 2: Pipeline status from Neon ─────────────────────────────────────
+  let pip: Record<string, unknown> = {};
+  try {
+    const rows = await queryDb(
+      `SELECT * FROM pipeline_status WHERE client_id = $1`,
+      [clientId]
+    );
+    pip = rows[0] || {};
+  } catch (err) {
+    console.error("send-briefing-email: pipeline_status query failed:", String(err).substring(0, 200));
+  }
 
-  const prefs = inventory?.threadPreferences || {};
-  const config = inventory?.notifications?.briefingEmail || {};
+  // ── Query 3: Preferences from Neon ─────────────────────────────────────────
+  let prefs: Record<string, unknown> = {};
+  try {
+    const rows = await queryDb(
+      `SELECT * FROM thread_preferences WHERE client_id = $1`,
+      [clientId]
+    );
+    prefs = rows[0] || {};
+  } catch (err) {
+    console.error("send-briefing-email: preferences query failed:", String(err).substring(0, 200));
+  }
 
-  const deliveryDays: number[] = prefs.deliveryDays?.length > 0
-    ? prefs.deliveryDays
-    : (config.weekdayOnly !== false ? [1,2,3,4,5] : [1,2,3,4,5]);
-
+  // ── Delivery day check ─────────────────────────────────────────────────────
+  const deliveryDaysStr = String(prefs.delivery_days || "1,2,3,4,5");
+  const deliveryDays: number[] = deliveryDaysStr.split(",").map(Number).filter(n => n > 0);
   const todayDay = new Date().getDay() === 0 ? 7 : new Date().getDay();
   if (!deliveryDays.includes(todayDay)) {
     return new Response(JSON.stringify({ skipped: `Not a delivery day (day ${todayDay})` }), {
@@ -107,15 +126,55 @@ export default async (req: Request, context: Context) => {
     });
   }
 
-  const recipients: string[] = bodyRecipients.length > 0
-    ? bodyRecipients
-    : (prefs.recipients?.length > 0 ? prefs.recipients : (config.recipients || []));
-  if (recipients.length === 0) {
+  // ── Recipients: POST body → users table → thread_preferences fallback ─────
+  let recipients: string[] = bodyRecipients;
+  if (!recipients.length) {
+    try {
+      const userRows = await queryDb(
+        `SELECT email FROM users
+         WHERE client_id = $1 AND is_active = true
+         AND (receive_briefing = true OR (receive_briefing IS NULL AND role IN ('employee', 'admin')))`,
+        [clientId]
+      );
+      recipients = userRows.map(r => String(r.email)).filter(e => e.includes("@"));
+    } catch (err) {
+      console.log("send-briefing-email: users query failed, trying preferences:", String(err).substring(0, 100));
+    }
+  }
+  if (!recipients.length) {
+    const prefRecipients = String(prefs.recipients || "");
+    if (prefRecipients) recipients = prefRecipients.split(",").map(e => e.trim()).filter(e => e.includes("@"));
+  }
+  if (!recipients.length) {
     return new Response(JSON.stringify({ skipped: "No recipients configured" }), {
       status: 200, headers: { "Content-Type": "application/json" }
     });
   }
 
+  // ── Parse briefing fields ──────────────────────────────────────────────────
+  const insights = briefing.insights ? JSON.parse(String(briefing.insights)) : [];
+  const dataHealth = briefing.data_health ? JSON.parse(String(briefing.data_health)) : null;
+  const clientName = String(briefing.client_name || "Heartland Ag Parts Co.");
+  const dataDate = String(briefing.data_date || new Date().toLocaleDateString());
+  const pipelineMissed = briefing.pipeline_missed === true;
+  const briefingLastRunMT = String(briefing.last_run_mt || "");
+
+  // ── Build dataHealth from pipeline_status if briefing.data_health is empty ─
+  const dh = dataHealth && dataHealth.lastRefresh && dataHealth.lastRefresh !== "Unknown"
+    ? dataHealth
+    : {
+        lastRefresh: String(pip.last_run_mt || "Unknown"),
+        tablesSuccess: Number(pip.tables_loaded || 0),
+        tablesTotal: Number(pip.total_tables || 16),
+        tablesFailed: Number(pip.tables_failed || 0),
+        duration: String(pip.duration || "—"),
+        recordsProcessed: Number(pip.total_rows || 0),
+        streakOk: Number(pip.streak_ok || 0),
+        streakTotal: Number(pip.streak_total || 0),
+        overallStatus: String(pip.overall_status || "UNKNOWN"),
+      };
+
+  // ── Build HTML ─────────────────────────────────────────────────────────────
   const severityStyle: Record<string, { bg: string; border: string; color: string; label: string }> = {
     alert:   { bg: "#fff0f0", border: "#c0201a", color: "#8a1010", label: "Action needed" },
     warning: { bg: "#fff8f0", border: "#c4511a", color: "#8a3010", label: "Watch closely" },
@@ -123,13 +182,13 @@ export default async (req: Request, context: Context) => {
     info:    { bg: "#e8f0ff", border: "#185fa5", color: "#0c447c", label: "FYI" }
   };
 
-  const pipelineAlert = briefing.pipelineMissed ? `
+  const pipelineAlert = pipelineMissed ? `
     <tr><td style="padding:0 0 16px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
         <td width="4" style="background:#c4511a;"></td>
         <td style="padding:14px 16px;background:#fff8f0;">
           <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c4511a;">Pipeline alert — data not refreshed today</p>
-          <p style="margin:0;font-size:15px;color:#6a4a2a;line-height:1.65;">Thread's data was last updated <strong>${briefing.lastRunMT || 'unknown'}</strong>. This Morning Thread reflects that data — today's activity is not yet included. Tailored.BI has been notified and is investigating.</p>
+          <p style="margin:0;font-size:15px;color:#6a4a2a;line-height:1.65;">Thread's data was last updated <strong>${briefingLastRunMT || 'unknown'}</strong>. This Morning Thread reflects that data — today's activity is not yet included. Tailored.BI has been notified and is investigating.</p>
         </td>
       </tr></table>
     </td></tr>` : '';
@@ -154,7 +213,7 @@ export default async (req: Request, context: Context) => {
     return '';
   }
 
-  const insightsHtml = (briefing.insights || []).map((ins: {
+  const insightsHtml = (insights || []).map((ins: {
     severity: string; title: string; text: string; action?: string; suggestedQuery?: string; category?: string; focusArea?: string
   }) => {
     const s = severityStyle[ins.severity] || severityStyle.info;
@@ -178,10 +237,6 @@ export default async (req: Request, context: Context) => {
     </td></tr>`;
   }).join('');
 
-  const clientName = inventory?.client || "Heartland Ag Parts Co.";
-  const dataDate = briefing.dataDate || new Date().toLocaleDateString();
-
-  const dh = briefing.dataHealth;
   const dataHealthTable = dh ? `
     <tr><td style="padding:0;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;border-top:1px solid #e2dbd2;">
@@ -289,9 +344,21 @@ export default async (req: Request, context: Context) => {
 </body>
 </html>`;
 
+  // ── Send email ─────────────────────────────────────────────────────────────
   try {
-    const token = await getGraphToken(tenantId, clientId, clientSecret);
-    await sendGraphEmail(token, recipients, `Morning Thread — ${inventory?.client || "Heartland Ag Parts"} · ${briefing.dataDate || new Date().toLocaleDateString()}`, html);
+    const token = await getGraphToken(tenantId, fabricClientId, fabricClientSecret);
+    await sendGraphEmail(token, recipients, `Morning Thread — ${clientName} · ${dataDate}`, html);
+
+    // ── Mark email_sent_at in Neon ─────────────────────────────────────────
+    try {
+      await execDb(
+        `UPDATE briefings SET email_sent_at = NOW()
+         WHERE client_id = $1 AND generated_at = $2`,
+        [clientId, briefing.generated_at]
+      );
+    } catch (markErr) {
+      console.error("send-briefing-email: failed to mark email_sent_at:", String(markErr).substring(0, 200));
+    }
 
     return new Response(JSON.stringify({
       success: true,
