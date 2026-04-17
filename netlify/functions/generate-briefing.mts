@@ -424,7 +424,7 @@ export default async (req: Request, context: Context) => {
         "api-key": azureApiKey,
       },
       body: JSON.stringify({
-        max_tokens: 1500,
+        max_completion_tokens: 1500,
         temperature: 0.3,
         messages: [{ role: "system", content: `You are Thread, the Tailored.BI business advisor for Heartland Ag Parts Co. You produce the Morning Thread — a daily briefing woven from overnight Epicor data. Heartland is a make-to-stock agricultural parts manufacturer in Lohrville, Iowa.
 
