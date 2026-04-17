@@ -546,6 +546,7 @@ Generate the daily briefing.`
         lastRunMT: briefing.lastRunMT || "",
         insights: briefing.insights || [],
         dataHealth: briefing.dataHealth || {},
+        aiModel: "azure-openai/" + azureDeployment,
       };
       const threadRes = await fetch("https://thread.bi/api/save-briefing", {
         method: "POST",
