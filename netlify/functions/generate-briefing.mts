@@ -133,13 +133,15 @@ async function getAndUpdateHistory(newBriefing: Record<string, unknown>, githubT
 }
 
 export default async (req: Request, context: Context) => {
-  const threadAIKey = Netlify.env.get("THREAD_AI_API_KEY") || Netlify.env.get("ANTHROPIC_API_KEY");
+  const azureEndpoint = Netlify.env.get("AZURE_OPENAI_ENDPOINT");
+  const azureApiKey = Netlify.env.get("AZURE_OPENAI_API_KEY");
+  const azureDeployment = Netlify.env.get("AZURE_OPENAI_DEPLOYMENT") || "gpt-5.4-mini";
   const fabricClientId = Netlify.env.get("FABRIC_CLIENT_ID");
   const clientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
   const tenantId = Netlify.env.get("FABRIC_TENANT_ID");
   const githubToken = Netlify.env.get("GITHUB_TOKEN");
 
-  if (!threadAIKey || !fabricClientId || !clientSecret || !tenantId || !githubToken) {
+  if (!azureEndpoint || !azureApiKey || !fabricClientId || !clientSecret || !tenantId || !githubToken) {
     return new Response(JSON.stringify({ error: "Not configured" }), { status: 500 });
   }
 
@@ -413,18 +415,18 @@ export default async (req: Request, context: Context) => {
       }
     } catch { priorHistory = []; }
 
-    // ThreadAI — AI provider abstraction (currently Anthropic, migrating to Azure OpenAI)
-    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+    // ThreadAI — Azure OpenAI
+    const aiUrl = `${azureEndpoint}openai/deployments/${azureDeployment}/chat/completions?api-version=2024-10-21`;
+    const aiRes = await fetch(aiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": threadAIKey,
-        "anthropic-version": "2023-06-01"
+        "api-key": azureApiKey,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
         max_tokens: 1500,
-        system: `You are Thread, the Tailored.BI business advisor for Heartland Ag Parts Co. You produce the Morning Thread — a daily briefing woven from overnight Epicor data. Heartland is a make-to-stock agricultural parts manufacturer in Lohrville, Iowa.
+        temperature: 0.3,
+        messages: [{ role: "system", content: `You are Thread, the Tailored.BI business advisor for Heartland Ag Parts Co. You produce the Morning Thread — a daily briefing woven from overnight Epicor data. Heartland is a make-to-stock agricultural parts manufacturer in Lohrville, Iowa.
 
 You receive fresh warehouse data every morning after their Epicor pipeline runs. You also receive the last 7 days of prior briefings so you can reason across time — spotting trends, tracking whether flagged issues improved or worsened, and avoiding repeating the same insight every day unless it is genuinely escalating.
 
@@ -479,8 +481,7 @@ Severity guide:
 - alert: needs attention today (overdue AR, stockout risk, large cost variance)
 - warning: watch closely (trending worse, approaching a threshold)
 - good: positive news worth noting
-- info: useful context, no action needed`,
-        messages: [{
+- info: useful context, no action needed` }, {
           role: "user",
           content: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
 
@@ -500,7 +501,7 @@ Generate the daily briefing.`
     });
 
     const aiData = await aiRes.json();
-    const rawText = aiData.content?.[0]?.text || "";
+    const rawText = aiData.choices?.[0]?.message?.content || "";
     const jsonMatch = rawText.match(/\{[\s\S]*"insights"[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Could not parse briefing response");
 
