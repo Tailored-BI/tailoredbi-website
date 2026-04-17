@@ -133,13 +133,13 @@ async function getAndUpdateHistory(newBriefing: Record<string, unknown>, githubT
 }
 
 export default async (req: Request, context: Context) => {
-  const anthropicKey = Netlify.env.get("ANTHROPIC_API_KEY");
+  const threadAIKey = Netlify.env.get("THREAD_AI_API_KEY") || Netlify.env.get("ANTHROPIC_API_KEY");
   const fabricClientId = Netlify.env.get("FABRIC_CLIENT_ID");
   const clientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
   const tenantId = Netlify.env.get("FABRIC_TENANT_ID");
   const githubToken = Netlify.env.get("GITHUB_TOKEN");
 
-  if (!anthropicKey || !fabricClientId || !clientSecret || !tenantId || !githubToken) {
+  if (!threadAIKey || !fabricClientId || !clientSecret || !tenantId || !githubToken) {
     return new Response(JSON.stringify({ error: "Not configured" }), { status: 500 });
   }
 
@@ -413,11 +413,12 @@ export default async (req: Request, context: Context) => {
       }
     } catch { priorHistory = []; }
 
-    const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
+    // ThreadAI — AI provider abstraction (currently Anthropic, migrating to Azure OpenAI)
+    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
+        "x-api-key": threadAIKey,
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
@@ -498,8 +499,8 @@ Generate the daily briefing.`
       })
     });
 
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content?.[0]?.text || "";
+    const aiData = await aiRes.json();
+    const rawText = aiData.content?.[0]?.text || "";
     const jsonMatch = rawText.match(/\{[\s\S]*"insights"[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Could not parse briefing response");
 

@@ -234,12 +234,12 @@ export default async (req: Request, context: Context) => {
     });
   }
 
-  const anthropicKey = Netlify.env.get("ANTHROPIC_API_KEY");
+  const threadAIKey = Netlify.env.get("THREAD_AI_API_KEY") || Netlify.env.get("ANTHROPIC_API_KEY");
   const clientId = Netlify.env.get("FABRIC_CLIENT_ID");
   const clientSecret = Netlify.env.get("FABRIC_CLIENT_SECRET");
   const tenantId = Netlify.env.get("FABRIC_TENANT_ID");
 
-  if (!anthropicKey || !clientId || !clientSecret || !tenantId) {
+  if (!threadAIKey || !clientId || !clientSecret || !tenantId) {
     return new Response(JSON.stringify({ error: "Service not fully configured" }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
@@ -247,11 +247,12 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
+    // ThreadAI — AI provider abstraction (currently Anthropic, migrating to Azure OpenAI)
+    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
+        "x-api-key": threadAIKey,
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
@@ -279,17 +280,17 @@ chartType rules:
       })
     });
 
-    if (!claudeRes.ok) {
-      const errBody = await claudeRes.text();
+    if (!aiRes.ok) {
+      const errBody = await aiRes.text();
       return new Response(JSON.stringify({
         error: "Thread error",
-        status: claudeRes.status,
+        status: aiRes.status,
         detail: errBody.substring(0, 500)
       }), { status: 502, headers: { "Content-Type": "application/json" } });
     }
 
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content?.[0]?.text || "";
+    const aiData = await aiRes.json();
+    const rawText = aiData.content?.[0]?.text || "";
 
     let parsed: { sql: string; title?: string; explanation: string; chartType: string };
     try {
